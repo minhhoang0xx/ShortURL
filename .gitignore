@@ -1,0 +1,12 @@
+
+.vs/
+*.suo
+*.user
+*.cache
+*.pdb
+*.exe
+
+bin/
+obj/
+
+node_modules
