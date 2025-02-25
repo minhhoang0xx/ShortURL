@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.Models;
 using System;
+using System.Xml.Serialization;
 
 namespace server.Controllers
 {
@@ -17,13 +18,16 @@ namespace server.Controllers
 		{
 			_context = context;
 		}
+		
 
-		[HttpPost("shorten")]
-		public async Task<IActionResult> ShortenUrl([FromBody] ShortUrlDTO request)
+
+		// gan Url goc va short Url vao database
+		[HttpPost("shorter")]
+		public async Task<IActionResult> ShorterUrl([FromBody] ShortUrlDTO request)
 		{
 			if (string.IsNullOrEmpty(request.URL))
 			{
-				return BadRequest("URL không hợp lệ.");
+				return BadRequest("URL is not validate");
 			}
 			
 			string shortCode = GenerateRandomURL();// random
@@ -32,7 +36,6 @@ namespace server.Controllers
 				URL = request.URL,
 				ShortURL = shortCode
 			};
-
 			_context.ShortUrls.Add(shortUrl); // them ca 2 vao dtbase
 			await _context.SaveChangesAsync();
 
@@ -47,11 +50,10 @@ namespace server.Controllers
 			var url = await _context.ShortUrls.FirstOrDefaultAsync(x => x.ShortURL == code); // search shortURL trong database
 			if (url == null)
 			{
-				return NotFound("Short URL not exist");
+				return NotFound("ShortURL not exist");
 			}
 			return Redirect(url.URL);// tra ve URL goc 
 		}
-	
 		private string GenerateRandomURL(int length = 6)
 		{
 			const string chars = "qwertyuiopasdfghjklzxcvbnm1234567890QWERTYUIOPASDFGHJKKLZXCVBNM";
