@@ -44,7 +44,7 @@ namespace server.Controllers
 		}
 
 		// lay URL goc tu shortUrl
-		[HttpGet("{code}")] // "code" trong domain
+		[HttpGet("/{code}")] // "code" trong domain
 		public async Task<IActionResult> RedirectUrl(string code)
 		{
 			var url = await _context.ShortUrls.FirstOrDefaultAsync(x => x.ShortURL == code); // search shortURL trong database
@@ -56,7 +56,7 @@ namespace server.Controllers
 		}
 		private string GenerateRandomURL(int length = 6)
 		{
-			const string chars = "qwertyuiopasdfghjklzxcvbnm1234567890QWERTYUIOPASDFGHJKKLZXCVBNM";
+			const string chars = "qwertyuioplkjhgfdsazxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM";
 			var random = new Random();
 			return new string(Enumerable.Repeat(chars, length)
 										.Select(s => s[random.Next(s.Length)]).ToArray());
