@@ -44,7 +44,7 @@ namespace server.Controllers
 		}
 
 		// lay URL goc tu shortUrl
-		[HttpGet("/{code}")] // "code" trong domain
+		[HttpGet("{code}")] // "code" trong domain
 		public async Task<IActionResult> RedirectUrl(string code)
 		{
 			var url = await _context.ShortUrls.FirstOrDefaultAsync(x => x.ShortURL == code); // search shortURL trong database
