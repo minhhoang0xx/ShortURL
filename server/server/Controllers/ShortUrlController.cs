@@ -78,14 +78,6 @@ namespace server.Controllers
 					return BadRequest("Alias already exists");
 				}
 			}
-			if (request.domain == "https://staxi.vn")
-			{
-				request.projectName = "STaxi";
-			}
-			if (request.domain == "https://baexpress.io")
-			{
-				request.projectName = "BAExpress";
-			}
 			var shortUrl = new ShortUrl
 			{
 				projectName = request.projectName,
@@ -125,15 +117,6 @@ namespace server.Controllers
 			{
 				return BadRequest("URL is not validate");
 			}
-			if (request.domain == "https://staxi.vn")
-			{
-				request.projectName = "STaxi";
-			}
-			if (request.domain == "https://baexpress.io")
-			{
-				request.projectName = "BAExpress";
-			}
-
 			string shortCode = request.alias;
 			if (string.IsNullOrEmpty(request.alias))
 			{

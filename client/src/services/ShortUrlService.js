@@ -18,6 +18,6 @@ export const updateShortLink = async (id, data) => {
     return res.data; 
 }
 export const deleteShortLink = async (id) => {
-    const res = await axios.post(`${process.env.REACT_APP_API_URL}/ShortUrl/delete/${id}`);
+    const res = await axios.delete(`${process.env.REACT_APP_API_URL}/ShortUrl/delete/${id}`);
     return res.data; 
 }

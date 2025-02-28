@@ -120,7 +120,10 @@ body {
 .CSL_result {
     margin-top: 20px;
 }
-
+.CSL_short-url{
+    margin-bottom: 15px; 
+    word-break: break-all;
+}
 
 .CSL_qr-code img {
     width: 150px;

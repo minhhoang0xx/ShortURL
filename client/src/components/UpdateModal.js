@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Button, Space } from 'antd';
-
+import { Modal, Form, Input, Button, Space, Select } from 'antd';
+const { Option } = Select;
 const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, initialValues }) => {
   const [form] = Form.useForm();
 
@@ -10,12 +10,9 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, initialValues }) =>
     }
   }, [visible, initialValues, form]);
 
-  const handleOk = () => {
-    form.submit();
-  };
-
-  const onFinish = (values) => {
-    onUpdate(values);
+  const onFinish = (data) => {
+    console.log('Form data:', data); 
+    onUpdate(initialValues.id, data); 
     onCancel();
   };
 
@@ -24,14 +21,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, initialValues }) =>
       title="Cập nhật Shortlink"
       open={visible}
       onCancel={onCancel}
-      footer={[
-        <Button key="cancel" onClick={onCancel}>
-          Hủy
-        </Button>,
-        <Button key="submit" type="primary" onClick={handleOk}>
-          Lưu
-        </Button>,
-      ]}
+      footer={null}
     >
       <Form
         form={form}
@@ -40,11 +30,20 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, initialValues }) =>
         layout="vertical"
       >
         <Form.Item
-          name="project"
-          label="Tên dự án"
-          rules={[{ required: true, message: 'Vui lòng nhập tên dự án!' }]}
+          name="originalUrl"
+          label="URL gốc"
         >
-          <Input />
+          <Input readOnly/>
+        </Form.Item>
+        <Form.Item
+          name="domain"
+          label="Dự án"
+          rules={[{ required: true, message: 'Vui lòng chọn domain!' }]}
+        >
+          <Select defaultValue="Chọn Domain" >
+            <Option value="https://baexpress.io">BAExpress</Option>
+            <Option value="https://staxi.vn">Staxi</Option>
+          </Select>
         </Form.Item>
         <Form.Item
           name="alias"
@@ -53,13 +52,11 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, initialValues }) =>
         >
           <Input />
         </Form.Item>
-
-        <Form.Item
-          name="originalUrl"
-          label="URL gốc"
-          rules={[{ required: true, message: 'Vui lòng nhập URL gốc!' }]}
-        >
-          <Input />
+        <Form.Item>
+          <Space>
+            <Button onClick={onCancel}>Hủy</Button>
+            <Button type="primary" htmlType="submit">Lưu</Button>
+          </Space>
         </Form.Item>
       </Form>
     </Modal>
