@@ -36,7 +36,7 @@ const ListShortLink = () =>{
           dataIndex: 'originalUrl',
           key: 'originalUrl',
           ellipsis: true,
-          render: (link) => <a>{link}</a>,
+          render: (HyperLink) => <a>{HyperLink}</a>,
           width: 650
         },
         {
@@ -45,7 +45,7 @@ const ListShortLink = () =>{
           key: 'shortlink',
           ellipsis: true,
           width: 320,
-          render: (link) => <a>{link}</a>,
+          render: (HyperLink) => <a>{HyperLink}</a>,
         },
         {
           title: 'Ngày tạo',
@@ -77,7 +77,7 @@ const ListShortLink = () =>{
             try {
                 const urls = await ShortURLService.getAllLink();
                 const urlfetch = urls.$values;
-                console.log("Data từ API:", urls.$values);
+                console.log("Data từ API:", urls);
                 setData(urlfetch.map(url => ({ ...url, key: url.id }))); 
             } catch (error) {
                 console.error("Failed to fetch cars:", error);
@@ -104,16 +104,16 @@ const ListShortLink = () =>{
         
       };
     
-      const ok = Array.from({ length: 100 }, (_, index) => ({
-        key: index + 1,
-        STT: index +1 ,
-        project: 'Staxi',
-        alias: 'KPI thử xe',
-        originalUrl: 'https://www.figma.com/design/xcIvdw8COOA5v1ML1c09t1/Untitled?node-id=27-174&t=HtbY1rEikcUdFy9g-0',
-        shortlink: 'https://bagg.vn/StaxiP1',
-        createdAt: '14:23 12/02/2025',
-        createdBy: 'uyendnt',
-      }));
+      // const ok = Array.from({ length: 100 }, (_, index) => ({
+      //   key: index + 1,
+      //   STT: index +1 ,
+      //   project: 'Staxi',
+      //   alias: 'StaxiP1',
+      //   originalUrl: 'https://www.figma.com/design/xcIvdw8COOA5v1ML1c09t1/Untitled?node-id=27-174&t=HtbY1rEikcUdFy9g-0',
+      //   shortlink: 'https://bagg.vn/StaxiP1',
+      //   createdAt: '14:23 12/02/2025',
+      //   createdBy: 'uyendnt',
+      // }));
 return(
     <Layout>
       <Header className="header">
@@ -145,7 +145,7 @@ return(
 
         <Table
           columns={columns}
-          dataSource={ok}
+          dataSource={data}
           bordered
           pagination={true} 
           className="LSL_shortlink-table"

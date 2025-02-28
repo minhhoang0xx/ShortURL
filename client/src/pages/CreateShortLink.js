@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Layout, Form, Input, Button, Select, Space } from 'antd';
+import { Layout, Form, Input, Button, Select, Space, message } from 'antd';
 import './style.css';
 import { useNavigate } from 'react-router-dom';
+import * as ShortUrlService from '../services/ShortUrlService';
 
 
 const { Header, Content, Footer } = Layout;
@@ -11,13 +12,24 @@ const { Option } = Select;
 const CreateShortLink = () => {
   const [qrLink, setQrLink] = useState(" ");
   const navigate = useNavigate();
-  const onFinish = (values) => {
-    console.log('Received values:', values);
-    // Xử lý logic khi submit form (ví dụ: tạo shortlink)
-    const longUrl = values.longUrl; // Lấy URL người dùng nhập vào
-    if (longUrl) {
-      setQrLink(`https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=${encodeURIComponent(longUrl)}`);
+  const [form] = Form.useForm();
+
+  const onFinish = async (data) => {
+    console.log('Received values:', data);
+    try {
+      // createAt = createAt.format('DD-MM-YYYY');
+      // console.log('Values2', data.createAt);
+      await ShortUrlService.createShortLink(data)
+      message.success('Link create successfully!');
+      form.resetFields();
+    } catch (error) {
+      console.error('err', error.response);
+      message.error('Failed to create.');
     }
+    // const originalUrl = data.originalUrl; // Lấy URL người dùng nhập vào
+    // if (originalUrl) {
+    //   setQrLink(`https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=${encodeURIComponent(originalUrl)}`);
+    // }
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -34,12 +46,12 @@ const CreateShortLink = () => {
         </div>
       </Header>
       <Button
-          type="primary"
-          style={{ position: 'absolute', right: '10px', top: '75px' }}
-        ><a onClick={() => navigate(`/listLink`)}>Danh sách link</a></Button> 
+        type="primary"
+        style={{ position: 'absolute', right: '10px', top: '75px' }}
+      ><a onClick={() => navigate(`/listLink`)}>Danh sách link</a></Button>
       <Content className="CSL_main-container">
-              
-         <h2>Quản trị Shortlink</h2>
+
+        <h2>Quản trị Shortlink</h2>
         <div className="CSL_shortlink-form">
           <h3>CÔNG CỤ TẠO SHORTLINK</h3>
 
@@ -51,7 +63,7 @@ const CreateShortLink = () => {
             style={{ width: '100%' }}
           >
             <Form.Item
-              name="longUrl"
+              name="originalUrl"
               rules={[{ required: true, message: 'Vui lòng nhập URL gốc!' }]}
             >
               <Input placeholder="Nhập URL gốc" />
@@ -69,17 +81,16 @@ const CreateShortLink = () => {
                   rules={[{ required: true, message: 'Vui lòng chọn domain!' }]}
                 >
                   <Select defaultValue="Chọn Domain" style={{ width: '50%' }}>
-                    <Option value="BAExpress">BAExpress</Option>
-                    <Option value="Staxi">Staxi</Option>
+                    <Option value="baexpress.io">BAExpress</Option>
+                    <Option value="staxi.vn">Staxi</Option>
                   </Select>
                 </Form.Item>
                 <span style={{ color: '#000', margin: '0 10px', fontSize: '20px' }}>/</span>
                 <Form.Item
                   name="alias"
                   noStyle
-                  rules={[{ required: true, message: 'Vui lòng nhập tên tùy chỉnh!' }]}
                 >
-                  <Input placeholder="Tên đường dẫn - Alias" style={{ width: '50%' }} />
+                  <Input placeholder="Tên đường dẫn - Alias(Không bắt buộc)" style={{ width: '50%' }} />
                 </Form.Item>
               </Space.Compact>
             </Form.Item>

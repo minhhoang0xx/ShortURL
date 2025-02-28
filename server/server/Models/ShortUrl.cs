@@ -5,7 +5,10 @@ namespace server.Models
 	public class ShortUrl
 	{
 		public int ID { get; set; }
-		public string URL { get; set; } = string.Empty;
-		public string ShortURL { get; set; }= string.Empty;
+		public string projectName {  get; set; }
+		public string originalUrl { get; set; }
+		public string domain { get; set; }
+		public string alias { get; set; }= string.Empty;
+		public DateTime CreateAt { get; set; }
 	}
 }
