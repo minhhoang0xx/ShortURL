@@ -48,7 +48,10 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, initialValues }) =>
         <Form.Item
           name="alias"
           label="Đường dẫn"
-          rules={[{ required: true, message: 'Vui lòng nhập tên đường dẫn!' }]}
+          rules={[
+            { required: true, message: 'Vui lòng nhập tên đường dẫn!' },
+            { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+          ]}
         >
           <Input />
         </Form.Item>

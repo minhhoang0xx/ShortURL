@@ -35,22 +35,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 app.UseCors(MyAllowSpecificOrigins);
-app.MapGet("/{code}", async context =>
-{
-	var code = context.Request.RouteValues["code"]?.ToString();
-	var host = context.Request.Host.Value; // Lấy domain từ request 
-	var dbContext = context.RequestServices.GetRequiredService<URLContext>();
-	var fullHost = $"https://{host}";
-	var url = await dbContext.ShortUrls.FirstOrDefaultAsync(x => x.alias == code && x.domain == fullHost);
-	if (url == null)
-	{
-		context.Response.StatusCode = 404;
-		await context.Response.WriteAsync("ShortURL not exist");
-		return;
-	}
-
-	context.Response.Redirect(url.originalUrl);
-});
 
 if (app.Environment.IsDevelopment())
 {
@@ -60,5 +44,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
-app.MapControllers();
+
+app.UseRouting();
+
+app.UseEndpoints(endpoints =>
+{
+	endpoints.MapControllerRoute(
+		name: "shortUrl",
+		pattern: "{domain}/{alias}",
+		defaults: new { controller = "ShortUrl", action = "Redirect2" }
+	);
+	endpoints.MapControllers();
+});
+//app.MapControllers();
 app.Run();

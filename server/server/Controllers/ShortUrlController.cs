@@ -67,6 +67,11 @@ namespace server.Controllers
 			{
 				return BadRequest("URL is not validate");
 			}
+			var existingOrigianalUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.originalUrl == request.originalUrl);
+			if(existingOrigianalUrl != null)
+			{
+				return BadRequest(new { message = "This URL has been shortened!" });
+			}
 			string shortCode = request.alias;
 			if (string.IsNullOrEmpty(request.alias))
 			{
@@ -75,7 +80,7 @@ namespace server.Controllers
 				var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.alias == shortCode);
 				if (existingUrl != null)
 				{
-					return BadRequest("Alias already exists");
+					return BadRequest(new { message = "Alias already exists!" });
 				}
 			}
 			var shortUrl = new ShortUrl
@@ -93,16 +98,29 @@ namespace server.Controllers
 			return Ok(new {shortLink });
 		}
 
-		//// lay URL goc tu shortUrl
-		//[HttpGet("{code}")] // "code" trong domain
-		//public async Task<IActionResult> RedirectUrl(string code)
+		// lay URL goc tu shortUrl
+		[HttpGet("{code}")] // "code" trong domain
+		public async Task<IActionResult> RedirectUrl(string code)
+		{
+			var url = await _context.ShortUrls.FirstOrDefaultAsync(x => x.alias == code); // search shortURL trong database
+			if (url == null)
+			{
+				return NotFound("ShortURL not exist");
+			}
+			return Redirect(url.originalUrl);// tra ve URL goc 
+		}
+		//[HttpGet]
+		//[Route("{domain}/{alias}")]
+		//public async Task<IActionResult> Redirect2(string domain, string alias)
 		//{
-		//	var url = await _context.ShortUrls.FirstOrDefaultAsync(x => x.alias == code); // search shortURL trong database
+		//	var url = await _context.ShortUrls.FirstOrDefaultAsync(x =>
+		//		x.domain == domain && x.alias == alias);
+
 		//	if (url == null)
 		//	{
 		//		return NotFound("ShortURL not exist");
 		//	}
-		//	return Redirect(url.originalUrl);// tra ve URL goc 
+		//	return Redirect(url.originalUrl);
 		//}
 		// Cap nhat URL bang ID
 		[HttpPut("update/{id}")]
@@ -129,7 +147,7 @@ namespace server.Controllers
 				var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.alias == shortCode && x.ID != id);
 				if (existingUrl != null)
 				{
-					return BadRequest("Alias already exists");
+					return BadRequest( new { massage = "Alias already exists" });
 				}
 			}
 			url.alias = shortCode;

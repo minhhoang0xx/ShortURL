@@ -49,8 +49,17 @@ body {
   }
   .LSL_search-bar Button {
     background-color: #0959A0;
+    min-width: 100%;
   }
+  .LSL_search-bar-Excel{
+    background-color: white !important;
+    color: #0959A0;
+    border: 1px solid #0959A0 
+  }
+  .LSL_search-bar-Excel:hover{
+    background-color: #0959A0 !important;
   
+  }
   .LSL_shortlink-table {
     margin-top: 20px;
     background-color: #ffffff;
@@ -72,6 +81,9 @@ body {
   :where(.css-dev-only-do-not-override-1v613y0).ant-table-wrapper .ant-table-thead >tr>th, :where(.css-dev-only-do-not-override-1v613y0).ant-table-wrapper .ant-table-thead >tr>td
   {
     text-align: center;
+  }
+  :where(.css-dev-only-do-not-override-1v613y0).ant-btn{
+    gap: 0 !important
   }
   
 

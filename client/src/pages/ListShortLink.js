@@ -1,9 +1,10 @@
-import { Layout, Table, Input, Button, Select, Space, Pagination, message } from 'antd';
+import { Layout, Table, Input, Button, Select, Space, Pagination, message, Popconfirm } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import dayjs from 'dayjs';
 import * as ShortURLService from '../services/ShortUrlService';
 import UpdateModal from '../components/UpdateModal';
+import DeleteModal from '../components/DeleteModal';
 
 const { Header, Content, Footer } = Layout;
 const { Option } = Select;
@@ -15,6 +16,10 @@ const ListShortLink = () => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [searchText, setSearchText] = useState('');
   const [selectedProject, setSelectedProject] = useState('all');
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState(null);
+
+  //-------------------------COLUMN--------------------------------
   const columns = [
     {
       title: 'STT',
@@ -69,12 +74,14 @@ const ListShortLink = () => {
       render: (_, record) => (
         <Space size="middle">
           <a onClick={() => showModal(record)}>Update</a>
-          <a onClick={() => handleDelete(record.id)}>Delete</a>
+          <a onClick={() => showDeleteConfirm(record)}>Delete</a>
         </Space>
       ),
     },
   ];
+//---------------------------------------------------------------
 
+//-----------------DATA------------------------------------------
   const fetchData = async () => {
     try {
       const urls = await ShortURLService.getAllLink();
@@ -109,24 +116,14 @@ const ListShortLink = () => {
     filterData(data, selectedProject, searchText);
   }, [selectedProject, searchText, data]);
 
-  const handleDelete = async (id) => {
-    try {
-      console.log("id1", id)
-      await ShortURLService.deleteShortLink(id);
-      console.log("id", id)
-      setData(prevData => prevData.filter(link => link.id !== id));
-      message.success("Delete successfull!")
-    } catch (error) {
-      console.error("Failed to delete car:", error);
-    }
-  }
-
   const showModal = (record) => {
     setSelectedRecord(record);
     setIsModalOpen(true);
   };
+//---------------------------------------------------------------
 
-  const handleCancel = () => {
+//------------START UPDATE---------------------------------------
+  const handleCancelUpdate = () => {
     setIsModalOpen(false);
     setSelectedRecord(null);
   };
@@ -151,14 +148,51 @@ const ListShortLink = () => {
       message.error("FailFail");
     };
   }
+//-------------END UPDATE----------------------------------------
+
+//-------------START DELETE--------------------------------------
+  const showDeleteConfirm = (record) => {
+    setRecordToDelete(record);
+    setDeleteModal(true);
+  };
+  const handleConfirmDelete = async () => {
+    try {
+      await ShortURLService.deleteShortLink(recordToDelete.id);
+      setData(prevData => prevData.filter(link => link.id !== recordToDelete.id));
+      message.success("Xóa thành công!");
+      setDeleteModal(false);
+      setRecordToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete link:", error);
+      message.error("Xóa thất bại!");
+    }
+  };
+  const handleCancelDelete = () => {
+    setDeleteModal(false);
+    setRecordToDelete(null);
+  };
   const handleProjectChange = (value) => {
     setSelectedProject(value);
   };
-
-  // Xử lý khi tìm kiếm
+//--------------------END DELETE----------------------------------
+  //====SEARCH=====
   const handleSearch = (value) => {
     setSearchText(value);
   };
+  //====EXPORT=====
+  const handleExportExcel = () => {
+
+  }
+  const ok = Array.from({ length: 100 }, (_, index) => ({
+    key: index + 1,
+    STT: index +1 ,
+    projectName: 'Staxi',
+    alias: 'KPI thử xe',
+    originalUrl: 'https://www.figma.com/design/xcIvdw8COOA5v1ML1c09t1/Untitled?node-id=27-174&t=HtbY1rEikcUdFy9g-0',
+    shortlink: 'https://bagg.vn/StaxiP1',
+    createdAt: '14:23 12/02/2025',
+    createdBy: 'uyendnt',
+  }));
   return (
     <Layout>
       <Header className="header">
@@ -173,7 +207,7 @@ const ListShortLink = () => {
         <div className="LSL_search-bar">
           <Space>
             <Select defaultValue="all" onChange={handleProjectChange} style={{ width: 120 }}>
-            <Option value="all">Tất cả dự án</Option>
+              <Option value="all">Tất cả dự án</Option>
               <Option value="BAExpress">BAExpress</Option>
               <Option value="staxi">Staxi</Option>
             </Select>
@@ -186,12 +220,14 @@ const ListShortLink = () => {
               style={{ width: 300 }}
             />
             <Button type="primary"> <a onClick={() => navigate(`/`)}>Tạo mới</a></Button>
+            <Button type="primary" className="LSL_search-bar-Excel"> <a onClick={handleExportExcel}>Xuất Excel</a></Button>
           </Space>
         </div>
 
         <Table
           columns={columns}
-          dataSource={filteredData}
+          // dataSource={filteredData}
+          dataSource={ok}
           bordered
           pagination={true}
           className="LSL_shortlink-table"
@@ -207,9 +243,15 @@ const ListShortLink = () => {
       </Footer>
       <UpdateModal
         visible={isModalOpen}
-        onCancel={handleCancel}
+        onCancel={handleCancelUpdate}
         onUpdate={handleUpdate}
         initialValues={selectedRecord}
+      />
+      <DeleteModal
+        visible={deleteModal}
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        record={recordToDelete}
       />
     </Layout>
   )
