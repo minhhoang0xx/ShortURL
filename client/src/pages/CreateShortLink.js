@@ -31,12 +31,22 @@ const CreateShortLink = () => {
   const onFinish = async (data) => {
     console.log('Received values:', data);
     try {
-      if (data.domain == "https://staxi.vn") {
-        data.projectName = "STaxi";
-      }
-      if (data.domain == "https://baexpress.io") {
-        data.projectName = "BAExpress";
-      }
+      // ===============-----CODE THẬT----================
+
+      // if (data.domain == "https://staxi.vn") {
+      //   data.projectName = "STaxi";
+      // }
+      // if (data.domain == "https://baexpress.io") {
+      //   data.projectName = "BAExpress";
+      // }
+      //--------------------------------------------------
+
+      //==============-----test trên local-----==============
+      if (data.domain == "https://localhost:7033/api/ShortUrl") {
+          data.projectName = "BAExpress";
+        }
+        // tương tự sửa bên dưới dòng 142
+      //---------------------------------------------------
       const response = await ShortUrlService.createShortLink(data)
       if (response && response.shortLink) {
         console.log("API Response:", response);
@@ -58,10 +68,6 @@ const CreateShortLink = () => {
       }
       message.error(err);
     }
-    // const originalUrl = data.originalUrl; // Lấy URL người dùng nhập vào
-    // if (originalUrl) {
-    //   setQrLink(`https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=${encodeURIComponent(originalUrl)}`);
-    // }
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -132,8 +138,9 @@ const CreateShortLink = () => {
                   rules={[{ required: true, message: 'Vui lòng chọn domain!' }]}
                 >
                   <Select placeholder="Chọn Domain" style={{ width: '50%' }}>
-                    <Option value="https://baexpress.io">BAExpress</Option>
-                    <Option value="https://staxi.vn">Staxi</Option>
+                    {/* <Option value="https://baexpress.io">BAExpress</Option>
+                    <Option value="https://staxi.vn">Staxi</Option> */}
+                    <Option value="https://localhost:7033/api/ShortUrl">localhost</Option>
                   </Select>
                 </Form.Item>
                 <span style={{ color: '#000', margin: '0 10px', fontSize: '20px' }}>/</span>

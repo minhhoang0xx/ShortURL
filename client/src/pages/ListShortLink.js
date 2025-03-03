@@ -1,4 +1,4 @@
-import { Layout, Table, Input, Button, Select, Space, Pagination, message, Popconfirm } from 'antd';
+import { Layout, Table, Input, Button, Select, Space, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import dayjs from 'dayjs';
@@ -79,9 +79,9 @@ const ListShortLink = () => {
       ),
     },
   ];
-//---------------------------------------------------------------
+  //---------------------------------------------------------------
 
-//-----------------DATA------------------------------------------
+  //-----------------DATA------------------------------------------
   const fetchData = async () => {
     try {
       const urls = await ShortURLService.getAllLink();
@@ -120,9 +120,9 @@ const ListShortLink = () => {
     setSelectedRecord(record);
     setIsModalOpen(true);
   };
-//---------------------------------------------------------------
+  //---------------------------------------------------------------
 
-//------------START UPDATE---------------------------------------
+  //------------START UPDATE---------------------------------------
   const handleCancelUpdate = () => {
     setIsModalOpen(false);
     setSelectedRecord(null);
@@ -142,15 +142,15 @@ const ListShortLink = () => {
       };
       console.log('updated', updated);
       await ShortURLService.updateShortLink(id, updated);
-      message.success("Success");
+      message.success("Success", 2);
       fetchData();
     } catch (error) {
       message.error("FailFail");
     };
   }
-//-------------END UPDATE----------------------------------------
+  //-------------END UPDATE----------------------------------------
 
-//-------------START DELETE--------------------------------------
+  //-------------START DELETE--------------------------------------
   const showDeleteConfirm = (record) => {
     setRecordToDelete(record);
     setDeleteModal(true);
@@ -174,25 +174,31 @@ const ListShortLink = () => {
   const handleProjectChange = (value) => {
     setSelectedProject(value);
   };
-//--------------------END DELETE----------------------------------
+  //--------------------END DELETE----------------------------------
   //====SEARCH=====
   const handleSearch = (value) => {
     setSearchText(value);
   };
   //====EXPORT=====
-  const handleExportExcel = () => {
-
+  const handleExportExcel = async () => {
+    try {
+      const response = await ShortURLService.download();
+      if (!response.ok) {
+        throw new Error("Failed to export Excel");
+      }
+      const blob = await response.blob(); // chuyển dữ liệu về blob
+      const url = window.URL.createObjectURL(blob);// create tam mot duong`dan~
+      const a = document.createElement("a"); // bat dau download
+      a.href = url;
+      a.download = "ShortUrls.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      a.remove(); // xoa sau khi tai xong 
+    } catch (error) {
+      console.error("Export failed:", error);
+      message.error("Xuất Excel thất bại!");
+    }
   }
-  const ok = Array.from({ length: 100 }, (_, index) => ({
-    key: index + 1,
-    STT: index +1 ,
-    projectName: 'Staxi',
-    alias: 'KPI thử xe',
-    originalUrl: 'https://www.figma.com/design/xcIvdw8COOA5v1ML1c09t1/Untitled?node-id=27-174&t=HtbY1rEikcUdFy9g-0',
-    shortlink: 'https://bagg.vn/StaxiP1',
-    createdAt: '14:23 12/02/2025',
-    createdBy: 'uyendnt',
-  }));
   return (
     <Layout>
       <Header className="header">
@@ -226,8 +232,7 @@ const ListShortLink = () => {
 
         <Table
           columns={columns}
-          // dataSource={filteredData}
-          dataSource={ok}
+          dataSource={filteredData}
           bordered
           pagination={true}
           className="LSL_shortlink-table"

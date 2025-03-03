@@ -49,8 +49,11 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, initialValues }) =>
           name="alias"
           label="Đường dẫn"
           rules={[
-            { required: true, message: 'Vui lòng nhập tên đường dẫn!' },
-            { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+            { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' },
+            { 
+              pattern: /^[a-zA-Z0-9]+$/, 
+              message: 'Alias chỉ được chứa chữ cái (a-z, A-Z) và số (0-9)!' 
+            }
           ]}
         >
           <Input />
