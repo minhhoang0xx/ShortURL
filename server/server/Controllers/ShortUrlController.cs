@@ -31,7 +31,8 @@ namespace server.Controllers
 				domain = url.domain,
 				alias = url.alias,
 				shortLink = $"{url.domain}/{url.alias}",
-				createAt = url.CreateAt
+				createAt = url.CreateAt,
+				qrCode = url.qrCode,
 			});
 
 			return Ok(result);
@@ -55,7 +56,8 @@ namespace server.Controllers
 				domain = url.domain,
 				alias = url.alias,
 				shortLink,
-				createAt = url.CreateAt
+				createAt = url.CreateAt,
+				qrCode = url.qrCode,
 			});
 		}
 
@@ -91,6 +93,7 @@ namespace server.Controllers
 				domain = request.domain,
 				alias = shortCode,
 				CreateAt = DateTime.Now,
+				qrCode = request.qrCode,
 			};
 			_context.ShortUrls.Add(shortUrl); // them vao dtbase
 			await _context.SaveChangesAsync();
@@ -110,19 +113,7 @@ namespace server.Controllers
 			}
 			return Redirect(url.originalUrl);// tra ve URL goc 
 		}
-		[HttpGet]
-		[Route("{domain}/{alias}")]
-		public async Task<IActionResult> Redirect2(string domain, string alias)
-		{
-			var url = await _context.ShortUrls.FirstOrDefaultAsync(x =>
-				x.domain == domain && x.alias == alias);
-
-			if (url == null)
-			{
-				return NotFound("ShortURL not exist");
-			}
-			return Redirect(url.originalUrl);
-		}
+	
 		// Cap nhat URL bang ID
 		[HttpPut("update/{id}")]
 		public async Task<IActionResult> UpdateUrl(int id, [FromBody] ShortUrlDTO request)
@@ -155,6 +146,7 @@ namespace server.Controllers
 			url.projectName = request.projectName;
 			url.originalUrl = request.originalUrl;
 			url.domain = request.domain;
+			url.qrCode = request.qrCode;
 
 			_context.ShortUrls.Update(url);
 			await _context.SaveChangesAsync();
@@ -187,43 +179,6 @@ namespace server.Controllers
 		}
 
 
-		[HttpGet("download")]
-		public async Task<IActionResult> ExportToExcel()
-		{
-			var shortUrls = await _context.ShortUrls.ToListAsync();
-
-			using (var package = new ExcelPackage())
-			{
-				var worksheet = package.Workbook.Worksheets.Add("ShortUrls");
-
-				worksheet.Cells[1, 1].Value = "STT";
-				worksheet.Cells[1, 2].Value = "Dự án";
-				worksheet.Cells[1, 3].Value = "Tên đường dẫn";
-				worksheet.Cells[1, 4].Value = "URL gốc";
-				worksheet.Cells[1, 5].Value = "ShortLink";
-				worksheet.Cells[1, 6].Value = "Ngày cập nhật";
-				worksheet.Cells[1, 7].Value = "Người cập nhật";
-				int row = 2;
-				int index = 1;
-				foreach (var url in shortUrls)
-				{
-					
-					worksheet.Cells[row, 1].Value = index; index++;
-					worksheet.Cells[row, 2].Value = url.projectName;
-					worksheet.Cells[row, 3].Value = url.alias;
-					worksheet.Cells[row, 4].Value = url.originalUrl;
-					worksheet.Cells[row, 5].Value = $"{url.domain}/{url.alias}";
-					worksheet.Cells[row, 6].Value = url.CreateAt.ToString("HH:mm dd/MM/yyyy");
-					worksheet.Cells[row, 7].Value = null;
-					row++;
-				}
-				worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
-				var stream = new MemoryStream();
-				package.SaveAs(stream);
-				stream.Position = 0;
-				return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-			}
-		}
 	}
 
 	

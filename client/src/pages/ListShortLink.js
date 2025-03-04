@@ -2,12 +2,18 @@ import { Layout, Table, Input, Button, Select, Space, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import dayjs from 'dayjs';
-import * as ShortURLService from '../services/ShortUrlService';
+import * as ShortUrlService from '../services/ShortUrlService';
+import * as DownloadService from '../services/DownloadService';
 import UpdateModal from '../components/UpdateModal';
 import DeleteModal from '../components/DeleteModal';
+import CreateModal from '../components/CreateModal';
+import { DeleteFilled, EditFilled } from '@ant-design/icons';
+import "../pages/style.css"
 
-const { Header, Content, Footer } = Layout;
+const { Content} = Layout;
 const { Option } = Select;
+
+
 const ListShortLink = () => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
@@ -18,6 +24,7 @@ const ListShortLink = () => {
   const [selectedProject, setSelectedProject] = useState('all');
   const [deleteModal, setDeleteModal] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState(null);
+  const [createModal,setCreateModal] = useState(false);
 
   //-------------------------COLUMN--------------------------------
   const columns = [
@@ -71,10 +78,11 @@ const ListShortLink = () => {
     {
       title: 'Chức Năng',
       key: 'action',
+      width: 90,
       render: (_, record) => (
         <Space size="middle">
-          <a onClick={() => showModal(record)}>Update</a>
-          <a onClick={() => showDeleteConfirm(record)}>Delete</a>
+          <a onClick={() => showModal(record)}><EditFilled /></a>
+          <a onClick={() => showDeleteConfirm(record)}><DeleteFilled /></a>
         </Space>
       ),
     },
@@ -84,7 +92,7 @@ const ListShortLink = () => {
   //-----------------DATA------------------------------------------
   const fetchData = async () => {
     try {
-      const urls = await ShortURLService.getAllLink();
+      const urls = await ShortUrlService.getAllLink();
       const urlfetch = urls.$values;
       console.log("Data từ API:", urls);
       const formattedData = urlfetch.map((url, index) => ({ ...url, key: url.id, STT: index + 1 }));
@@ -128,25 +136,8 @@ const ListShortLink = () => {
     setSelectedRecord(null);
   };
 
-  const handleUpdate = async (id, data) => {
-    console.log('data123', data)
-    try {
-      if (data.domain == "https://staxi.vn") {
-        data.projectName = "STaxi";
-      }
-      if (data.domain == "https://baexpress.io") {
-        data.projectName = "BAExpress";
-      }
-      const updated = {
-        ...data,
-      };
-      console.log('updated', updated);
-      await ShortURLService.updateShortLink(id, updated);
-      message.success("Success", 2);
+  const handleUpdate =  () => {
       fetchData();
-    } catch (error) {
-      message.error("FailFail");
-    };
   }
   //-------------END UPDATE----------------------------------------
 
@@ -157,11 +148,12 @@ const ListShortLink = () => {
   };
   const handleConfirmDelete = async () => {
     try {
-      await ShortURLService.deleteShortLink(recordToDelete.id);
+      await ShortUrlService.deleteShortLink(recordToDelete.id);
       setData(prevData => prevData.filter(link => link.id !== recordToDelete.id));
       message.success("Xóa thành công!");
       setDeleteModal(false);
       setRecordToDelete(null);
+      fetchData()
     } catch (error) {
       console.error("Failed to delete link:", error);
       message.error("Xóa thất bại!");
@@ -182,7 +174,7 @@ const ListShortLink = () => {
   //====EXPORT=====
   const handleExportExcel = async () => {
     try {
-      const response = await ShortURLService.download();
+      const response = await DownloadService.download();
       if (!response.ok) {
         throw new Error("Failed to export Excel");
       }
@@ -199,16 +191,17 @@ const ListShortLink = () => {
       message.error("Xuất Excel thất bại!");
     }
   }
+  const showCreateModal = () => {
+    setCreateModal(true); 
+  }
+  const handleCreate = () => {
+    fetchData()
+  }
+  const handleCancelCreate = () =>{
+    setCreateModal(false); 
+  }
   return (
     <Layout>
-      <Header className="header">
-        <div className="header-content">
-          <img src="logo.png" alt="Logo BA GPS" className="logo" />
-
-          <span>CÔNG TY TNHH PHÁT TRIỂN CÔNG NGHỆ ĐIỆN TỬ BÌNH ANH</span>
-        </div>
-      </Header>
-
       <Content className="LSL_main-container">
         <div className="LSL_search-bar">
           <Space>
@@ -225,7 +218,7 @@ const ListShortLink = () => {
               onChange={(e) => setSearchText(e.target.value)}
               style={{ width: 300 }}
             />
-            <Button type="primary"> <a onClick={() => navigate(`/`)}>Tạo mới</a></Button>
+            <Button type="primary"> <a onClick={(showCreateModal)}>Tạo mới</a></Button>
             <Button type="primary" className="LSL_search-bar-Excel"> <a onClick={handleExportExcel}>Xuất Excel</a></Button>
           </Space>
         </div>
@@ -239,24 +232,23 @@ const ListShortLink = () => {
         />
       </Content>
 
-      <Footer className="footer">
-        <div className="footer-content">
-          <span>14 Nguyễn Cảnh Dị, Định Công, Hoàng Mai, Hà Nội</span>
-          <span>📞 0983 535 666</span>
-          <a href="https://admin.baexpress.io" target="_blank">https://admin.baexpress.io</a>
-        </div>
-      </Footer>
+      
       <UpdateModal
         visible={isModalOpen}
         onCancel={handleCancelUpdate}
         onUpdate={handleUpdate}
-        initialValues={selectedRecord}
+        record={selectedRecord}
       />
       <DeleteModal
         visible={deleteModal}
         onCancel={handleCancelDelete}
         onConfirm={handleConfirmDelete}
         record={recordToDelete}
+      />
+      <CreateModal
+      visible={ createModal} 
+      onCancel={handleCancelCreate}
+      onCreate={handleCreate}
       />
     </Layout>
   )

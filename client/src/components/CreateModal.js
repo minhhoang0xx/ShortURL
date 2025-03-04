@@ -1,26 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Button, Space, Select, message } from 'antd';
-import { Content } from 'antd/es/layout/layout';
-import { LinkOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { Button, Form, Input, Modal, Select, Space, message } from "antd";
+import { LinkOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Content } from "antd/es/layout/layout";
+import { Option } from "antd/es/mentions";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import * as ShortUrlService from '../services/ShortUrlService';
-const { Option } = Select;
-const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
-  const [form] = Form.useForm();
+import * as DomainService from '../services/DomainService';
+
+
+const CreateModal = ({ visible, onCancel, onCreate }) => {
+  const [qrLink, setQrLink] = useState("");
   const [shortUrl, setShortUrl] = useState("");
   const navigate = useNavigate();
-  const [qrLink, setQrLink] = useState("");
+  const [form] = Form.useForm();
+  const [domains, setDomains] = useState([]);
 
   useEffect(() => {
-    resetForm();
-    if (visible && record) {
-      form.resetFields();
-      form.setFieldsValue(record);
-      setShortUrl(record.shortLink);
-      setQrLink(record.qrCode)
-      console.log("Form values after setting:", record);
+    if (visible) {
+      fetchDomains();
+      console.log(domains)
     }
-  }, [visible, record]);
+  }, [visible]);
+  const fetchDomains = async () => {
+    const response = await DomainService.getAll();
+    setDomains(response.$values);
+    console.log("doamin", response)
+  };
 
   const handleFormValuesChange = (changedValues) => {
     if ('domain' in changedValues || 'alias' in changedValues) {
@@ -32,10 +37,10 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       }
     }
   };
+
   const onFinish = async (data) => {
     console.log('Received values:', data);
     try {
-      onUpdate();
       if (data.domain == "https://staxi.vn") {
         data.projectName = "STaxi";
       }
@@ -48,14 +53,14 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       const linkShort = `${data.domain}/${data.alias}`;
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
       data.qrCode = qr;
-      const response = await ShortUrlService.updateShortLink(record.id, data)
-      
+      const response = await ShortUrlService.createShortLink(data)
       if (response && response.shortLink) {
-        console.log("API Response:", response);
-        message.success(`Link updated successfully!`);
+        message.success(`Link created successfully!`);
         setShortUrl(response.shortLink);
-        setQrLink(qr)
-        onUpdate();
+        setQrLink(qr);
+        console.log("QR Link:", qrLink);
+        onCreate()
+
       } else {
         throw new Error("Failed to create link");
       }
@@ -88,13 +93,17 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     }
   };
   const resetForm = () => {
+    form.resetFields();
     setShortUrl("");
   }
-
   return (
-    <Modal open={visible} onCancel={onCancel} footer={null}>
+    <Modal
+      open={visible}
+      onCancel={onCancel}
+      footer={null}>
       <Content className="CSL_main-container">
-        <h3>CẬP NHẬT SHORTLINK</h3>
+        <h3>CÔNG CỤ TẠO SHORTLINK</h3>
+
         <Form
           name="shortlink-form"
           onFinish={onFinish}
@@ -107,7 +116,11 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
             name="originalUrl"
             rules={[{ required: true, message: 'Vui lòng nhập URL gốc!' }]}
           >
-            <Input placeholder="Nhập URL gốc" />
+            <div className="shortlink-form_Original">
+              <Input placeholder="Nhập URL gốc" />
+              <Button onClick={resetForm}><ReloadOutlined /></Button>
+              {/* <Button onClick={getDomain}><domain /></Button> */}
+            </div>
           </Form.Item>
 
           <Form.Item
@@ -121,9 +134,14 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
                 rules={[{ required: true, message: 'Vui lòng chọn domain!' }]}
               >
                 <Select placeholder="Chọn Domain" style={{ width: '50%' }}>
-                  <Option value="https://baexpress.io">BAExpress</Option>
+                  {/* <Option value="https://baexpress.io">BAExpress</Option>
                   <Option value="https://staxi.vn">Staxi</Option>
-                  <Option value="https://localhost:7033/api/ShortUrl">localhost</Option>
+                  <Option value="https://localhost:7033/api/ShortUrl">localhost</Option> */}
+                  {domains.map((domain) => (
+                    <Select.Option key={domain.id} value={domain.link}>
+                      {domain.name}
+                    </Select.Option>
+                  ))}
                 </Select>
               </Form.Item>
               <span style={{ color: '#000', margin: '0 10px', fontSize: '20px' }}>/</span>
@@ -153,10 +171,10 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
           <Form.Item label="Kết quả:" className="CSL_form-result">
             <div className="CSL_result">
               <div className="CSL_short-url">
-              {shortUrl}
+                {shortUrl}
               </div>
               <div className="CSL_qr-code">
-              {qrLink && <img src={qrLink} alt="QR Code"/>}
+                {qrLink && <img src={qrLink} alt="QR Code" />}
               </div>
             </div>
           </Form.Item>
@@ -172,7 +190,6 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
         </Form>
       </Content>
     </Modal>
-  );
-};
-
-export default UpdateShortlinkModal;
+  )
+}
+export default CreateModal;

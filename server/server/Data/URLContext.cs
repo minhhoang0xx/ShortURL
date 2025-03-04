@@ -9,5 +9,6 @@ namespace server.Data
 	{	
 		public URLContext(DbContextOptions<URLContext> options) : base(options) { }
 		public DbSet<ShortUrl> ShortUrls { get; set; }
+		public DbSet<Domain> Domains { get; set; }
 	}
 }
