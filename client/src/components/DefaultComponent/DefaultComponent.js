@@ -1,6 +1,6 @@
 import React from "react";
-import Header from "../header.js";
-import Footer from "../footer.js";
+import Header from "../HeaderFooterComponents/header";
+import Footer from "../HeaderFooterComponents/footer";
 
     const DefaultComponent = ({children}) =>{
     return (

@@ -127,6 +127,11 @@ namespace server.Controllers
 			{
 				return BadRequest("URL is not validate");
 			}
+			var existingOrigianalUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.originalUrl == request.originalUrl);
+			if (existingOrigianalUrl != null)
+			{
+				return BadRequest(new { message = "This URL has been shortened!" });
+			}
 			string shortCode = request.alias;
 			if (string.IsNullOrEmpty(request.alias))
 			{
@@ -136,7 +141,7 @@ namespace server.Controllers
 			if (url.alias != shortCode)
 			{
 				// Kiem tra neu alias moi da ton tai
-				var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.alias == shortCode && x.ID != id);
+				var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.alias == shortCode );
 				if (existingUrl != null)
 				{
 					return BadRequest( new { massage = "Alias already exists" });

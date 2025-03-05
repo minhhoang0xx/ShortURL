@@ -39,9 +39,9 @@ body {
 
 /* start List Link */
 .LSL_main-container{
-    margin: 20px auto;
+    margin: 0 auto;
     padding: 20px;
-    min-height: 80.5vh;
+    min-height: 86vh;
 }
 .LSL_search-bar {
     margin-bottom: 20px;
@@ -52,10 +52,14 @@ body {
     background-color: #0959A0;
     min-width: 100%;
   }
+  /* .LSL_search-bar-Create{
+    background-color:#2FAFCB !important;
+  } */
   .LSL_search-bar-Excel{
     background-color: white !important;
     color: #0959A0;
-    border: 1px solid #0959A0 
+    border: 1px solid #0959A0;
+    font-weight: bold;
   }
   .LSL_search-bar-Excel:hover{
     background-color: #0959A0 !important;
@@ -64,7 +68,6 @@ body {
   .LSL_shortlink-table {
     margin-top: 20px;
     background-color: #ffffff;
-    border: 1px solid #e8e8e8;
   }
   
   .LSL_shortlink-table .ant-table-thead > tr > th {
@@ -83,8 +86,14 @@ body {
   {
     text-align: center;
   }
+  :where(.css-dev-only-do-not-override-1v613y0).ant-table-wrapper .ant-table-pagination.ant-pagination{
+    margin: 16px 0;
+  }
   :where(.css-dev-only-do-not-override-1v613y0).ant-btn{
     gap: 0 !important
+  }
+  .action-column{
+    text-align: center;
   }
 
   

@@ -7,7 +7,7 @@ import * as DownloadService from '../services/DownloadService';
 import UpdateModal from '../components/UpdateModal';
 import DeleteModal from '../components/DeleteModal';
 import CreateModal from '../components/CreateModal';
-import { DeleteFilled, EditFilled } from '@ant-design/icons';
+import {  DeleteTwoTone, EditFilled } from '@ant-design/icons';
 import "../pages/style.css"
 import * as DomainService from '../services/DomainService';
 const { Content } = Layout;
@@ -79,10 +79,11 @@ const ListShortLink = () => {
       title: 'Chức Năng',
       key: 'action',
       width: 90,
+      className:"action-column",
       render: (_, record) => (
         <Space size="middle">
           <a onClick={() => showModal(record)}><EditFilled /></a>
-          <a onClick={() => showDeleteConfirm(record)}><DeleteFilled /></a>
+          <a onClick={() => showDeleteConfirm(record)}><DeleteTwoTone twoToneColor ="#ed0505"/></a>
         </Space>
       ),
     },
@@ -173,6 +174,18 @@ const ListShortLink = () => {
     setSelectedProject(value);
   };
   //--------------------END DELETE----------------------------------
+  //--------------------start Create--------------------------------
+  const showCreateModal = () => {
+    setCreateModal(true);
+  }
+  const handleCreate = () => {
+    fetchData()
+  }
+  const handleCancelCreate = () => {
+    setCreateModal(false);
+  }
+  //---------------------end Create---------------------------------
+
   //====SEARCH=====
   const handleSearch = (value) => {
     setSearchText(value);
@@ -188,22 +201,14 @@ const ListShortLink = () => {
       a.download = `Excel.xlsx`;
       document.body.appendChild(a);
       a.click();
-      a.remove(); // xoa sau khi tai xong 
+      a.remove(); 
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Export failed:", error);
       message.error("Xuất Excel thất bại!");
     }
   }
-  const showCreateModal = () => {
-    setCreateModal(true);
-  }
-  const handleCreate = () => {
-    fetchData()
-  }
-  const handleCancelCreate = () => {
-    setCreateModal(false);
-  }
+
   return (
     <Layout>
       <Content className="LSL_main-container">
@@ -223,7 +228,7 @@ const ListShortLink = () => {
               onChange={(e) => setSearchText(e.target.value)}
               style={{ width: 300 }}
             />
-            <Button type="primary"> <a onClick={(showCreateModal)}>Tạo mới</a></Button>
+            <Button type="primary" className="LSL_search-bar-Create"> <a onClick={(showCreateModal)}>Tạo mới</a></Button>
             <Button type="primary" className="LSL_search-bar-Excel"> <a onClick={handleExportExcel}>Xuất Excel</a></Button>
           </Space>
         </div>

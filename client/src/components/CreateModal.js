@@ -1,7 +1,6 @@
 import { Button, Form, Input, Modal, Select, Space, message } from "antd";
-import { LinkOutlined, ReloadOutlined } from '@ant-design/icons';
+import { LinkOutlined, SyncOutlined } from '@ant-design/icons';
 import { Content } from "antd/es/layout/layout";
-import { Option } from "antd/es/mentions";
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import * as ShortUrlService from '../services/ShortUrlService';
@@ -89,6 +88,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
   const resetForm = () => {
     form.resetFields();
     setShortUrl("");
+    setQrLink("");
   }
   return (
     <Modal
@@ -112,7 +112,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
           >
             <div className="shortlink-form_Original">
               <Input placeholder="Nhập URL gốc" />
-              <Button onClick={resetForm}><ReloadOutlined /></Button>
+              <Button onClick={resetForm}><SyncOutlined /></Button>
             </div>
           </Form.Item>
 

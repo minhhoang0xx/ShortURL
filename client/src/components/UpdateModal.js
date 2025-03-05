@@ -5,7 +5,7 @@ import { LinkOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import * as ShortUrlService from '../services/ShortUrlService';
 import * as DomainService from '../services/DomainService';
-const { Option } = Select;
+
 const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const [form] = Form.useForm();
   const [shortUrl, setShortUrl] = useState("");
@@ -14,9 +14,9 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const [domains, setDomains] = useState([]);
 
   useEffect(() => {
-    resetForm();
+
     if (visible && record) {
-      form.resetFields();
+      resetForm();
       form.setFieldsValue(record);
       fetchDomains();
       setShortUrl(record.shortLink);
@@ -59,7 +59,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
         setQrLink(qr)
         onUpdate();
       } else {
-        throw new Error("Failed to create link");
+        throw new Error("Failed to update link");
       }
     } catch (error) {
       console.error("API Error:", error);
@@ -91,6 +91,8 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   };
   const resetForm = () => {
     setShortUrl("");
+    setQrLink("")
+    form.resetFields();
   }
 
   return (
@@ -150,7 +152,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
 
           <Form.Item>
             <Button type="primary" htmlType="submit" className="CSL_button-create">
-              Tạo mới
+              Cập nhật
             </Button>
           </Form.Item>
 
