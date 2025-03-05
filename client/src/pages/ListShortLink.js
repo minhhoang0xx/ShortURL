@@ -9,8 +9,8 @@ import DeleteModal from '../components/DeleteModal';
 import CreateModal from '../components/CreateModal';
 import { DeleteFilled, EditFilled } from '@ant-design/icons';
 import "../pages/style.css"
-
-const { Content} = Layout;
+import * as DomainService from '../services/DomainService';
+const { Content } = Layout;
 const { Option } = Select;
 
 
@@ -24,8 +24,8 @@ const ListShortLink = () => {
   const [selectedProject, setSelectedProject] = useState('all');
   const [deleteModal, setDeleteModal] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState(null);
-  const [createModal,setCreateModal] = useState(false);
-
+  const [createModal, setCreateModal] = useState(false);
+  const [domains, setDomains] = useState([]);
   //-------------------------COLUMN--------------------------------
   const columns = [
     {
@@ -117,8 +117,14 @@ const ListShortLink = () => {
     }
     setFilteredData(result);
   };
+  const fetchDomains = async () => {
+    const response = await DomainService.getAll();
+    setDomains(response.$values.map(domain => domain.name));
+    console.log("doamin", response)
+  }
   useEffect(() => { // cai nay de cho fetch chi chay 1 lan
     fetchData();
+    fetchDomains();
   }, []);
   useEffect(() => { // loc lai data sau khi search hoac filter
     filterData(data, selectedProject, searchText);
@@ -136,8 +142,8 @@ const ListShortLink = () => {
     setSelectedRecord(null);
   };
 
-  const handleUpdate =  () => {
-      fetchData();
+  const handleUpdate = () => {
+    fetchData();
   }
   //-------------END UPDATE----------------------------------------
 
@@ -174,31 +180,29 @@ const ListShortLink = () => {
   //====EXPORT=====
   const handleExportExcel = async () => {
     try {
-      const response = await DownloadService.download();
-      if (!response.ok) {
-        throw new Error("Failed to export Excel");
-      }
-      const blob = await response.blob(); // chuyển dữ liệu về blob
+      const blob = await DownloadService.download();
+      console.log("excel", blob)
       const url = window.URL.createObjectURL(blob);// create tam mot duong`dan~
       const a = document.createElement("a"); // bat dau download
       a.href = url;
-      a.download = "ShortUrls.xlsx";
+      a.download = `Excel.xlsx`;
       document.body.appendChild(a);
       a.click();
       a.remove(); // xoa sau khi tai xong 
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Export failed:", error);
       message.error("Xuất Excel thất bại!");
     }
   }
   const showCreateModal = () => {
-    setCreateModal(true); 
+    setCreateModal(true);
   }
   const handleCreate = () => {
     fetchData()
   }
-  const handleCancelCreate = () =>{
-    setCreateModal(false); 
+  const handleCancelCreate = () => {
+    setCreateModal(false);
   }
   return (
     <Layout>
@@ -207,8 +211,9 @@ const ListShortLink = () => {
           <Space>
             <Select defaultValue="all" onChange={handleProjectChange} style={{ width: 120 }}>
               <Option value="all">Tất cả dự án</Option>
-              <Option value="BAExpress">BAExpress</Option>
-              <Option value="staxi">Staxi</Option>
+              {domains.map((domain) => (
+                <Option key={domain} value={domain}>{domain}</Option>
+              ))}
             </Select>
             <Input.Search
               placeholder="Tìm kiếm theo đường dẫn"
@@ -232,7 +237,7 @@ const ListShortLink = () => {
         />
       </Content>
 
-      
+
       <UpdateModal
         visible={isModalOpen}
         onCancel={handleCancelUpdate}
@@ -246,9 +251,9 @@ const ListShortLink = () => {
         record={recordToDelete}
       />
       <CreateModal
-      visible={ createModal} 
-      onCancel={handleCancelCreate}
-      onCreate={handleCreate}
+        visible={createModal}
+        onCancel={handleCancelCreate}
+        onCreate={handleCreate}
       />
     </Layout>
   )

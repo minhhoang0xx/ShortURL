@@ -41,6 +41,7 @@ body {
 .LSL_main-container{
     margin: 20px auto;
     padding: 20px;
+    min-height: 80.5vh;
 }
 .LSL_search-bar {
     margin-bottom: 20px;

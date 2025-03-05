@@ -19,6 +19,7 @@ namespace server.Controllers
 		[HttpGet("download")]
 		public async Task<IActionResult> ExportToExcel()
 		{
+			ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 			var shortUrls = await _context.ShortUrls.ToListAsync();
 
 			using (var package = new ExcelPackage())
