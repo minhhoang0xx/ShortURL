@@ -159,11 +159,22 @@ body {
     border: none;
     width: 100%;
 }
-
 /* end Create Link */
 
-
-/* ----------------------------------end header------------------------------- */
+/* Not Found */
+.notFound-container{
+    display: flex;
+    text-align: center;
+    align-items: center;
+}
+.notFound-image img{
+ width: 70%;
+}
+.notFound-title p{
+    font-size: 32px;
+    font-style: italic;
+}
+/* ----------------------------------end body------------------------------- */
 
 /* ----------------------------------start footer-------------------------- */
 .footer {

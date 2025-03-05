@@ -1,5 +1,6 @@
 
 import ListShortLink from "../pages/ListShortLink";
+import NotFound from "../pages/NotFound";
 
 
 export const routes =[
@@ -8,6 +9,13 @@ export const routes =[
         page: ListShortLink,
         isShowHeader: true,
         isShowFooter: true,
+    },
+    {
+        path: '*',
+        page: NotFound,
+        isShowHeader: true,
+        isShowFooter: true,
+    
     },
 
 
