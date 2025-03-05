@@ -18,7 +18,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
   useEffect(() => {
     if (visible) {
       fetchDomains();
-      console.log(domains)
+      console.log("fetchDomains", domains)
     }
   }, [visible]);
   const fetchDomains = async () => {
@@ -41,15 +41,9 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
   const onFinish = async (data) => {
     console.log('Received values:', data);
     try {
-      if (data.domain == "https://staxi.vn") {
-        data.projectName = "STaxi";
-      }
-      if (data.domain == "https://baexpress.io") {
-        data.projectName = "BAExpress";
-      }
-      if (data.domain == "https://localhost:7033/api/ShortUrl") {
-        data.projectName = "BAExpress";
-      }
+      const selectedDomain = domains.find(domain => domain.link === data.domain);
+      data.projectName = selectedDomain.name
+      console.log("selectedDomain", selectedDomain)
       const linkShort = `${data.domain}/${data.alias}`;
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
       data.qrCode = qr;
@@ -119,7 +113,6 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
             <div className="shortlink-form_Original">
               <Input placeholder="Nhập URL gốc" />
               <Button onClick={resetForm}><ReloadOutlined /></Button>
-              {/* <Button onClick={getDomain}><domain /></Button> */}
             </div>
           </Form.Item>
 
@@ -134,9 +127,6 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
                 rules={[{ required: true, message: 'Vui lòng chọn domain!' }]}
               >
                 <Select placeholder="Chọn Domain" style={{ width: '50%' }}>
-                  {/* <Option value="https://baexpress.io">BAExpress</Option>
-                  <Option value="https://staxi.vn">Staxi</Option>
-                  <Option value="https://localhost:7033/api/ShortUrl">localhost</Option> */}
                   {domains.map((domain) => (
                     <Select.Option key={domain.id} value={domain.link}>
                       {domain.name}

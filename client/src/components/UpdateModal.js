@@ -4,23 +4,31 @@ import { Content } from 'antd/es/layout/layout';
 import { LinkOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import * as ShortUrlService from '../services/ShortUrlService';
+import * as DomainService from '../services/DomainService';
 const { Option } = Select;
 const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const [form] = Form.useForm();
   const [shortUrl, setShortUrl] = useState("");
   const navigate = useNavigate();
   const [qrLink, setQrLink] = useState("");
+  const [domains, setDomains] = useState([]);
 
   useEffect(() => {
     resetForm();
     if (visible && record) {
       form.resetFields();
       form.setFieldsValue(record);
+      fetchDomains();
       setShortUrl(record.shortLink);
       setQrLink(record.qrCode)
       console.log("Form values after setting:", record);
     }
   }, [visible, record]);
+  const fetchDomains = async () => {
+    const response = await DomainService.getAll();
+    setDomains(response.$values);
+    console.log("doamin", response)
+  };
 
   const handleFormValuesChange = (changedValues) => {
     if ('domain' in changedValues || 'alias' in changedValues) {
@@ -36,15 +44,9 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     console.log('Received values:', data);
     try {
       onUpdate();
-      if (data.domain == "https://staxi.vn") {
-        data.projectName = "STaxi";
-      }
-      if (data.domain == "https://baexpress.io") {
-        data.projectName = "BAExpress";
-      }
-      if (data.domain == "https://localhost:7033/api/ShortUrl") {
-        data.projectName = "BAExpress";
-      }
+      const selectedDomain = domains.find(domain => domain.link === data.domain);
+      data.projectName = selectedDomain.name
+      console.log("selectedDomain", selectedDomain)
       const linkShort = `${data.domain}/${data.alias}`;
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
       data.qrCode = qr;
@@ -121,9 +123,11 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
                 rules={[{ required: true, message: 'Vui lòng chọn domain!' }]}
               >
                 <Select placeholder="Chọn Domain" style={{ width: '50%' }}>
-                  <Option value="https://baexpress.io">BAExpress</Option>
-                  <Option value="https://staxi.vn">Staxi</Option>
-                  <Option value="https://localhost:7033/api/ShortUrl">localhost</Option>
+                {domains.map((domain) => (
+                    <Select.Option key={domain.id} value={domain.link}>
+                      {domain.name}
+                    </Select.Option>
+                ))}
                 </Select>
               </Form.Item>
               <span style={{ color: '#000', margin: '0 10px', fontSize: '20px' }}>/</span>
