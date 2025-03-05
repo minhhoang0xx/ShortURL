@@ -100,7 +100,7 @@ const ListShortLink = () => {
       setData(formattedData);
       filterData(formattedData, selectedProject, searchText);
     } catch (error) {
-      console.error("Failed to fetch cars:", error);
+      console.error("Failed to fetch data:", error);
     }
   };
 

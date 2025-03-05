@@ -18,7 +18,7 @@ const DeleteModal = ({ visible, onCancel, onConfirm, record }) => {
       <h3>Bạn có chắc chắn muốn xóa ShortLink không?</h3>
       {record && (
         <>
-          <p>{record.alias}</p>
+          <p style={{color:"#2e8cc3"}}>{record.shortLink}</p>
         </>
       )}
     </Modal>

@@ -127,10 +127,13 @@ namespace server.Controllers
 			{
 				return BadRequest("URL is not validate");
 			}
-			var existingOrigianalUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.originalUrl == request.originalUrl);
-			if (existingOrigianalUrl != null)
+			if (url.originalUrl != request.originalUrl) // neu original thay doi thi moi can ktra 
 			{
-				return BadRequest(new { message = "This URL has been shortened!" });
+				var existingOriginalUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.originalUrl == request.originalUrl);
+				if (existingOriginalUrl != null)
+				{
+					return BadRequest(new { message = "This URL has been shortened!" });
+				}
 			}
 			string shortCode = request.alias;
 			if (string.IsNullOrEmpty(request.alias))
