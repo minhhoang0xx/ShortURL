@@ -182,7 +182,8 @@ body {
 }
 .notFound-title p{
     font-size: 32px;
-    font-style: italic;
+    font-weight: bold;
+    
 }
 /* ----------------------------------end body------------------------------- */
 
