@@ -162,7 +162,7 @@ namespace server.Controllers
 			var shortLink = $"{url.domain}/{url.alias}";
 			return Ok(new { id = url.ID, shortLink });
 		}
-
+		
 		// Xoa URL bang ID
 		[HttpDelete("delete/{id}")]
 		public async Task<IActionResult> DeleteUrl(int id)
