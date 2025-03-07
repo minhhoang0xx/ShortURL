@@ -1,4 +1,4 @@
-import { Layout, Table, Input, Button, Select, Space, message } from 'antd';
+import { Layout, Table, Input, Button, Select, Space, message, Spin } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import dayjs from 'dayjs';
@@ -7,7 +7,7 @@ import * as DownloadService from '../services/DownloadService';
 import UpdateModal from '../components/UpdateModal';
 import DeleteModal from '../components/DeleteModal';
 import CreateModal from '../components/CreateModal';
-import {  DeleteTwoTone, EditFilled } from '@ant-design/icons';
+import { DeleteTwoTone, EditFilled } from '@ant-design/icons';
 import "../pages/style.css"
 import * as DomainService from '../services/DomainService';
 const { Content } = Layout;
@@ -26,6 +26,7 @@ const ListShortLink = () => {
   const [recordToDelete, setRecordToDelete] = useState(null);
   const [createModal, setCreateModal] = useState(false);
   const [domains, setDomains] = useState([]);
+  const [loading, setLoading] = useState(false);
   //-------------------------COLUMN--------------------------------
   const columns = [
     {
@@ -79,11 +80,11 @@ const ListShortLink = () => {
       title: 'Chức Năng',
       key: 'action',
       width: 90,
-      className:"action-column",
+      className: "action-column",
       render: (_, record) => (
         <Space size="middle">
           <a onClick={() => showModal(record)}><EditFilled /></a>
-          <a onClick={() => showDeleteConfirm(record)}><DeleteTwoTone twoToneColor ="#ed0505"/></a>
+          <a onClick={() => showDeleteConfirm(record)}><DeleteTwoTone twoToneColor="#ed0505" /></a>
         </Space>
       ),
     },
@@ -92,6 +93,7 @@ const ListShortLink = () => {
 
   //-----------------DATA------------------------------------------
   const fetchData = async () => {
+    setLoading(true)
     try {
       const urls = await ShortUrlService.getAllLink();
       const urlfetch = urls.$values;
@@ -102,6 +104,7 @@ const ListShortLink = () => {
     } catch (error) {
       console.error("Failed to fetch data:", error);
     }
+    setLoading(false)
   };
 
   const filterData = (sourceData, project, search) => {
@@ -133,7 +136,9 @@ const ListShortLink = () => {
 
   const showModal = (record) => {
     setSelectedRecord(record);
+    setLoading(true)
     setIsModalOpen(true);
+    setLoading(false)
   };
   //---------------------------------------------------------------
 
@@ -150,10 +155,13 @@ const ListShortLink = () => {
 
   //-------------START DELETE--------------------------------------
   const showDeleteConfirm = (record) => {
+    setLoading(true)
     setRecordToDelete(record);
     setDeleteModal(true);
+    setLoading(false)
   };
   const handleConfirmDelete = async () => {
+    setLoading(true)
     try {
       await ShortUrlService.deleteShortLink(recordToDelete.id);
       setData(prevData => prevData.filter(link => link.id !== recordToDelete.id));
@@ -165,6 +173,7 @@ const ListShortLink = () => {
       console.error("Failed to delete link:", error);
       message.error("Xóa thất bại!");
     }
+    setLoading(false)
   };
   const handleCancelDelete = () => {
     setDeleteModal(false);
@@ -176,7 +185,9 @@ const ListShortLink = () => {
   //--------------------END DELETE----------------------------------
   //--------------------start Create--------------------------------
   const showCreateModal = () => {
+    setLoading(true)
     setCreateModal(true);
+    setLoading(false)
   }
   const handleCreate = () => {
     fetchData()
@@ -192,6 +203,7 @@ const ListShortLink = () => {
   };
   //====EXPORT=====
   const handleExportExcel = async () => {
+    setLoading(true);
     try {
       const blob = await DownloadService.download();
       console.log("excel", blob)
@@ -201,12 +213,13 @@ const ListShortLink = () => {
       a.download = `Excel.xlsx`;
       document.body.appendChild(a);
       a.click();
-      a.remove(); 
+      a.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Export failed:", error);
       message.error("Xuất Excel thất bại!");
     }
+    setLoading(false);
   }
 
   return (
@@ -238,24 +251,28 @@ const ListShortLink = () => {
           dataSource={filteredData}
           bordered
           pagination={true}
+          loading={loading}
           className="LSL_shortlink-table"
         />
       </Content>
 
 
       <UpdateModal
+        loading={loading}
         visible={isModalOpen}
         onCancel={handleCancelUpdate}
         onUpdate={handleUpdate}
         record={selectedRecord}
       />
       <DeleteModal
+        loading={loading}
         visible={deleteModal}
         onCancel={handleCancelDelete}
         onConfirm={handleConfirmDelete}
         record={recordToDelete}
       />
       <CreateModal
+        loading={loading}
         visible={createModal}
         onCancel={handleCancelCreate}
         onCreate={handleCreate}

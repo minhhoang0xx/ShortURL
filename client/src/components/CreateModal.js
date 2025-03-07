@@ -13,6 +13,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [domains, setDomains] = useState([]);
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (visible) {
@@ -39,6 +40,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
 
   const onFinish = async (data) => {
     console.log('Received values:', data);
+    setLoading(true)
     try {
       const selectedDomain = domains.find(domain => domain.link === data.domain);
       data.projectName = selectedDomain.name
@@ -67,6 +69,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       }
       message.error(err);
     }
+    setLoading(false)
   };
   const copyToClipboard = () => {
     if (shortUrl) {
@@ -94,6 +97,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
     <Modal
       open={visible}
       onCancel={onCancel}
+      // loading = {loading}
       footer={null}>
       <Content className="CSL_main-container">
         <h3>CÔNG CỤ TẠO SHORTLINK</h3>

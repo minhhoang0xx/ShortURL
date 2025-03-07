@@ -12,6 +12,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const navigate = useNavigate();
   const [qrLink, setQrLink] = useState("");
   const [domains, setDomains] = useState([]);
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
 
@@ -42,6 +43,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   };
   const onFinish = async (data) => {
     console.log('Received values:', data);
+    setLoading(true)
     try {
       onUpdate();
       const selectedDomain = domains.find(domain => domain.link === data.domain);
@@ -71,6 +73,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       }
       message.error(err);
     }
+    setLoading(false);
   };
   const copyToClipboard = () => {
     if (shortUrl) {
@@ -96,7 +99,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   }
 
   return (
-    <Modal open={visible} onCancel={onCancel} footer={null}>
+    <Modal open={visible} onCancel={onCancel} loading={loading} footer={null}>
       <Content className="CSL_main-container">
         <h3>CẬP NHẬT SHORTLINK</h3>
         <Form
