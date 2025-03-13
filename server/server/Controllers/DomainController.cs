@@ -21,25 +21,25 @@ namespace server.Controllers
 		{
 			var urls = await _context.Domains.ToListAsync();
 			var result = urls.Select(url => new {
-				id = url.ID,
-				link = url.link,
-				name = url.name,
+				id = url.ShortDomainID,
+				Link = url.Link,
+				name = url.Name,
 			});
 
 			return Ok(result);
 		}
 		[HttpPost("addDomain")]
-		public async Task<IActionResult> addDomain([FromBody] DomainDTO domain)
+		public async Task<IActionResult> addDomain([FromBody] ShortURL_DomainDTO domain)
 		{
-			var existedDomain = _context.Domains.FirstOrDefault(x => x.link == domain.link);
+			var existedDomain = _context.Domains.FirstOrDefault(x => x.Link == domain.Link);
 			if(existedDomain != null)
 			{
 				return BadRequest(new { message = "Domain này đã tồn tại!" });
 			}
-			var create = new Domain
+			var create = new ShortURL_Domain
 			{
-				link = domain.link,
-				name = domain.name
+				Link = domain.Link,
+				Name = domain.Name
 			};
 			_context.Domains.Add(create);
 			_context.SaveChanges();
@@ -47,20 +47,20 @@ namespace server.Controllers
 			return Ok();
 		}
 		[HttpPut("updateDomain/{id}")]
-		public async Task<IActionResult> UpdateDomain(int id, [FromBody] DomainDTO domain)
+		public async Task<IActionResult> UpdateDomain(int id, [FromBody] ShortURL_DomainDTO domain)
 		{
 			var data = await _context.Domains.FindAsync(id);
 	
-			if (data.link != domain.link)
+			if (data.Link != domain.Link)
 			{
-				var existedDomain = _context.Domains.FirstOrDefault(x => x.link == domain.link);
+				var existedDomain = _context.Domains.FirstOrDefault(x => x.Link == domain.Link);
 				if (existedDomain != null)
 				{
 					return BadRequest(new { message = "Domain này đã tồn tại!" });
 				}
 			}
-			data.link = domain.link;
-			data.name = domain.name;
+			data.Link = domain.Link;
+			data.Name = domain.Name;
 
 			_context.Domains.Update(data);
 			_context.SaveChanges();

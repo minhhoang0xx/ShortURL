@@ -25,8 +25,8 @@ namespace ShortUrl.Tests
 				.UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
 			_context = new URLContext(options);
 
-			_context.ShortUrls.Add(new server.Models.ShortUrl { ID = 1, projectName = "Project 1", originalUrl = "https://example1.com", domain = "https://short1", alias = "abc1", qrCode ="qrcode1"});
-			_context.ShortUrls.Add(new server.Models.ShortUrl { ID = 2, projectName = "Project 2", originalUrl = "https://example2.com", domain = "https://short2", alias = "abc2", qrCode = "qrcode2" });
+			_context.ShortUrls.Add(new server.Models.ShortUrl_Link { ID = 1, projectName = "Project 1", originalUrl = "https://example1.com", domain = "https://short1", alias = "abc1", qrCode ="qrcode1"});
+			_context.ShortUrls.Add(new server.Models.ShortUrl_Link { ID = 2, projectName = "Project 2", originalUrl = "https://example2.com", domain = "https://short2", alias = "abc2", qrCode = "qrcode2" });
 			_context.SaveChanges();
 
 			_controller = new ShortUrlController(_context);
@@ -57,7 +57,7 @@ namespace ShortUrl.Tests
 		[Fact]
 		public async Task ShortOriginalUrl_ToShorterUrl()
 		{
-			var newUrl = new ShortUrlDTO
+			var newUrl = new ShortUrl_LinkDTO
 			{
 				projectName = "Project C",
 				originalUrl = "https://example3.com",
@@ -83,7 +83,7 @@ namespace ShortUrl.Tests
 		[Fact]
 		public async Task Update_ShortUrl()
 		{
-			var newUrl = new ShortUrlDTO
+			var newUrl = new ShortUrl_LinkDTO
 			{
 				projectName = "Project 1",
 				originalUrl = "https://example1ed",

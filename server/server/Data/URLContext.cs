@@ -8,7 +8,8 @@ namespace server.Data
 	public class URLContext : DbContext
 	{	
 		public URLContext(DbContextOptions<URLContext> options) : base(options) { }
-		public DbSet<ShortUrl> ShortUrls { get; set; }
-		public DbSet<Domain> Domains { get; set; }
+		public DbSet<ShortURL_Link> ShortUrls { get; set; }
+		public DbSet<ShortURL_Domain> Domains { get; set; }
+		public DbSet<Admin_Users> AdminUsers { get; set; }
 	}
 }

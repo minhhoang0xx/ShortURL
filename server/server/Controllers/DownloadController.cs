@@ -39,10 +39,10 @@ namespace server.Controllers
 				{
 
 					worksheet.Cells[row, 1].Value = index; index++;
-					worksheet.Cells[row, 2].Value = url.projectName;
-					worksheet.Cells[row, 3].Value = url.alias;
-					worksheet.Cells[row, 4].Value = url.originalUrl;
-					worksheet.Cells[row, 5].Value = $"{url.domain}/{url.alias}";
+					worksheet.Cells[row, 2].Value = url.ProjectName;
+					worksheet.Cells[row, 3].Value = url.Alias;
+					worksheet.Cells[row, 4].Value = url.OriginalUrl;
+					worksheet.Cells[row, 5].Value = $"{url.Domain}/{url.Alias}";
 					worksheet.Cells[row, 6].Value = url.CreateAt.ToString("HH:mm dd/MM/yyyy");
 					worksheet.Cells[row, 7].Value = null;
 					row++;

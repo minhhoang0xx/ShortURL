@@ -2,14 +2,14 @@ import { Layout, Table, Input, Button, Select, Space, message, Spin } from 'antd
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import dayjs from 'dayjs';
-import * as ShortUrlService from '../services/ShortUrlService';
-import * as DownloadService from '../services/DownloadService';
-import UpdateModal from '../components/UpdateModal';
-import DeleteModal from '../components/DeleteModal';
-import CreateModal from '../components/CreateModal';
+import * as ShortUrlService from '../../services/ShortUrlService';
+import * as DownloadService from '../../services/DownloadService';
+import UpdateModal from '../../components/UpdateModal';
+import DeleteModal from '../../components/DeleteModal';
+import CreateModal from '../../components/CreateModal';
 import { DeleteTwoTone, EditFilled } from '@ant-design/icons';
-import "../pages/style.css"
-import * as DomainService from '../services/DomainService';
+import "../../pages/ShortURL/style.css"
+import * as DomainService from '../../services/DomainService';
 const { Content } = Layout;
 const { Option } = Select;
 

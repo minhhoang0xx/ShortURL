@@ -25,14 +25,14 @@ namespace server.Controllers
 		{
 			var urls = await _context.ShortUrls.ToListAsync();
 			var result = urls.Select(url => new {
-				id = url.ID,
-				projectName = url.projectName,
-				originalUrl = url.originalUrl,
-				domain = url.domain,
-				alias = url.alias,
-				shortLink = $"{url.domain}/{url.alias}",
+				id = url.ShortId,
+				projectName = url.ProjectName,
+				originalUrl = url.OriginalUrl,
+				domain = url.Domain,
+				alias = url.Alias,
+				shortLink = $"{url.Domain}/{url.Alias}",
 				createAt = url.CreateAt,
-				qrCode = url.qrCode,
+				qrCode = url.QrCode,
 			});
 
 			return Ok(result);
@@ -47,58 +47,58 @@ namespace server.Controllers
 				return NotFound("ShortURL not exist");
 			}
 
-			var shortLink = $"{url.domain}/{url.alias}";
+			var shortLink = $"{url.Domain}/{url.Alias}";
 			return Ok(new
 			{
-				id = url.ID,
-				projectName = url.projectName,
-				originalUrl = url.originalUrl,
-				domain = url.domain,
-				alias = url.alias,
+				id = url.ShortId,
+				projectName = url.ProjectName,
+				originalUrl = url.OriginalUrl,
+				domain = url.Domain,
+				alias = url.Alias,
 				shortLink,
 				createAt = url.CreateAt,
-				qrCode = url.qrCode,
+				qrCode = url.QrCode,
 			});
 		}
 
 
 		// gan Url goc va short Url vao database
 		[HttpPost("shorter")]
-		public async Task<IActionResult> ShorterUrl([FromBody] ShortUrlDTO request)
+		public async Task<IActionResult> ShorterUrl([FromBody] ShortURL_LinkDTO request)
 		{
-			if (string.IsNullOrEmpty(request.originalUrl))
+			if (string.IsNullOrEmpty(request.OriginalUrl))
 			{
 				return BadRequest("URL is not validate");
 			}
-			var existingOrigianalUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.originalUrl == request.originalUrl);
+			var existingOrigianalUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.OriginalUrl == request.OriginalUrl);
 			if(existingOrigianalUrl != null)
 			{
 				return BadRequest(new { message = "This URL has been shortened!" });
 			}
-			string shortCode = request.alias;
-			if (string.IsNullOrEmpty(request.alias))
+			string shortCode = request.Alias;
+			if (string.IsNullOrEmpty(request.Alias))
 			{
 				shortCode = GenerateRandomURL();
 			}else{
-				var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.alias == shortCode);
+				var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == shortCode);
 				if (existingUrl != null)
 				{
 					return BadRequest(new { message = "Alias already exists!" });
 				}
 			}
-			var shortUrl = new ShortUrl
+			var shortUrl = new ShortURL_Link
 			{
-				projectName = request.projectName,
-				originalUrl = request.originalUrl,
-				domain = request.domain,
-				alias = shortCode,
+				ProjectName = request.ProjectName,
+				OriginalUrl = request.OriginalUrl,
+				Domain = request.Domain,
+				Alias = shortCode,
 				CreateAt = DateTime.Now,
-				qrCode = request.qrCode,
+				QrCode = request.QrCode,
 			};
 			_context.ShortUrls.Add(shortUrl); // them vao dtbase
 			await _context.SaveChangesAsync();
 
-			var shortLink = $"{request.domain}/{shortCode}";
+			var shortLink = $"{request.Domain}/{shortCode}";
 			return Ok(new {shortLink });
 		}
 
@@ -106,61 +106,61 @@ namespace server.Controllers
 		[HttpGet("{code}")] // "code" trong domain
 		public async Task<IActionResult> RedirectUrl(string code)
 		{
-			var url = await _context.ShortUrls.FirstOrDefaultAsync(x => x.alias == code); // search shortURL trong database
+			var url = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == code); // search shortURL trong database
 			if (url == null)
 			{
 				return NotFound("ShortURL not exist");
 			}
-			return Redirect(url.originalUrl);// tra ve URL goc 
+			return Redirect(url.OriginalUrl);// tra ve URL goc 
 		}
 	
 		// Cap nhat URL bang ID
 		[HttpPut("update/{id}")]
-		public async Task<IActionResult> UpdateUrl(int id, [FromBody] ShortUrlDTO request)
+		public async Task<IActionResult> UpdateUrl(int id, [FromBody] ShortURL_LinkDTO request)
 		{
 			var url = await _context.ShortUrls.FindAsync(id);
 			if (url == null)
 			{
 				return NotFound("ShortURL not exist");
 			}
-			if (string.IsNullOrEmpty(request.originalUrl))
+			if (string.IsNullOrEmpty(request.OriginalUrl))
 			{
 				return BadRequest("URL is not validate");
 			}
-			if (url.originalUrl != request.originalUrl) // neu original thay doi thi moi can ktra 
+			if (url.OriginalUrl != request.OriginalUrl) // neu original thay doi thi moi can ktra 
 			{
-				var existingOriginalUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.originalUrl == request.originalUrl);
+				var existingOriginalUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.OriginalUrl == request.OriginalUrl);
 				if (existingOriginalUrl != null)
 				{
 					return BadRequest(new { message = "This URL has been shortened!" });
 				}
 			}
-			string shortCode = request.alias;
-			if (string.IsNullOrEmpty(request.alias))
+			string shortCode = request.Alias;
+			if (string.IsNullOrEmpty(request.Alias))
 			{
 				shortCode = GenerateRandomURL();
 			}
 			// Neu shortCode khac voi alias hien tai
-			if (url.alias != shortCode)
+			if (url.Alias != shortCode)
 			{
 				// Kiem tra neu alias moi da ton tai
-				var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.alias == shortCode );
+				var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == shortCode );
 				if (existingUrl != null)
 				{
 					return BadRequest( new { massage = "Alias already exists" });
 				}
 			}
-			url.alias = shortCode;
-			url.projectName = request.projectName;
-			url.originalUrl = request.originalUrl;
-			url.domain = request.domain;
-			url.qrCode = request.qrCode;
+			url.Alias = shortCode;
+			url.ProjectName = request.ProjectName;
+			url.OriginalUrl = request.OriginalUrl;
+			url.Domain = request.Domain;
+			url.QrCode = request.QrCode;
 
 			_context.ShortUrls.Update(url);
 			await _context.SaveChangesAsync();
 
-			var shortLink = $"{url.domain}/{url.alias}";
-			return Ok(new { id = url.ID, shortLink });
+			var shortLink = $"{url.Domain}/{url.Alias}";
+			return Ok(new { id = url.ShortId, shortLink });
 		}
 		
 		// Xoa URL bang ID
