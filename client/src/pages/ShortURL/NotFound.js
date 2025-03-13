@@ -4,7 +4,7 @@ const NotFound = () =>{
     return (
         <div className="notFound-container">
             <div className="notFound-image">
-                <img src="not-found.png"></img>
+                <img src="/LandingPageBAExpress/Not-found.png"></img>
             </div>
             <div className="notFound-title">
                 <p>Rất tiếc đã có lỗi xảy ra.<br/> Xin vui lòng thử lại!</p>
