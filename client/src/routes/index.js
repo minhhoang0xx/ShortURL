@@ -4,7 +4,6 @@ import NotFound from "../pages/ShortURL/NotFound";
 import LandingPageBAExpress from "../pages/BAExpress/LandingPage";    
 import RegisterPage from "../pages/ShortURL/RegisterPage";
 import LoginPage from "../pages/ShortURL/LoginPage";
-import { TruckOutlined } from "@ant-design/icons";
 
 export const routes =[
     {
@@ -12,7 +11,7 @@ export const routes =[
         page: ListShortLink,
         isShowHeader: true,
         isShowFooter: true,
-        requireAuth: TruckOutlined
+        requireAuth: true
     },
     {
         path: '*',

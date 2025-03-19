@@ -313,8 +313,7 @@ const LandingPageBAExpress = () => {
                                 </ul>
                             </nav>
                         </div>
-                        {/* 
-                <!-- Start-Modal --> */}
+                        {/*  <!-- Start-Modal --> */}
                         <div id="CSvanchuyen" className="section-7_container-modal">
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
@@ -558,3 +557,16 @@ const LandingPageBAExpress = () => {
     )
 }
 export default LandingPageBAExpress;
+
+
+
+
+
+
+
+
+
+
+
+
+
