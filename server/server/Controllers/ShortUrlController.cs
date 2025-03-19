@@ -23,6 +23,7 @@ namespace server.Controllers
 		[HttpGet("getAll")]
 		public async Task<IActionResult> getAllUrl()
 		{
+			//var context = HttpContext.Request.HttpContext.Session
 			var urls = await _context.ShortUrls.ToListAsync();
 			var result = urls.Select(url => new {
 				id = url.ShortId,
@@ -106,12 +107,13 @@ namespace server.Controllers
 		[HttpGet("{code}")] // "code" trong domain
 		public async Task<IActionResult> RedirectUrl(string code)
 		{
+			// string UserAgent = Request.Headers["User-Agent"].ToString().ToUpper();
 			var url = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == code); // search shortURL trong database
 			if (url == null)
 			{
 				return NotFound("ShortURL not exist");
 			}
-			return Redirect(url.OriginalUrl);// tra ve URL goc 
+			return Ok(url.OriginalUrl);// tra ve URL goc 
 		}
 	
 		// Cap nhat URL bang ID

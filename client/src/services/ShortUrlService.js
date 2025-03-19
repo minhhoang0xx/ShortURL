@@ -13,6 +13,10 @@ export const getLink = async (id) => {
     const res = await axios.get(`${process.env.REACT_APP_API_URL}/ShortUrl/getLink/${id}`);
     return res.data; 
 }
+export const getLinkByAlias = async (alias) => {
+    const res = await axios.get(`${process.env.REACT_APP_API_URL}/ShortUrl/${alias}`);
+    return res.data; 
+}
 export const updateShortLink = async (id, data) => {
     const res = await axios.put(`${process.env.REACT_APP_API_URL}/ShortUrl/update/${id}`, data);
     return res.data; 

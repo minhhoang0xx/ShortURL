@@ -51,11 +51,10 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       const response = await ShortUrlService.createShortLink(data)
       if (response && response.shortLink) {
         message.success(`Link created successfully!`);
-        setShortUrl(response.shortLink);
+        setShortUrl(linkShort);
         setQrLink(qr);
         console.log("QR Link:", qrLink);
         onCreate()
-
       } else {
         throw new Error("Failed to create link");
       }

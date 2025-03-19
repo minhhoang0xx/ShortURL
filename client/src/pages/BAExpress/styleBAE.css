@@ -152,6 +152,7 @@ padding-top: 32px;
     border: 1px solid;
     border-radius: 50px;
     padding: 8px 35px;
+    cursor: pointer;
 }
 .btn-outline-secondary:hover{
     color: #1c3b87;

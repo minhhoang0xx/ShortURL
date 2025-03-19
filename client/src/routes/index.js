@@ -1,9 +1,9 @@
-
 import ListShortLink from "../pages/ShortURL/ListShortLink";
 import NotFound from "../pages/ShortURL/NotFound";
 import LandingPageBAExpress from "../pages/BAExpress/LandingPage";    
 import RegisterPage from "../pages/ShortURL/RegisterPage";
 import LoginPage from "../pages/ShortURL/LoginPage";
+import RedirectPage from "../pages/ShortURL/RedirectPage";
 
 export const routes =[
     {
@@ -14,18 +14,23 @@ export const routes =[
         requireAuth: true
     },
     {
+        path: 'link/:alias',
+        page: RedirectPage,
+        isShowHeader: false,
+        isShowFooter: false,
+        requireAuth: false
+    },
+    {
         path: '*',
         page: NotFound,
         isShowHeader: true,
         isShowFooter: true,
         requireAuth: false
-    
     },
     {
         path: '/',
         page: LandingPageBAExpress,
         requireAuth: false
-    
     },
     {
         path: '/Register',
@@ -36,7 +41,5 @@ export const routes =[
         path: '/Login',
         page: LoginPage,
         requireAuth: false
-    },
-
-
+    }
 ]   

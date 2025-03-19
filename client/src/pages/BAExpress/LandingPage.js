@@ -261,9 +261,9 @@ const LandingPageBAExpress = () => {
                         <div className="section-6_container-left">
                             <img src="/LandingPageBAExpress/section6.1.png" alt="" className="section-6_container-left-img" />
                             <div className="section-6_container-left-download">
-                                <a href="https://play.google.com/store/apps/details?id=com.binhanh.driver.baexpress"><img
+                                <a href="https://apps.apple.com/vn/app/baexpress/id1560112617" target="_blank"><img
                                     src="/LandingPageBAExpress/section6.2.png" alt="" /></a>
-                                <a href="https://apps.apple.com/vn/app/baexpress/id1560112617"><img src="/LandingPageBAExpress/section6.3.png"
+                                <a href="https://play.google.com/store/apps/details?id=com.binhanh.driver.baexpress" target="_blank"><img src="/LandingPageBAExpress/section6.3.png"
                                     alt="" /></a>
                             </div>
                         </div>
