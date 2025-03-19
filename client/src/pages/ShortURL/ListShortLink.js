@@ -134,6 +134,12 @@ const ListShortLink = () => {
     filterData(data, selectedProject, searchText);
   }, [selectedProject, searchText, data]);
 
+  useEffect(() => {
+    const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
+    if(!token) {
+      navigate('/Login');
+    }
+  }, [navigate]);
   const showModal = (record) => {
     setSelectedRecord(record);
     setLoading(true)

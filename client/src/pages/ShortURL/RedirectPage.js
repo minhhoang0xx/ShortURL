@@ -22,7 +22,6 @@ const RedirectPage = () => {
                 navigate('*');
             }
         };
-
         redirectToOriginalUrl();
     }, [ alias, navigate]);
 

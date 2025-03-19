@@ -35,19 +35,18 @@ const LoginPage = () => {
         try {
             console.log("dataLogin", loginData);
             const response = await AuthenticationService.Login(loginData);
-            if (response.token) {
-                localStorage.setItem('token', response.token); 
-            } else {
-                localStorage.setItem('isLoggedIn', 'true');
-            }
-            message.success(response.message || "Login successfully!");
-            navigate('/ShortUrl');
-            setAttempts(0);
-            setShowCaptcha(false);
-            setCaptchaToken(null);
-            if (recaptchaRef.current) {
-                recaptchaRef.current.reset();
-            }
+            if (response.message === "Login successfully!") {
+                message.success(response.message);
+                navigate('/ShortUrl');
+                setAttempts(0);
+                setShowCaptcha(false);
+                setCaptchaToken(null);
+                if (recaptchaRef.current) {
+                    recaptchaRef.current.reset();
+                }
+            }else{
+                message.error(response.message);
+            }   
         } catch (error) {
             const newAttempts = attempts + 1;
             setAttempts(newAttempts);
@@ -55,7 +54,7 @@ const LoginPage = () => {
                 setShowCaptcha(true);
                 setCaptchaToken(null);
                 if (recaptchaRef.current) {
-                    recaptchaRef.current.reset(); 
+                    recaptchaRef.current.reset();
                 }
             }
             if (error.response?.data?.message) {
