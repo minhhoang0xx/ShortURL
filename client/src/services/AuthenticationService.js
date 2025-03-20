@@ -1,32 +1,36 @@
 import axios from 'axios';
+import {jwtDecode} from "jwt-decode";
 
 export const Login = async (data) => {
     const res = await axios.post(`${process.env.REACT_APP_API_URL}/Authentication/Login`,data);
     if(res.data.message === "Login successfully!") {
-        const token = 1;
+        const token = res.data.token;
         localStorage.setItem(`${process.env.REACT_APP_TOKEN_KEY}`, token.toString());
-        const expiryTime = Date.now() + 1000 * 60 * 0.5 ;
-        localStorage.setItem(`${process.env.REACT_APP_EXPIRY_KEY}`, expiryTime.toString());
     }
     return res.data; 
 }
 export const Logout = async () => {
     localStorage.removeItem(`${process.env.REACT_APP_TOKEN_KEY}`);
-    localStorage.removeItem(`${process.env.REACT_APP_EXPIRY_KEY}`);
 }
 
 export const isLoggedIn = () => {
     const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
-    const expiry = localStorage.getItem(`${process.env.REACT_APP_EXPIRY_KEY}`);
-    if(!token || !expiry) {
+    if(!token) {
         return false;
     }
-    const currentTime = Date.now();
-    if(currentTime > parseInt(expiry)) {
+    try {
+        const decodedToken = jwtDecode(token);
+        const currentTime = Date.now() / 1000; 
+        if (currentTime > decodedToken.exp) { 
+            Logout();
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error("Invalid token:", error);
         Logout();
         return false;
     }
-    return true;
 }
 
 export const getToken = () => {

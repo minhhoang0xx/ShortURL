@@ -6,18 +6,21 @@ using server.Data;
 using server.Models;
 using System.Security.Cryptography;
 namespace server.Controllers;
+using server.Services;
 using System.Text;
 
 [Route("api/[controller]")]
 [ApiController]
 public class Authentication : ControllerBase
 	{
+		private readonly JwtService _jwtService;
 		private readonly URLContext _context;
 		private readonly RecaptchaService _recaptchaService;
-		public	Authentication(URLContext context, RecaptchaService recaptchaService)
+		public	Authentication(URLContext context, RecaptchaService recaptchaService, JwtService jwtService)
 		{
 			_context = context;
 			_recaptchaService = recaptchaService;
+			_jwtService = jwtService;
 	}
 		private string HashToMD5(string input)
 		{
@@ -86,7 +89,8 @@ public class Authentication : ControllerBase
 			}
 
 			Reset(account.UserName);
-			return Ok(new {message="Login successfully!"});
+			var token = _jwtService.GenerateToken(checkLogin.UserName.ToString());
+            return Ok(new { message = "Login successfully!", token });
 		}
 
 }

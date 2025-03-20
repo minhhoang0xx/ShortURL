@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using server.Controllers;
 using server.Data;
 using System;
+using server.Services;
 
 
 
@@ -16,6 +20,23 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<RecaptchaService>();
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -42,11 +63,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseRouting();
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseRouting();
+
+
 
 app.UseEndpoints(endpoints =>
 {

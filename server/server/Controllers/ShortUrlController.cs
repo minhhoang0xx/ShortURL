@@ -6,6 +6,7 @@ using server.Data;
 using server.Models;
 using System;
 using System.Xml.Serialization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace server.Controllers
 {
@@ -19,7 +20,7 @@ namespace server.Controllers
 		{
 			_context = context;
 		}
-
+		[Authorize]
 		[HttpGet("getAll")]
 		public async Task<IActionResult> getAllUrl()
 		{
@@ -39,6 +40,7 @@ namespace server.Controllers
 			return Ok(result);
 		}
 		// Lay thong tin URL bang ID
+		[Authorize]
 		[HttpGet("getLink/{id}")]
 		public async Task<IActionResult> GetUrlInfo(int id)
 		{
@@ -64,6 +66,7 @@ namespace server.Controllers
 
 
 		// gan Url goc va short Url vao database
+		[Authorize]
 		[HttpPost("shorter")]
 		public async Task<IActionResult> ShorterUrl([FromBody] ShortURL_LinkDTO request)
 		{
@@ -104,6 +107,7 @@ namespace server.Controllers
 		}
 
 		// lay URL goc tu shortUrl
+		[AllowAnonymous]
 		[HttpGet("{code}")] // "code" trong domain
 		public async Task<IActionResult> RedirectUrl(string code)
 		{
@@ -117,6 +121,7 @@ namespace server.Controllers
 		}
 	
 		// Cap nhat URL bang ID
+		[Authorize] 
 		[HttpPut("update/{id}")]
 		public async Task<IActionResult> UpdateUrl(int id, [FromBody] ShortURL_LinkDTO request)
 		{
@@ -166,6 +171,7 @@ namespace server.Controllers
 		}
 		
 		// Xoa URL bang ID
+		[Authorize] 
 		[HttpDelete("delete/{id}")]
 		public async Task<IActionResult> DeleteUrl(int id)
 		{
