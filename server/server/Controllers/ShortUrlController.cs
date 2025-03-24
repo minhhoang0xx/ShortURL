@@ -7,6 +7,7 @@ using server.Models;
 using System;
 using System.Xml.Serialization;
 using Microsoft.AspNetCore.Authorization;
+using System.Reflection.Metadata.Ecma335;
 
 namespace server.Controllers
 {
@@ -24,9 +25,9 @@ namespace server.Controllers
 		[HttpGet("getAll")]
 		public async Task<IActionResult> getAllUrl()
 		{
-			//var context = HttpContext.Request.HttpContext.Session
 			var urls = await _context.ShortUrls.ToListAsync();
-			var result = urls.Select(url => new {
+			var result = urls.Select(url => new
+			{
 				id = url.ShortId,
 				projectName = url.ProjectName,
 				originalUrl = url.OriginalUrl,
@@ -35,6 +36,9 @@ namespace server.Controllers
 				shortLink = $"{url.Domain}/{url.Alias}",
 				createAt = url.CreateAt,
 				qrCode = url.QrCode,
+				checkOS = url.CheckOS,
+				IosLink = url.IosLink,
+				AndroidLink = url.AndroidLink,
 			});
 
 			return Ok(result);
@@ -61,6 +65,9 @@ namespace server.Controllers
 				shortLink,
 				createAt = url.CreateAt,
 				qrCode = url.QrCode,
+				checkOS = url.CheckOS,
+				IosLink = url.IosLink,
+				AndroidLink = url.AndroidLink,
 			});
 		}
 
@@ -98,6 +105,9 @@ namespace server.Controllers
 				Alias = shortCode,
 				CreateAt = DateTime.Now,
 				QrCode = request.QrCode,
+				CheckOS = request.CheckOS,
+				IosLink = request.IosLink,
+				AndroidLink = request.AndroidLink,
 			};
 			_context.ShortUrls.Add(shortUrl); // them vao dtbase
 			await _context.SaveChangesAsync();
@@ -111,11 +121,24 @@ namespace server.Controllers
 		[HttpGet("{code}")] // "code" trong domain
 		public async Task<IActionResult> RedirectUrl(string code)
 		{
-			// string UserAgent = Request.Headers["User-Agent"].ToString().ToUpper();
+			
 			var url = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == code); // search shortURL trong database
 			if (url == null)
 			{
 				return NotFound("ShortURL not exist");
+			}
+			if (url.CheckOS)
+			{
+				string UserAgent = Request.Headers["User-Agent"].ToString().ToUpper();
+				if (UserAgent.Contains("IPHONE") || UserAgent.Contains("IPAD") || UserAgent.Contains("MACINTOSH") 
+					|| UserAgent.Contains("WATCH") || UserAgent.Contains("WINDOWS"))
+				{
+					return Ok(url.IosLink);
+				}
+				else if (UserAgent.Contains("ANDROID"))
+				{
+					return Ok(url.AndroidLink) ;
+				}
 			}
 			return Ok(url.OriginalUrl);// tra ve URL goc 
 		}

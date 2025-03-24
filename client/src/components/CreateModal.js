@@ -1,4 +1,4 @@
-import { Button, Form, Input, Modal, Select, Space, message } from "antd";
+import { Button, Form, Input, Modal, Radio, Select, Space, message } from "antd";
 import { LinkOutlined, SyncOutlined } from '@ant-design/icons';
 import { Content } from "antd/es/layout/layout";
 import React, { useEffect, useState } from 'react';
@@ -14,6 +14,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
   const [form] = Form.useForm();
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(false)
+  const [isChecked, setIsChecked] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -37,6 +38,13 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       }
     }
   };
+  const handleCheckOSChange = (e) => {
+    const check = !isChecked;
+    setIsChecked(check);
+    if (!check) {
+      form.setFieldsValue({ iosLink: "", androidLink: "" });
+    }
+  };
 
   const onFinish = async (data) => {
     console.log('Received values:', data);
@@ -44,6 +52,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
     try {
       const selectedDomain = domains.find(domain => domain.link === data.domain);
       data.projectName = selectedDomain.name
+      data.checkOS = isChecked ? true : false;
       console.log("selectedDomain", selectedDomain)
       const linkShort = `${data.domain}/${data.alias}`;
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
@@ -91,6 +100,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
     form.resetFields();
     setShortUrl("");
     setQrLink("");
+    setIsChecked(false);
   }
   return (
     <Modal
@@ -154,7 +164,27 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
               </Form.Item>
             </Space.Compact>
           </Form.Item>
-
+          <Form.Item name="checkOS">
+            <Radio checked={isChecked} onClick={handleCheckOSChange}>
+              Check OS
+            </Radio>
+          </Form.Item>
+          {isChecked && (
+            <Form.Item
+              name="iosLink"
+              rules={[{ required: true, message: "Vui lòng nhập URL App Store!" }]}
+            >
+              <Input placeholder="Nhập URL App Store" />
+            </Form.Item>
+          )}
+          {isChecked && (
+            <Form.Item
+              name="androidLink"
+              rules={[{ required: true, message: "Vui lòng nhập URL Google Play!" }]}
+            >
+              <Input placeholder="Nhập URL Google Play" />
+            </Form.Item>
+          )}
           <Form.Item>
             <Button type="primary" htmlType="submit" className="CSL_button-create">
               Tạo mới
@@ -177,7 +207,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
               <Button className="CSL_copy-btn" htmlType="button" onClick={copyToClipboard} disabled={!shortUrl}>Sao chép</Button>
             </div>
             <div>
-              <Button className="CSL_link-btn" htmlType="button" onClick={openLink}><LinkOutlined />Mở Link</Button>
+              <Button className="CSL_link-btn" htmlType="button" onClick={openLink} disabled={!shortUrl}><LinkOutlined />Mở Link</Button>
             </div>
           </Form.Item>
         </Form>

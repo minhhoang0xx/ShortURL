@@ -1,3 +1,4 @@
+import { message } from 'antd';
 import axios from 'axios';
 import {jwtDecode} from "jwt-decode";
 
@@ -28,7 +29,9 @@ export const isLoggedIn = () => {
         return true;
     } catch (error) {
         console.error("Invalid token:", error);
+        message.warning("you have to Login again!")
         Logout();
+        window.location.href = "/Login";
         return false;
     }
 }

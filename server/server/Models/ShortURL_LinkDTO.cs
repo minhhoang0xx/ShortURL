@@ -8,5 +8,8 @@
 		public string Alias { get; set; } = string.Empty;
 		public string QrCode { get; set; }
 		public DateTime CreateAt { get; set; }
+		public bool CheckOS { get; set; }
+		public string? IosLink { get; set; }
+		public string? AndroidLink { get; set; }
 	}
 }

@@ -21,8 +21,8 @@ namespace server.Services
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, UserName),
-            };
+			   new Claim("name", UserName)
+			};
 
             var token = new JwtSecurityToken(
                

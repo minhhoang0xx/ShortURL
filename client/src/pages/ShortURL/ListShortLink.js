@@ -10,6 +10,7 @@ import CreateModal from '../../components/CreateModal';
 import { DeleteTwoTone, EditFilled } from '@ant-design/icons';
 import "../../pages/ShortURL/style.css"
 import * as DomainService from '../../services/DomainService';
+import { jwtDecode } from 'jwt-decode';
 const { Content } = Layout;
 const { Option } = Select;
 
@@ -72,8 +73,8 @@ const ListShortLink = () => {
     },
     {
       title: 'Người tạo',
-      dataIndex: 'createdBy',
-      key: 'createdBy',
+      dataIndex: 'userName',
+      key: 'userName',
       width: 90
     },
     {
@@ -97,8 +98,13 @@ const ListShortLink = () => {
     try {
       const urls = await ShortUrlService.getAllLink();
       const urlfetch = urls.$values;
+      const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
+      const decodedToken = jwtDecode(token);
+      console.log("token", token)
+      const userName = decodedToken["name"];
+      console.log("userName", userName)
       console.log("Data từ API:", urls);
-      const formattedData = urlfetch.map((url, index) => ({ ...url, key: url.id, STT: index + 1 }));
+      const formattedData = urlfetch.map((url, index) => ({ ...url, key: url.id, STT: index + 1, userName: userName }));
       setData(formattedData);
       filterData(formattedData, selectedProject, searchText);
     } catch (error) {
@@ -136,7 +142,7 @@ const ListShortLink = () => {
 
   useEffect(() => {
     const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
-    if(!token) {
+    if (!token) {
       navigate('/Login');
     }
   }, [navigate]);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Button, Space, Select, message } from 'antd';
+import { Modal, Form, Input, Button, Space, Select, message, Radio } from 'antd';
 import { Content } from 'antd/es/layout/layout';
 import { LinkOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +13,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const [qrLink, setQrLink] = useState("");
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(false)
+  const [isChecked, setIsChecked] = useState(false);
 
   useEffect(() => {
 
@@ -22,6 +23,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       fetchDomains();
       setShortUrl(record.shortLink);
       setQrLink(record.qrCode)
+      setIsChecked(record.checkOS)
       console.log("Form values after setting:", record);
     }
   }, [visible, record]);
@@ -41,6 +43,13 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       }
     }
   };
+  const handleCheckOSChange = (e) => {
+    const check = !isChecked;
+    setIsChecked(check);
+    if (!check) {
+      form.setFieldsValue({ iosLink: "", androidLink: "" });
+    }
+  };
   const onFinish = async (data) => {
     console.log('Received values:', data);
     setLoading(true)
@@ -48,6 +57,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       onUpdate();
       const selectedDomain = domains.find(domain => domain.link === data.domain);
       data.projectName = selectedDomain.name
+      data.checkOS = isChecked ? true : false;
       console.log("selectedDomain", selectedDomain)
       const linkShort = `${data.domain}/${data.alias}`;
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
@@ -95,6 +105,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const resetForm = () => {
     setShortUrl("");
     setQrLink("")
+    setIsChecked(false)
     form.resetFields();
   }
 
@@ -152,7 +163,27 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
               </Form.Item>
             </Space.Compact>
           </Form.Item>
-
+          <Form.Item name="checkOS">
+            <Radio checked={isChecked} onClick={handleCheckOSChange}>
+              Check OS
+            </Radio>
+          </Form.Item>
+          {isChecked && (
+            <Form.Item
+              name="iosLink"
+              rules={[{ required: true, message: "Vui lòng nhập URL App Store!" }]}
+            >
+              <Input placeholder="Nhập URL App Store" />
+            </Form.Item>
+          )}
+          {isChecked && (
+            <Form.Item
+              name="androidLink"
+              rules={[{ required: true, message: "Vui lòng nhập URL Google Play!" }]}
+            >
+              <Input placeholder="Nhập URL Google Play" />
+            </Form.Item>
+          )}
           <Form.Item>
             <Button type="primary" htmlType="submit" className="CSL_button-create">
               Cập nhật
@@ -175,7 +206,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
               <Button className="CSL_copy-btn" htmlType="button" onClick={copyToClipboard} disabled={!shortUrl}>Sao chép</Button>
             </div>
             <div>
-              <Button className="CSL_link-btn" htmlType="button" onClick={openLink}><LinkOutlined />Mở Link</Button>
+              <Button className="CSL_link-btn" htmlType="button" onClick={openLink} disabled={!shortUrl}><LinkOutlined />Mở Link</Button>
             </div>
           </Form.Item>
         </Form>
