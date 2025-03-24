@@ -1,4 +1,4 @@
-import { Button, Form, Input, Modal, Radio, Select, Space, message } from "antd";
+import { Button, Form, Input, Modal, Radio, Select, Space, Switch, message } from "antd";
 import { LinkOutlined, SyncOutlined } from '@ant-design/icons';
 import { Content } from "antd/es/layout/layout";
 import React, { useEffect, useState } from 'react';
@@ -165,9 +165,9 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
             </Space.Compact>
           </Form.Item>
           <Form.Item name="checkOS">
-            <Radio checked={isChecked} onClick={handleCheckOSChange}>
+            <Switch checked={isChecked} onClick={handleCheckOSChange} checkedChildren="CheckOS" unCheckedChildren="UnCheck">
               Check OS
-            </Radio>
+            </Switch>
           </Form.Item>
           {isChecked && (
             <Form.Item

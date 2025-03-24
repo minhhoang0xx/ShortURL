@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Button, Space, Select, message, Radio } from 'antd';
+import { Modal, Form, Input, Button, Space, Select, message, Radio, Switch } from 'antd';
 import { Content } from 'antd/es/layout/layout';
 import { LinkOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -164,9 +164,9 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
             </Space.Compact>
           </Form.Item>
           <Form.Item name="checkOS">
-            <Radio checked={isChecked} onClick={handleCheckOSChange}>
+            <Switch checked={isChecked} onClick={handleCheckOSChange} checkedChildren="CheckOS" unCheckedChildren="UnCheck">
               Check OS
-            </Radio>
+            </Switch>
           </Form.Item>
           {isChecked && (
             <Form.Item
