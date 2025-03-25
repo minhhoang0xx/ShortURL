@@ -23,7 +23,7 @@ const LoginPage = () => {
 
     const onFinish = async (data) => {
         if (showCaptcha && !captchaToken) {
-            message.error("Please complete the CAPTCHA!");
+            message.error("Vui lòng hoàn thành CAPTCHA!");
             return;
         }
         setLoading(true);
@@ -90,8 +90,8 @@ const LoginPage = () => {
                         label="UserName"
                         name="UserName"
                         rules={[
-                            { required: true, message: 'Please input your Username!' },
-                            { min: 6, message: 'Username must be at least 6 characters!' },
+                            { required: true, message: 'Vui lòng nhập tên tài khoản!' },
+                            { min: 6, message: 'Tên tài khoản phải có ít nhất 6 ký tự!' },
                         ]}
                     >
                         <Input />
@@ -101,8 +101,8 @@ const LoginPage = () => {
                         label="Password"
                         name="Password"
                         rules={[
-                            { required: true, message: 'Please input your password!' },
-                            { min: 6, message: 'Password must be at least 6 characters!' },
+                            { required: true, message: 'Vui lòng nhập mật khẩu!' },
+                            { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
                         ]}
                     >
                         <Input.Password />
@@ -123,11 +123,11 @@ const LoginPage = () => {
                         valuePropName="checked"
                         wrapperCol={{ offset: 5, span: 19 }}
                     >
-                        <Checkbox>Remember me</Checkbox>
+                        <Checkbox>Ghi nhớ tôi</Checkbox>
                         <p>
-                            Don't have an account?{' '}
+                            Không có tài khoản?{' '}
                             <span className="register-link" onClick={handleNavigateRegister}>
-                                Register
+                                Đăng ký
                             </span>
                         </p>
                     </Form.Item>
@@ -139,7 +139,7 @@ const LoginPage = () => {
                             className="submit-button"
                             loading={loading} // Hiển thị loading trên nút
                         >
-                            Submit
+                            Đăng nhập
                         </Button>
                         <Button
                             color="default"
@@ -147,7 +147,7 @@ const LoginPage = () => {
                             className="back-button"
                             onClick={handleNavigateHome}
                         >
-                            Home
+                            Trang chủ
                         </Button>
                     </Form.Item>
                 </Form>

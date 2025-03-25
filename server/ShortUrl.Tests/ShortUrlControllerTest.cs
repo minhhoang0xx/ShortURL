@@ -25,8 +25,8 @@ namespace ShortUrl.Tests
 				.UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
 			_context = new URLContext(options);
 
-			_context.ShortUrls.Add(new server.Models.ShortUrl_Link { ID = 1, projectName = "Project 1", originalUrl = "https://example1.com", domain = "https://short1", alias = "abc1", qrCode ="qrcode1"});
-			_context.ShortUrls.Add(new server.Models.ShortUrl_Link { ID = 2, projectName = "Project 2", originalUrl = "https://example2.com", domain = "https://short2", alias = "abc2", qrCode = "qrcode2" });
+			_context.ShortUrls.Add(new ShortURL_Link { ShortId = 1, ProjectName = "Project 1", OriginalUrl = "https://example1.com", Domain = "https://short1", Alias = "abc1", QrCode ="qrcode1"});
+			_context.ShortUrls.Add(new ShortURL_Link { ShortId = 2, ProjectName = "Project 2", OriginalUrl = "https://example2.com", Domain = "https://short2", Alias = "abc2", QrCode = "qrcode2" });
 			_context.SaveChanges();
 
 			_controller = new ShortUrlController(_context);
@@ -57,13 +57,13 @@ namespace ShortUrl.Tests
 		[Fact]
 		public async Task ShortOriginalUrl_ToShorterUrl()
 		{
-			var newUrl = new ShortUrl_LinkDTO
+			var newUrl = new ShortURL_LinkDTO
 			{
-				projectName = "Project C",
-				originalUrl = "https://example3.com",
-				domain = "https://short3",
-				alias = "abc3",
-				qrCode ="qrCode3"
+				ProjectName = "Project C",
+				OriginalUrl = "https://example3.com",
+				Domain = "https://short3",
+				Alias = "abc3",
+				QrCode ="qrCode3"
 			};
 			var result = await _controller.ShorterUrl(newUrl);
 			var okResult = Assert.IsType<OkObjectResult>(result);
@@ -77,18 +77,18 @@ namespace ShortUrl.Tests
 		{
 			var code = "abc1";
 			var result = await _controller.RedirectUrl(code);
-			var redirectResult = Assert.IsType<RedirectResult>(result);
-			Assert.Equal("https://example1.com", redirectResult.Url);
+			var OkObjectResult = Assert.IsType<OkObjectResult>(result);
+			Assert.Equal("https://example1.com", OkObjectResult.Value);
 		}
 		[Fact]
 		public async Task Update_ShortUrl()
 		{
-			var newUrl = new ShortUrl_LinkDTO
+			var newUrl = new ShortURL_LinkDTO
 			{
-				projectName = "Project 1",
-				originalUrl = "https://example1ed",
-				domain = "https://edited",
-				alias = "1ed"
+				ProjectName = "Project 1",
+				OriginalUrl = "https://example1ed",
+				Domain = "https://edited",
+				Alias = "1ed"
 			};
 			var result = await _controller.UpdateUrl(1, newUrl);
 			var okResult = Assert.IsType<OkObjectResult>(result);

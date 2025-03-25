@@ -46,16 +46,16 @@ const RegisterPage = () => {
                     loading = {loading}
                     autoComplete="off"
                 >
-                    <Form.Item label="UserName" name="UserName" rules={[{ required: true, message: 'Please input UserName!' },
-                        { min: 6, message: 'UserName must be at least 6 characters!' }
+                    <Form.Item label="UserName" name="UserName" rules={[{ required: true, message: 'Vui lòng nhập tên tài khoản!' },
+                        { min: 6, message: 'Tên tài khoản phải có ít nhất 6 ký tự!' }
                     ]}>
                         <Input />
                     </Form.Item>
                     <Form.Item
                         label="Password"
                         name="password"
-                        rules={[{ required: true, message: 'Please input your password!' },
-                        { min: 6, message: 'Password must be at least 6 characters!' }
+                        rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' },
+                        { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' }
                         ]}
                     >
                         <Input.Password />
@@ -65,43 +65,43 @@ const RegisterPage = () => {
                         name="confirmPassword"
                         dependencies={['password']}
                         rules={[
-                            { required: true, message: 'Please confirm your password!' },
+                            { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
                             ({ getFieldValue }) => ({
                                 validator(_, value) {
                                     if (!value || getFieldValue('password') === value) {
                                         return Promise.resolve();
                                     }
-                                    return Promise.reject(new Error('The two passwords do not match!'));
+                                    return Promise.reject(new Error('Mật khẩu không khớp!'));
                                 }
                             })
                         ]}
                     >
                         <Input.Password />
                     </Form.Item>
-                    <Form.Item label="FullName" name="FullName" rules={[{ required: true, message: 'Please input UserName!' }]}>
+                    <Form.Item label="FullName" name="FullName" rules={[{ required: true, message: 'Vui lòng nhập tên!' }]}>
                         <Input />
                     </Form.Item>
 
                     <Form.Item
                         label="Phone Number"
                         name="PhoneNumber"
-                        rules={[{ pattern: /^[0-9]{10}$/, message: 'Phone number is incorrect!' }]}
+                        rules={[{ pattern: /^[0-9]{10}$/, message: 'Số điện thoại không hợp lệ!' }]}
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item
                         label="Email"
                         name="Email"
-                        rules={[{ type: 'email', message: 'Please enter a valid email!' }]}
+                        rules={[{ type: 'email', message: 'Vui lòng nhập email hợp lệ!' }]}
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item wrapperCol={{ offset: 6, span: 18 }}>
                         <Button type="primary" htmlType="submit" className="submit-button">
-                            Submit
+                            Đăng ký
                         </Button>
                         <Button color="default" variant="filled" className="back-button" onClick={handleNavigateLogin}>
-                            Login
+                            Đăng nhập
                         </Button>
                     </Form.Item>
                 </Form>

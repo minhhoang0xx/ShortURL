@@ -66,13 +66,13 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       data.qrCode = qr;
       const response = await ShortUrlService.createShortLink(data)
       if (response && response.shortLink) {
-        message.success(`Link created successfully!`);
+        message.success(`Tạo thành công!`);
         setShortUrl(linkShort);
         setQrLink(qr);
         console.log("QR Link:", qrLink);
         onCreate()
       } else {
-        throw new Error("Failed to create link");
+        throw new Error("Tạo thất bại!");
       }
     } catch (error) {
       console.error("API Error:", error);
@@ -159,7 +159,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
                 name="alias"
                 noStyle
                 rules={[
-                  { required: true, message: 'Vui lòng nhập ShortCode' },
+                  { required: true, message: 'Vui lòng nhập Alias' },
                   { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' },
                   {
                     pattern: /^[a-zA-Z0-9]+$/,

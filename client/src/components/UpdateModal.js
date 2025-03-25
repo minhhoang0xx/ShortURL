@@ -71,12 +71,12 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       
       if (response && response.shortLink) {
         console.log("API Response:", response);
-        message.success(`Link updated successfully!`);
+        message.success(`Cập nhật thành công!`);
         setShortUrl(response.shortLink);
         setQrLink(qr)
         onUpdate();
       } else {
-        throw new Error("Failed to update link");
+        throw new Error("Cập nhật thất bại!");
       }
     } catch (error) {
       console.error("API Error:", error);
@@ -141,9 +141,9 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
               <Form.Item
                 name="domain"
                 noStyle
-                rules={[{ required: true, message: 'Vui lòng chọn domain!' }]}
+                rules={[{ required: true, message: 'Vui lòng chọn Dự án!' }]}
               >
-                <Select placeholder="Chọn Domain" style={{ width: '50%' }}>
+                <Select placeholder="Chọn Dự án" style={{ width: '50%' }}>
                 {domains.map((domain) => (
                     <Select.Option key={domain.id} value={domain.link}>
                       {domain.name}
@@ -156,7 +156,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
                 name="alias"
                 noStyle
                 rules={[
-                  { required: true, message: 'Vui lòng nhập ShortCode' },
+                  { required: true, message: 'Vui lòng nhập Alias' },
                   { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' },
                   {
                     pattern: /^[a-zA-Z0-9]+$/,
@@ -169,9 +169,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
             </Space.Compact>
           </Form.Item>
           <Form.Item name="checkOS">
-            <Switch checked={isChecked} onClick={handleCheckOSChange} checkedChildren="CheckOS" unCheckedChildren="UnCheck">
-              Check OS
-            </Switch>
+            <Switch checked={isChecked} onClick={handleCheckOSChange} checkedChildren="CheckOS" unCheckedChildren="UnCheck"/>
           </Form.Item>
           {isChecked && (
             <Form.Item

@@ -141,7 +141,7 @@ namespace server.Controllers
 					return Ok(url.AndroidLink) ;
 				}
 			}
-			return Ok(url.OriginalUrl);// tra ve URL goc 
+			return Ok(url.OriginalUrl);
 		}
 
 		[Authorize] 
@@ -187,6 +187,9 @@ namespace server.Controllers
 			url.Domain = request.Domain;
 			url.QrCode = request.QrCode;
 			url.CreatedByUser = request.CreatedByUser;
+			url.CheckOS = request.CheckOS;
+			url.AndroidLink = request.AndroidLink;
+			url.IosLink = request.IosLink;
 
 			_context.ShortUrls.Update(url);
 			await _context.SaveChangesAsync();
