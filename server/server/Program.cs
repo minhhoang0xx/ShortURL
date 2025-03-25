@@ -71,14 +71,14 @@ app.UseAuthorization();
 
 
 
-app.UseEndpoints(endpoints =>
-{
-	endpoints.MapControllerRoute(
-		name: "shortUrl",
-		pattern: "{domain}/{alias}",
-		defaults: new { controller = "ShortUrl", action = "Redirect2" }
-	);
-	endpoints.MapControllers();
-});
-//app.MapControllers();
+//app.UseEndpoints(endpoints =>
+//{
+//	endpoints.MapControllerRoute(
+//		name: "shortUrl",
+//		pattern: "{domain}/{alias}",
+//		defaults: new { controller = "ShortUrl", action = "Redirect2" }
+//	);
+//	endpoints.MapControllers();
+//});
+app.MapControllers();
 app.Run();

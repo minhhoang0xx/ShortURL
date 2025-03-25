@@ -72,7 +72,7 @@ const ListShortLink = () => {
       width: 130
     },
     {
-      title: 'Người tạo',
+      title: 'Người chỉnh sửa',
       dataIndex: 'userName',
       key: 'userName',
       width: 90
@@ -98,13 +98,8 @@ const ListShortLink = () => {
     try {
       const urls = await ShortUrlService.getAllLink();
       const urlfetch = urls.$values;
-      const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
-      const decodedToken = jwtDecode(token);
-      console.log("token", token)
-      const userName = decodedToken["name"];
-      console.log("userName", userName)
       console.log("Data từ API:", urls);
-      const formattedData = urlfetch.map((url, index) => ({ ...url, key: url.id, STT: index + 1, userName: userName }));
+      const formattedData = urlfetch.map((url, index) => ({ ...url, key: url.id, STT: index + 1 }));
       setData(formattedData);
       filterData(formattedData, selectedProject, searchText);
     } catch (error) {

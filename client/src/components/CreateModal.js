@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import * as ShortUrlService from '../services/ShortUrlService';
 import * as DomainService from '../services/DomainService';
+import { jwtDecode } from "jwt-decode";
 
 
 const CreateModal = ({ visible, onCancel, onCreate }) => {
@@ -53,7 +54,13 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       const selectedDomain = domains.find(domain => domain.link === data.domain);
       data.projectName = selectedDomain.name
       data.checkOS = isChecked ? true : false;
+      const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
+      const decodedToken = jwtDecode(token);
+      const userName = decodedToken["name"];
+      data.createdByUser = userName;
+      console.log("userName", userName)
       console.log("selectedDomain", selectedDomain)
+      console.log("data", data)
       const linkShort = `${data.domain}/${data.alias}`;
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
       data.qrCode = qr;

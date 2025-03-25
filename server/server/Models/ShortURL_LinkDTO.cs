@@ -11,5 +11,6 @@
 		public bool CheckOS { get; set; }
 		public string? IosLink { get; set; }
 		public string? AndroidLink { get; set; }
+		public string? CreatedByUser { get; set; }
 	}
 }

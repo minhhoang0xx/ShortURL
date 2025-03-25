@@ -8,6 +8,7 @@ using System;
 using System.Xml.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using System.Reflection.Metadata.Ecma335;
+using System.Security.Claims;
 
 namespace server.Controllers
 {
@@ -37,8 +38,9 @@ namespace server.Controllers
 				createAt = url.CreateAt,
 				qrCode = url.QrCode,
 				checkOS = url.CheckOS,
-				IosLink = url.IosLink,
-				AndroidLink = url.AndroidLink,
+				iosLink = url.IosLink,
+				androidLink = url.AndroidLink,
+				userName = url.CreatedByUser ?? "unknow"
 			});
 
 			return Ok(result);
@@ -66,13 +68,12 @@ namespace server.Controllers
 				createAt = url.CreateAt,
 				qrCode = url.QrCode,
 				checkOS = url.CheckOS,
-				IosLink = url.IosLink,
-				AndroidLink = url.AndroidLink,
+				iosLink = url.IosLink,
+				androidLink = url.AndroidLink,
+				createdByUser = url.CreatedByUser
 			});
 		}
 
-
-		// gan Url goc va short Url vao database
 		[Authorize]
 		[HttpPost("shorter")]
 		public async Task<IActionResult> ShorterUrl([FromBody] ShortURL_LinkDTO request)
@@ -108,15 +109,15 @@ namespace server.Controllers
 				CheckOS = request.CheckOS,
 				IosLink = request.IosLink,
 				AndroidLink = request.AndroidLink,
+				CreatedByUser = request.CreatedByUser
 			};
-			_context.ShortUrls.Add(shortUrl); // them vao dtbase
+			_context.ShortUrls.Add(shortUrl);
 			await _context.SaveChangesAsync();
 
 			var shortLink = $"{request.Domain}/{shortCode}";
 			return Ok(new {shortLink });
 		}
 
-		// lay URL goc tu shortUrl
 		[AllowAnonymous]
 		[HttpGet("{code}")] // "code" trong domain
 		public async Task<IActionResult> RedirectUrl(string code)
@@ -142,8 +143,7 @@ namespace server.Controllers
 			}
 			return Ok(url.OriginalUrl);// tra ve URL goc 
 		}
-	
-		// Cap nhat URL bang ID
+
 		[Authorize] 
 		[HttpPut("update/{id}")]
 		public async Task<IActionResult> UpdateUrl(int id, [FromBody] ShortURL_LinkDTO request)
@@ -180,11 +180,13 @@ namespace server.Controllers
 					return BadRequest( new { massage = "Alias already exists" });
 				}
 			}
+
 			url.Alias = shortCode;
 			url.ProjectName = request.ProjectName;
 			url.OriginalUrl = request.OriginalUrl;
 			url.Domain = request.Domain;
 			url.QrCode = request.QrCode;
+			url.CreatedByUser = request.CreatedByUser;
 
 			_context.ShortUrls.Update(url);
 			await _context.SaveChangesAsync();
@@ -193,7 +195,6 @@ namespace server.Controllers
 			return Ok(new { id = url.ShortId, shortLink });
 		}
 		
-		// Xoa URL bang ID
 		[Authorize] 
 		[HttpDelete("delete/{id}")]
 		public async Task<IActionResult> DeleteUrl(int id)
@@ -216,9 +217,10 @@ namespace server.Controllers
 			return new string(Enumerable.Repeat(chars, length)
 										.Select(s => s[random.Next(s.Length)]).ToArray());
 		}
+	
 
 
 	}
 
-	
+
 }
