@@ -54,7 +54,7 @@ const ListShortLink = () => {
       key: 'originalUrl',
       ellipsis: true,
       render: (HyperLink) => <a href={HyperLink} target="_blank" >{HyperLink}</a>,
-      width: 600
+      width: 560
     },
     {
       title: 'Shortlink',
@@ -75,7 +75,7 @@ const ListShortLink = () => {
       title: 'Người chỉnh sửa',
       dataIndex: 'userName',
       key: 'userName',
-      width: 90
+      width: 130
     },
     {
       title: 'Chức Năng',
@@ -99,7 +99,7 @@ const ListShortLink = () => {
       const urls = await ShortUrlService.getAllLink();
       const urlfetch = urls.$values;
       console.log("Data từ API:", urls);
-      const formattedData = urlfetch.map((url, index) => ({ ...url, key: url.id, STT: index + 1 }));
+      const formattedData = urlfetch.map((url, index) => ({ ...url, STT: index + 1 }));
       setData(formattedData);
       filterData(formattedData, selectedProject, searchText);
     } catch (error) {
@@ -125,7 +125,6 @@ const ListShortLink = () => {
   const fetchDomains = async () => {
     const response = await DomainService.getAll();
     setDomains(response.$values.map(domain => domain.name));
-    console.log("doamin", response)
   }
   useEffect(() => { // cai nay de cho fetch chi chay 1 lan
     fetchData();
@@ -250,6 +249,7 @@ const ListShortLink = () => {
             />
             <Button type="primary" className="LSL_search-bar-Create"> <a onClick={(showCreateModal)}>Tạo mới</a></Button>
             <Button type="primary" className="LSL_search-bar-Excel"> <a onClick={handleExportExcel}>Xuất Excel</a></Button>
+            
           </Space>
         </div>
 

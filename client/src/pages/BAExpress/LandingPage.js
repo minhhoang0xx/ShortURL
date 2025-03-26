@@ -71,7 +71,7 @@ const LandingPageBAExpress = () => {
                 <section id="3" className="section-3">
                     <h2>
                         <span className="blue">LÝ DO</span>
-                        <span className="green">BẠN NÊN SỬ DỤNG</span><br />
+                        <span className="green"> BẠN NÊN SỬ DỤNG</span><br />
                         <span className="blue">GIẢI
                             PHÁP ĐIỀU HÀNH VẬN TẢI</span>
                     </h2>

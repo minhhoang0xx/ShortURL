@@ -58,7 +58,6 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       const decodedToken = jwtDecode(token);
       const userName = decodedToken["name"];
       data.createdByUser = userName;
-      console.log("userName", userName)
       console.log("selectedDomain", selectedDomain)
       console.log("data", data)
       const linkShort = `${data.domain}/${data.alias}`;
@@ -128,7 +127,9 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
         >
           <Form.Item
             name="originalUrl"
-            rules={[{ required: true, message: 'Vui lòng nhập URL gốc!' }]}
+            rules={[{ required: true, message: 'Vui lòng nhập URL gốc!' },
+              { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+            ]}
           >
             <div className="shortlink-form_Original">
               <Input placeholder="Nhập URL gốc" />
@@ -179,7 +180,9 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
           {isChecked && (
             <Form.Item
               name="iosLink"
-              rules={[{ required: true, message: "Vui lòng nhập URL App Store!" }]}
+              rules={[{ required: true, message: "Vui lòng nhập URL App Store!" },
+                { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+              ]}
             >
               <Input placeholder="Nhập URL App Store" />
             </Form.Item>
@@ -187,7 +190,9 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
           {isChecked && (
             <Form.Item
               name="androidLink"
-              rules={[{ required: true, message: "Vui lòng nhập URL Google Play!" }]}
+              rules={[{ required: true, message: "Vui lòng nhập URL Google Play!" },
+                { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+              ]}
             >
               <Input placeholder="Nhập URL Google Play" />
             </Form.Item>

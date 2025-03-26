@@ -128,7 +128,9 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
         >
           <Form.Item
             name="originalUrl"
-            rules={[{ required: true, message: 'Vui lòng nhập URL gốc!' }]}
+            rules={[{ required: true, message: 'Vui lòng nhập URL gốc!' },
+              { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+            ]}
           >
             <Input placeholder="Nhập URL gốc" />
           </Form.Item>
@@ -174,7 +176,9 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
           {isChecked && (
             <Form.Item
               name="iosLink"
-              rules={[{ required: true, message: "Vui lòng nhập URL App Store!" }]}
+              rules={[{ required: true, message: "Vui lòng nhập URL App Store!" },
+                { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+              ]}
             >
               <Input placeholder="Nhập URL App Store" />
             </Form.Item>
@@ -182,7 +186,9 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
           {isChecked && (
             <Form.Item
               name="androidLink"
-              rules={[{ required: true, message: "Vui lòng nhập URL Google Play!" }]}
+              rules={[{ required: true, message: "Vui lòng nhập URL Google Play!" },
+                { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+              ]}
             >
               <Input placeholder="Nhập URL Google Play" />
             </Form.Item>

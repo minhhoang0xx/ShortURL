@@ -167,7 +167,7 @@ namespace server.Controllers
 			}
 			string shortCode = request.Alias;
 			if (string.IsNullOrEmpty(request.Alias))
-			{
+			{	
 				shortCode = GenerateRandomURL();
 			}
 			// Neu shortCode khac voi alias hien tai
@@ -213,7 +213,7 @@ namespace server.Controllers
 
 			return Ok(new { message = "URL deleted successfully", id = id });
 		}
-		private string GenerateRandomURL(int length = 6)
+		private string GenerateRandomURL(int length = 10)
 		{
 			const string chars = "qwertyuioplkjhgfdsazxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM";
 			var random = new Random();
