@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace server.Data
 {
 	public class URLContext : DbContext
@@ -11,5 +12,6 @@ namespace server.Data
 		public DbSet<ShortURL_Link> ShortUrls { get; set; }
 		public DbSet<ShortURL_Domain> Domains { get; set; }
 		public DbSet<Admin_Users> AdminUsers { get; set; }
+		public DbSet<RequestForm> FormRequests { get; set; }
 	}
 }

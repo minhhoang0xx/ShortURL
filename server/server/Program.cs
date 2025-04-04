@@ -50,7 +50,9 @@ builder.Services.AddCors(options =>
 		{
 			policy.WithOrigins("http://localhost:3000")
 				  .AllowAnyHeader()
-				  .AllowAnyMethod();
+				  .AllowAnyMethod()
+				
+			;
 		});
 });
 
@@ -68,17 +70,5 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-
-
-
-//app.UseEndpoints(endpoints =>
-//{
-//	endpoints.MapControllerRoute(
-//		name: "shortUrl",
-//		pattern: "{domain}/{alias}",
-//		defaults: new { controller = "ShortUrl", action = "Redirect2" }
-//	);
-//	endpoints.MapControllers();
-//});
 app.MapControllers();
 app.Run();

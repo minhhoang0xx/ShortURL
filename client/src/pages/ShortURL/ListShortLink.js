@@ -99,7 +99,7 @@ const ListShortLink = () => {
       const urls = await ShortUrlService.getAllLink();
       const urlfetch = urls.$values;
       console.log("Data từ API:", urls);
-      const formattedData = urlfetch.map((url, index) => ({ ...url, STT: index + 1 }));
+      const formattedData = urlfetch.map((url, index) => ({ ...url,key:url.id, STT: index + 1 }));
       setData(formattedData);
       filterData(formattedData, selectedProject, searchText);
     } catch (error) {
