@@ -4,6 +4,7 @@ import LandingPageBAExpress from "../pages/BAExpress/LandingPage";
 import RegisterPage from "../pages/ShortURL/RegisterPage";
 import LoginPage from "../pages/ShortURL/LoginPage";
 import RedirectPage from "../pages/ShortURL/RedirectPage";
+import LandingPageStaxi from "../pages/Staxi/LandingPage";
 
 export const routes =[
     {
@@ -30,16 +31,29 @@ export const routes =[
     {
         path: '/',
         page: LandingPageBAExpress,
-        requireAuth: false
+        requireAuth: false,
+        isShowHeader: false,
+        isShowFooter: false,
     },
     {
         path: '/Register',
         page: RegisterPage,
-        requireAuth: false
+        requireAuth: false,
+        isShowHeader: false,
+        isShowFooter: false,
     },
     {
         path: '/Login',
         page: LoginPage,
-        requireAuth: false
+        requireAuth: false,
+        isShowHeader: false,
+        isShowFooter: false,
+    },
+    {
+        path: 'Staxi',
+        page: LandingPageStaxi,
+        requireAuth: false,
+        isShowHeader: false,
+        isShowFooter: false,
     }
 ]   

@@ -12,6 +12,6 @@ namespace server.Data
 		public DbSet<ShortURL_Link> ShortUrls { get; set; }
 		public DbSet<ShortURL_Domain> Domains { get; set; }
 		public DbSet<Admin_Users> AdminUsers { get; set; }
-		public DbSet<RequestForm> FormRequests { get; set; }
+		public DbSet<FormRequest> FormRequests { get; set; }
 	}
 }

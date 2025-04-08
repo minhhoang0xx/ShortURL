@@ -19,13 +19,13 @@ namespace server.Controllers
 			_recaptchaService = recaptchaService;	
 		}
 
-		[HttpPost("saveRequest")]
-		public async Task<IActionResult> saveRequest([FromBody] RequestFormDTO request)
+		[HttpPost("saveRequestBAE")]
+		public async Task<IActionResult> saveRequestBAE([FromBody] FormRequestDTO request)
 		{
 
 			if (request == null)
 			{
-				return BadRequest(new { message = "Invalid request data" });
+				return BadRequest(new { message = "Không có dữ liệu được gửi" });
 			}
 			string clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "local";
 			int attempts = Failed(clientIp);
@@ -33,7 +33,7 @@ namespace server.Controllers
 			{
 				if (string.IsNullOrEmpty(request.RecaptchaToken))
 				{
-					return BadRequest(new { message = "Please complete the CAPTCHA!", requiresCaptcha = true});
+					return BadRequest(new { message = "Hãy Thực hiện xác thực trước!", requiresCaptcha = true});
 		
 				}
 
@@ -41,12 +41,12 @@ namespace server.Controllers
 				if (!isRecaptchaValid)
 				{
 					Increase(clientIp);
-					return BadRequest(new { message = "Invalid CAPTCHA!" });
+					return BadRequest(new { message = "Chưa xác thực CAPTCHA!" });
 				}
 			}
 			try
 			{
-				var create = new RequestForm
+				var create = new FormRequest
 				{
 					projectName = request.projectName,
 					fullName = request.fullName,
@@ -65,6 +65,54 @@ namespace server.Controllers
 				return BadRequest( new { message = "Có lỗi xảy ra khi lưu thông tin", error = ex.Message });
 			}
 			
+		}
+
+		[HttpPost("saveRequestStaxi")]
+		public async Task<IActionResult> saveRequestStaxi([FromBody] FormRequestDTO request)
+		{
+
+			if (request == null)
+			{
+				return BadRequest(new { message = "Không có dữ liệu được gửi" });
+			}
+			string clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "local";
+			int attempts = Failed(clientIp);
+			if (attempts >= 3)
+			{
+				if (string.IsNullOrEmpty(request.RecaptchaToken))
+				{
+					return BadRequest(new { message = "Hãy Thực hiện xác thực trước!", requiresCaptcha = true });
+
+				}
+
+				bool isRecaptchaValid = await _recaptchaService.VerifyRecaptchaAsync(request.RecaptchaToken);
+				if (!isRecaptchaValid)
+				{
+					Increase(clientIp);
+					return BadRequest(new { message = "Chưa xác thực CAPTCHA!" });
+				}
+			}
+			try
+			{
+				var create = new FormRequest
+				{
+					projectName = request.projectName,
+					fullName = request.fullName,
+					email = request.email,
+					company = request.company,
+					address = request.address
+				};
+				_context.FormRequests.Add(create);
+				await _context.SaveChangesAsync();
+				Increase(clientIp);
+				return Ok(new { message = "Thông tin đã được ghi nhận", attempts = Failed(clientIp) });
+			}
+			catch (Exception ex)
+			{
+				Increase(clientIp);
+				return BadRequest(new { message = "Có lỗi xảy ra khi lưu thông tin", error = ex.Message });
+			}
+
 		}
 
 		private void Increase( string clientIp)

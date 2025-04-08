@@ -488,7 +488,7 @@ margin-right: 20px;
 .section-6_container-right-form textarea {
     min-height: 120px;
     resize: vertical;
-    margin-bottom: 35px;
+    margin-bottom: 15px;
 }
 .section-6_container-right-form button {
     background-color: #273c8e;
@@ -502,6 +502,7 @@ margin-right: 20px;
     display: block;
     margin: 0 auto;
     font-weight: bold;
+    margin-top: 20px;
 }
 .section-6_container-right-form button:hover {
     background-color: #1e2e6c;
@@ -810,6 +811,7 @@ margin-right: 20px;
         width: 100%;
         padding: 10px 20px;
         border-top: 1px solid rgba(255, 255, 255, 0.1);
+        justify-content: center;
     }
     
     .header_contact{

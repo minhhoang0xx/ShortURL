@@ -53,7 +53,7 @@ const ListShortLink = () => {
       dataIndex: 'originalUrl',
       key: 'originalUrl',
       ellipsis: true,
-      render: (HyperLink) => <a href={HyperLink} target="_blank" >{HyperLink}</a>,
+      render: (HyperLink) => <a href={HyperLink} target="_blank" rel="noreferrer" >{HyperLink}</a>,
       width: 560
     },
     {
@@ -62,7 +62,7 @@ const ListShortLink = () => {
       key: 'shortLink',
       ellipsis: true,
       width: 280,
-      render: (HyperLink) => <a href={HyperLink} target="_blank" >{HyperLink}</a>,
+      render: (HyperLink) => <a href={HyperLink} target="_blank" rel="noreferrer" >{HyperLink}</a>,
     },
     {
       title: 'Ngày tạo',

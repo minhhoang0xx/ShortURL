@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "../BAExpress/styleBAE.css";
 import ReCAPTCHA from "react-google-recaptcha";
 import * as FormRequestService from "../../services/FormRequestService";
@@ -6,10 +6,18 @@ import { message } from "antd";
 
 const LandingPageBAExpress = () => {
     const [loading, setLoading] = useState(false);
-    const [showCaptcha, setShowCaptcha] = useState(false);
     const [captchaToken, setCaptchaToken] = useState(null);
-    const [attempts, setAttempts] = useState(0);
+    const [attempts, setAttempts] = useState(() => parseInt(localStorage.getItem("attempts") || "0"));
+    const [showCaptcha, setShowCaptcha] = useState(() => parseInt(localStorage.getItem("attempts") || "0") >= 3);
     const recaptchaRef = useRef(null);
+
+    useEffect(() => {
+        console.log('submit times', attempts)
+        localStorage.setItem("attempts", attempts.toString());
+        if (attempts >= 3) {
+            setShowCaptcha(true);
+        }
+    }, [attempts]);
 
     const [formData, setFormData] = useState({
         projectName: "",
@@ -34,12 +42,10 @@ const LandingPageBAExpress = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('submit',captchaToken )
-
         if (showCaptcha && !captchaToken) {
             message.error("Vui lòng hoàn thành CAPTCHA!");
             return;
         }
-
         const dataToSubmit = {
             ...formData,
             projectName: "BAExpress",
@@ -48,7 +54,7 @@ const LandingPageBAExpress = () => {
         setLoading(true);
         try {
             console.log("data", dataToSubmit);
-            const response = await FormRequestService.saveRequest(dataToSubmit);
+            const response = await FormRequestService.saveRequestBAE(dataToSubmit);
             console.log("Response:", response);
 
             if (response && response.message) {
@@ -62,7 +68,7 @@ const LandingPageBAExpress = () => {
                 });
                 setAttempts(response.attempts);
                 console.log('sumbit times', attempts)
-                setShowCaptcha(false);
+                // setShowCaptcha(false);
                 setCaptchaToken(null);
                 if (recaptchaRef.current) {
                     recaptchaRef.current.reset();
@@ -350,10 +356,10 @@ const LandingPageBAExpress = () => {
                         <div className="section-6_container-left">
                             <img src="/LandingPageBAExpress/section6.1.png" alt="" className="section-6_container-left-img" />
                             <div className="section-6_container-left-download">
-                                <a href="https://apps.apple.com/vn/app/baexpress/id1560112617" target="_blank"><img
-                                    src="/LandingPageBAExpress/section6.2.png" alt="" /></a>
-                                <a href="https://play.google.com/store/apps/details?id=com.binhanh.driver.baexpress" target="_blank"><img src="/LandingPageBAExpress/section6.3.png"
-                                    alt="" /></a>
+                                <a href="https://apps.apple.com/vn/app/baexpress/id1560112617" target="_blank" rel="noreferrer">
+                                <img src="/LandingPageBAExpress/section6.2.png" alt="app-store" /></a>
+                                <a href="https://play.google.com/store/apps/details?id=com.binhanh.driver.baexpress" target="_blank" rel="noreferrer">
+                                <img src="/LandingPageBAExpress/section6.3.png" alt="google-play" /></a>
                             </div>
                         </div>
                         <div className="section-6_container-right">
@@ -364,7 +370,7 @@ const LandingPageBAExpress = () => {
                             </div>
                             <div className="section-6_container-right-form">
 
-                                <form onSubmit={handleSubmit} method="post" loading>
+                                <form onSubmit={handleSubmit} method="post" loading ="true">
                                     <input type="text" name="fullName" placeholder="Họ và tên" required value={formData.fullName} onChange={handleChange} />
                                     <input type="email" name="email" placeholder="Email" required value={formData.email} onChange={handleChange} />
                                     <input type="tel" name="phoneNumber" placeholder="Số điện thoại" required value={formData.phoneNumber} onChange={handleChange} />

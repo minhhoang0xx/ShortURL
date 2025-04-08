@@ -19,10 +19,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
 	options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
 });
-builder.Services.AddHttpClient("RecaptchaClient", client =>
-{
-	client.Timeout = TimeSpan.FromSeconds(10);
-});
+builder.Services.AddHttpClient("RecaptchaClient");
 builder.Services.AddScoped<RecaptchaService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
