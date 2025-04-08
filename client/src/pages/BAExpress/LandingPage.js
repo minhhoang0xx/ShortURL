@@ -650,7 +650,7 @@ const LandingPageBAExpress = () => {
                     <p>Địa chỉ: Lô 14 phố Nguyễn Cảnh Dị, Q. Hoàng Mai, Hà Nội</p>
                     <p>☏ Hotline: 1900 6464</p>
                     <p>✉ Email: connect@baexpress.io</p>
-                    <p>Website: <a href="https://baexpress.io">https://baexpress.io</a> <a href="https://bagps.vn">https://bagps.vn</a></p>
+                    <p>🌐 Website: <a href="https://baexpress.io">https://baexpress.io</a> <a href="https://bagps.vn">https://bagps.vn</a></p>
                     <p>✎ Số ĐKKD: 0102306702</p>
                 </div>
             </footer>

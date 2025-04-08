@@ -593,7 +593,9 @@ margin-right: 20px;
     font-weight: bold;
 }
 /* END FOOTER */
-
+.footerBAE p a{
+    color: #003366;
+} 
 
 #menu-toggle {
     display: none;

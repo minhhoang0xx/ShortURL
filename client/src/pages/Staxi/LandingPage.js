@@ -375,10 +375,10 @@ const LandingPageStaxi = () => {
                     <div className="S_footer-contact">
                         <h3>STAXI - MỘT SẢN PHẨM CỦA BA GPS</h3>
                         <h4>CÔNG TY TNHH PHÁT TRIỂN CÔNG NGHỆ ĐIỆN TỬ BÌNH ANH</h4>
-                        <span>Địa chỉ: Lô 14 phố Nguyễn Cảnh Dị, Q. Hoàng Mai, Hà Nội</span><br />
-                        <span>Hotline: 1900 6415 - 1900 6464</span><br />
-                        <span>Website: <a href="http://staxi.vn" target="_blank" rel="noreferrer"> http://staxi.vn</a></span><br />
-                        <span>Số ĐKKD: 0102306702</span><br />
+                        <span> 🏠 Địa chỉ: Lô 14 phố Nguyễn Cảnh Dị, Q. Hoàng Mai, Hà Nội</span><br />
+                        <span>📞 Hotline: 1900 6415 - 1900 6464</span><br />
+                        <span>🌐 Website: <a href="http://staxi.vn" target="_blank" rel="noreferrer"> http://staxi.vn</a></span><br />
+                        <span>✏️ Số ĐKKD: 0102306702</span><br />
                         <a href="http://online.gov.vn/Home/WebDetails/71521?AspxAutoDetectCookieSupport=1" target="_blank" rel="noreferrer"> <img
                             src="LandingPageStaxi/footer.png" alt="" /></a>
                         <p>Copyright © 2020 BA GPS</p>
@@ -389,7 +389,7 @@ const LandingPageStaxi = () => {
                         <form onSubmit={handleSubmit} className="S_footer-form" loading ="true">
                             <div className="S_footer-form-inline">
                                 <input type="text" name ="fullName" placeholder="Họ và tên*" required value={formData.fullName} onChange={handleChange} />
-                                <input type="text" name="phoneNumber" placeholder="Số điện thoại*" required  value={formData.phoneNumber} onChange={handleChange}/>
+                                <input type="tel" name="phoneNumber" placeholder="Số điện thoại*" required  value={formData.phoneNumber} onChange={handleChange}/>
                                 <input type="email" name="email" placeholder="Email" required value={formData.email} onChange={handleChange} />
                             </div>
                             <div className="S_footer-form-inline">
