@@ -20,7 +20,6 @@ const LoginPage = () => {
     const handleNavigateHome = () => {
         navigate('/');
     };
-
     const onFinish = async (data) => {
         if (showCaptcha && !captchaToken) {
             message.error("Vui lòng hoàn thành CAPTCHA!");
