@@ -11,15 +11,21 @@ using server.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
-// Add services to the container.
+
+
 builder.Services.AddDbContext<URLContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-    
-builder.Services.AddControllers();
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+	options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+});
+builder.Services.AddHttpClient("RecaptchaClient", client =>
+{
+	client.Timeout = TimeSpan.FromSeconds(10);
+});
+builder.Services.AddScoped<RecaptchaService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<RecaptchaService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddAuthentication(options =>
 {
@@ -39,10 +45,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-	options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-});
+
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy(name: MyAllowSpecificOrigins,
