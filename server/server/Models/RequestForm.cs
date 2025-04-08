@@ -13,5 +13,6 @@ namespace server.Models
 		public string? email { get; set; }
 		public string? phoneNumber { get; set; }
 		public string? message { get; set; }
+		public string? status { get; set; }
 	}
 }
