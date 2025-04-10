@@ -98,6 +98,7 @@ namespace server.Controllers
 				{
 					projectName = request.projectName,
 					fullName = request.fullName,
+					phoneNumber = request.phoneNumber,
 					email = request.email,
 					company = request.company,
 					address = request.address

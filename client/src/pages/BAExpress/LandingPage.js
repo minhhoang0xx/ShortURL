@@ -41,7 +41,7 @@ const LandingPageBAExpress = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('submit',captchaToken )
+        console.log('submit', captchaToken)
         if (showCaptcha && !captchaToken) {
             message.error("Vui lòng hoàn thành CAPTCHA!");
             return;
@@ -118,8 +118,10 @@ const LandingPageBAExpress = () => {
                         </ul>
                     </nav>
                     <div className="header_contact">
-                        <img src="/LandingPageBAExpress/call.svg" alt="Phone Icon" className="header_contact-icon" />
-                        <span>1900 6464</span>
+                        <a href="tel:19006451" className="header_contact_tel" >
+                            <img src="/LandingPageBAExpress/call.svg" alt="Phone Icon" className="header_contact-icon" />
+                            <span>1900 6464</span>
+                        </a>
                     </div>
                 </div>
             </header>
@@ -357,9 +359,9 @@ const LandingPageBAExpress = () => {
                             <img src="/LandingPageBAExpress/section6.1.png" alt="" className="section-6_container-left-img" />
                             <div className="section-6_container-left-download">
                                 <a href="https://apps.apple.com/vn/app/baexpress/id1560112617" target="_blank" rel="noreferrer">
-                                <img src="/LandingPageBAExpress/section6.2.png" alt="app-store" /></a>
+                                    <img src="/LandingPageBAExpress/section6.2.png" alt="app-store" /></a>
                                 <a href="https://play.google.com/store/apps/details?id=com.binhanh.driver.baexpress" target="_blank" rel="noreferrer">
-                                <img src="/LandingPageBAExpress/section6.3.png" alt="google-play" /></a>
+                                    <img src="/LandingPageBAExpress/section6.3.png" alt="google-play" /></a>
                             </div>
                         </div>
                         <div className="section-6_container-right">
@@ -370,7 +372,7 @@ const LandingPageBAExpress = () => {
                             </div>
                             <div className="section-6_container-right-form">
 
-                                <form onSubmit={handleSubmit} method="post" loading ="true">
+                                <form onSubmit={handleSubmit} method="post" loading="true">
                                     <input type="text" name="fullName" placeholder="Họ và tên" required value={formData.fullName} onChange={handleChange} />
                                     <input type="email" name="email" placeholder="Email" required value={formData.email} onChange={handleChange} />
                                     <input type="tel" name="phoneNumber" placeholder="Số điện thoại" required value={formData.phoneNumber} onChange={handleChange} />

@@ -10,7 +10,7 @@ const LandingPageStaxi = () => {
     const [captchaToken, setCaptchaToken] = useState(null);
     const [attempts, setAttempts] = useState(() => parseInt(localStorage.getItem("attempts") || "0"));
     const [showCaptcha, setShowCaptcha] = useState(() => parseInt(localStorage.getItem("attempts") || "0") >= 3);
-    const recaptchaRef = useRef(null);  
+    const recaptchaRef = useRef(null);
 
     useEffect(() => {
         console.log('submit times', attempts)
@@ -24,7 +24,7 @@ const LandingPageStaxi = () => {
         projectName: "",
         fullName: "",
         email: "",
-        phoneNumber:"",
+        phoneNumber: "",
         address: "",
         company: "",
     });
@@ -47,16 +47,22 @@ const LandingPageStaxi = () => {
             message.error("Vui lòng hoàn thành CAPTCHA!");
             return;
         }
-
+        // // để khi với data "" thì nó sẽ chuyển sang null
+        // const data = Object.fromEntries(
+        //     Object.entries(formData).map(([key, value]) => [
+        //         key,
+        //         value === "" ? null : value
+        //     ])
+        // );
         const dataToSubmit = {
             ...formData,
-            projectName: "BAExpress",
+            projectName: "Staxi",
             RecaptchaToken: captchaToken,
         };
         setLoading(true);
         try {
             console.log("data", dataToSubmit);
-            const response = await FormRequestService.saveRequestBAE(dataToSubmit);
+            const response = await FormRequestService.saveRequestStaxi(dataToSubmit);
             console.log("Response:", response);
             if (response && response.message) {
                 message.success(response.message);
@@ -65,7 +71,7 @@ const LandingPageStaxi = () => {
                     fullName: "",
                     email: "",
                     phoneNumber: "",
-                    address:"",
+                    address: "",
                     company: "",
                 });
                 setAttempts(response.attempts);
@@ -120,10 +126,11 @@ const LandingPageStaxi = () => {
                         </ul>
                     </nav>
                     <div className="S_header_contact">
-                        <img src="LandingPageStaxi/call.svg" alt="Icon" className="S_header_contact-icon" />
-                        <span>1900 6415</span>
+                        <a href="tel:19006415" className="S_header_contact_tel">
+                            <img src="LandingPageStaxi/call.svg" alt="Icon" className="S_header_contact-icon" />
+                            <span>1900 6415</span>
+                        </a>
                     </div>
-
                 </div>
             </header>
             {/* <!-- end header --> */}
@@ -375,7 +382,7 @@ const LandingPageStaxi = () => {
                     <div className="S_footer-contact">
                         <h3>STAXI - MỘT SẢN PHẨM CỦA BA GPS</h3>
                         <h4>CÔNG TY TNHH PHÁT TRIỂN CÔNG NGHỆ ĐIỆN TỬ BÌNH ANH</h4>
-                        <span> 🏠 Địa chỉ: Lô 14 phố Nguyễn Cảnh Dị, Q. Hoàng Mai, Hà Nội</span><br />
+                        <span> 🏠 Địa chỉ: Lô 14 phố Nguyễn Cảnh Dị, Hoàng Mai, Hà Nội</span><br />
                         <span>📞 Hotline: 1900 6415 - 1900 6464</span><br />
                         <span>🌐 Website: <a href="http://staxi.vn" target="_blank" rel="noreferrer"> http://staxi.vn</a></span><br />
                         <span>✏️ Số ĐKKD: 0102306702</span><br />
@@ -386,23 +393,23 @@ const LandingPageStaxi = () => {
                     <div className="S_footer-opinion">
                         <h3>TƯ VẤN MIỄN PHÍ</h3>
                         <span>Giải pháp điều hành taxi công nghệ thông minh trong tầm tay! </span>
-                        <form onSubmit={handleSubmit} className="S_footer-form" loading ="true">
+                        <form onSubmit={handleSubmit} className="S_footer-form" loading="true">
                             <div className="S_footer-form-inline">
-                                <input type="text" name ="fullName" placeholder="Họ và tên*" required value={formData.fullName} onChange={handleChange} />
-                                <input type="tel" name="phoneNumber" placeholder="Số điện thoại*" required  value={formData.phoneNumber} onChange={handleChange}/>
-                                <input type="email" name="email" placeholder="Email" required value={formData.email} onChange={handleChange} />
+                                <input type="text" name="fullName" placeholder="Họ và tên*" required value={formData.fullName} onChange={handleChange} />
+                                <input type="tel" name="phoneNumber" placeholder="Số điện thoại*" required value={formData.phoneNumber} onChange={handleChange} />
+                                <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
                             </div>
                             <div className="S_footer-form-inline">
-                                <input type="text" name="company" placeholder="Công ty*" value={formData.company} onChange={handleChange}/>
+                                <input type="text" name="company" placeholder="Công ty*" required value={formData.company} onChange={handleChange} />
                                 <input type="text" name="address" placeholder="Địa chỉ" value={formData.address} onChange={handleChange} />
                             </div>
                             {showCaptcha && (
-                                        <ReCAPTCHA
-                                            ref={recaptchaRef}
-                                            sitekey={process.env.REACT_APP_CAPTCHA_KEY}
-                                            onChange={handleCaptchaChange}
-                                        />
-                                    )}
+                                <ReCAPTCHA
+                                    ref={recaptchaRef}
+                                    sitekey={process.env.REACT_APP_CAPTCHA_KEY}
+                                    onChange={handleCaptchaChange}
+                                />
+                            )}
                             <button disabled={loading} type="submit">ĐĂNG KÝ NGAY</button>
                         </form>
                         <div className="S_footer-policies">
