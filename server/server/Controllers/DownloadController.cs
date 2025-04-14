@@ -44,7 +44,7 @@ namespace server.Controllers
 					worksheet.Cells[row, 4].Value = url.OriginalUrl;
 					worksheet.Cells[row, 5].Value = $"{url.Domain}/{url.Alias}";
 					worksheet.Cells[row, 6].Value = url.CreateAt.ToString("HH:mm dd/MM/yyyy");
-					worksheet.Cells[row, 7].Value = null;
+					worksheet.Cells[row, 7].Value = url.CreatedByUser;
 					row++;
 				}
 				worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();

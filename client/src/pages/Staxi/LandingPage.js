@@ -47,13 +47,7 @@ const LandingPageStaxi = () => {
             message.error("Vui lòng hoàn thành CAPTCHA!");
             return;
         }
-        // // để khi với data "" thì nó sẽ chuyển sang null
-        // const data = Object.fromEntries(
-        //     Object.entries(formData).map(([key, value]) => [
-        //         key,
-        //         value === "" ? null : value
-        //     ])
-        // );
+
         const dataToSubmit = {
             ...formData,
             projectName: "Staxi",
@@ -431,6 +425,7 @@ const LandingPageStaxi = () => {
                     </div>
                 </div>
                 <div id="modal-1" className="S_footer_container-modal">
+                    <a href="#close" class="S_footer_overlay"></a>
                     <div className="S_footer_container-modal-content">
                         <div className="S_footer_container-modal-header">
                             <h2>Chính sách vận chuyển và giao nhận</h2>
@@ -477,6 +472,7 @@ const LandingPageStaxi = () => {
                     </div>
                 </div>
                 <div id="modal-2" className="S_footer_container-modal">
+                    <a href="#close" class="S_footer_overlay"></a>
                     <div className="S_footer_container-modal-content">
                         <div className="S_footer_container-modal-header">
                             <h2>Chính sách bảo hành</h2>
@@ -504,6 +500,7 @@ const LandingPageStaxi = () => {
                     </div>
                 </div>
                 <div id="modal-3" className="S_footer_container-modal">
+                    <a href="#close" class="S_footer_overlay"></a>
                     <div className="S_footer_container-modal-content">
                         <div className="S_footer_container-modal-header">
                             <h2>Chính sách bảo mật</h2>
@@ -548,8 +545,8 @@ const LandingPageStaxi = () => {
                         </div>
                     </div>
                 </div>
-
                 <div id="modal-4" className="S_footer_container-modal">
+                    <a href="#close" class="S_footer_overlay"></a>
                     <div className="S_footer_container-modal-content">
                         <div className="S_footer_container-modal-header">
                             <h2>Chính sách đổi trả & hoàn tiền</h2>
@@ -586,6 +583,7 @@ const LandingPageStaxi = () => {
                     </div>
                 </div>
                 <div id="modal-5" className="S_footer_container-modal">
+                    <a href="#close" class="S_footer_overlay"></a>
                     <div className="S_footer_container-modal-content">
                         <div className="S_footer_container-modal-header">
                             <h2>Hình thức thanh toán</h2>
@@ -619,6 +617,7 @@ const LandingPageStaxi = () => {
                     </div>
                 </div>
                 <div id="modal-6" className="S_footer_container-modal">
+                    <a href="#close" class="S_footer_overlay"></a>
                     <div className="S_footer_container-modal-content">
                         <div className="S_footer_container-modal-header">
                             <h2>Điều khoản sử dụng</h2>

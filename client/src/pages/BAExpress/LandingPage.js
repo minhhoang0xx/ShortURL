@@ -419,7 +419,9 @@ const LandingPageBAExpress = () => {
                         </div>
                         {/*  <!-- Start-Modal --> */}
                         <div id="CSvanchuyen" className="section-7_container-modal">
+                            <a href="#close" class="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
+
                                 <div className="section-7_container-modal-header">
                                     <h2>Chính sách vận chuyển và giao nhận</h2>
                                     <a href="#close" className="close-btn">&times;</a>
@@ -465,6 +467,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="CSbaomat" className="section-7_container-modal">
+                        <a href="#close" class="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Chính sách bảo mật</h2>
@@ -510,6 +513,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="CSbaohanh" className="section-7_container-modal">
+                        <a href="#close" class="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Chính sách bảo hành</h2>
@@ -537,6 +541,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="CSdoitra" className="section-7_container-modal">
+                        <a href="#close" class="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Chính sách đổi trả & hoàn tiền</h2>
@@ -573,6 +578,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="HTthanhtoan" className="section-7_container-modal">
+                        <a href="#close" class="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Hình thức thanh toán</h2>
@@ -606,6 +612,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="DKsudung" className="section-7_container-modal">
+                        <a href="#close" class="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Điều khoản sử dụng</h2>
