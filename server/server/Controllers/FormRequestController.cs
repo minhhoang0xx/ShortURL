@@ -25,7 +25,19 @@ namespace server.Controllers
 
 			if (request == null)
 			{
-				return BadRequest(new { message = "Không có dữ liệu được gửi" });
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "REQUEST_NOT_FOUND",
+					ErrorMessage = "Không có dữ liệu được gửi!"
+				});
+			}
+			if (request.fullName == null || request.phoneNumber == null || request.email == null)
+			{
+				return NotFound(new ErrorResponse
+				{
+					ErrorCode = "DATA_INVALID",
+					ErrorMessage = "Thiếu một hoặc nhiều những thông tin!"
+				});
 			}
 			string clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "local";
 			int attempts = Failed(clientIp);
@@ -33,15 +45,22 @@ namespace server.Controllers
 			{
 				if (string.IsNullOrEmpty(request.RecaptchaToken))
 				{
-					return BadRequest(new { message = "Hãy Thực hiện xác thực trước!", requiresCaptcha = true});
-		
-				}
+					return BadRequest(new ErrorResponse
+					{
+						ErrorCode = "RECAPTCHA_REQUIRED",
+						ErrorMessage = "Hãy thực hiện xác thực trước!"
+					});
 
+				}
 				bool isRecaptchaValid = await _recaptchaService.VerifyRecaptchaAsync(request.RecaptchaToken);
 				if (!isRecaptchaValid)
 				{
 					Increase(clientIp);
-					return BadRequest(new { message = "Chưa xác thực CAPTCHA!" });
+					return BadRequest(new ErrorResponse
+					{
+						ErrorCode = "RECAPTCHA_INVALID",
+						ErrorMessage = "Chưa xác thực CAPTCHA!"
+					});
 				}
 			}
 			try
@@ -62,7 +81,11 @@ namespace server.Controllers
 			catch (Exception ex) 
 			{
 				Increase(clientIp);
-				return BadRequest( new { message = "Có lỗi xảy ra khi lưu thông tin", error = ex.Message });
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "SAVE_FAILED",
+					ErrorMessage = "Đã xảy ra lỗi trong quá trình lưu thông tin."
+				});
 			}
 			
 		}
@@ -73,7 +96,19 @@ namespace server.Controllers
 
 			if (request == null)
 			{
-				return BadRequest(new { message = "Không có dữ liệu được gửi" });
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "REQUEST_NOT_FOUND",
+					ErrorMessage = "Không có dữ liệu được gửi!"
+				});
+			}
+			if(request.fullName == null||request.phoneNumber ==null ||request.company == null  )
+			{
+				return NotFound( new ErrorResponse
+				{
+					ErrorCode="DATA_INVALID",
+					ErrorMessage="Thiếu một hoặc nhiều những thông tin!"
+				});
 			}
 			string clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "local";
 			int attempts = Failed(clientIp);
@@ -81,15 +116,24 @@ namespace server.Controllers
 			{
 				if (string.IsNullOrEmpty(request.RecaptchaToken))
 				{
-					return BadRequest(new { message = "Hãy Thực hiện xác thực trước!", requiresCaptcha = true });
+					//return BadRequest(new { message = "Hãy Thực hiện xác thực trước!", requiresCaptcha = true });
+					return BadRequest(new ErrorResponse
+					{
+						ErrorCode = "RECAPTCHA_REQUIRED",
+						ErrorMessage = "Hãy thực hiện xác thực trước!",
+						RequiresCaptcha = true
+					});
 
 				}
-
 				bool isRecaptchaValid = await _recaptchaService.VerifyRecaptchaAsync(request.RecaptchaToken);
 				if (!isRecaptchaValid)
 				{
 					Increase(clientIp);
-					return BadRequest(new { message = "Chưa xác thực CAPTCHA!" });
+					return BadRequest(new ErrorResponse
+					{
+						ErrorCode = "RECAPTCHA_INVALID",
+						ErrorMessage = "Chưa xác thực CAPTCHA!"
+					});
 				}
 			}
 			try
@@ -111,7 +155,11 @@ namespace server.Controllers
 			catch (Exception ex)
 			{
 				Increase(clientIp);
-				return BadRequest(new { message = "Có lỗi xảy ra khi lưu thông tin", error = ex.Message });
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "SAVE_FAILED",
+					ErrorMessage = "Đã xảy ra lỗi trong quá trình lưu thông tin."
+				});
 			}
 
 		}

@@ -53,7 +53,11 @@ namespace server.Controllers
 			var url = await _context.ShortUrls.FindAsync(id);
 			if (url == null)
 			{
-				return NotFound("ShortURL not exist");
+				return NotFound(new ErrorResponse
+				{
+					ErrorCode = "SHORTURL_NOT_FOUND",
+					ErrorMessage = "ShortURL không tồn tại."
+				});
 			}
 
 			var shortLink = $"{url.Domain}/{url.Alias}";
@@ -80,12 +84,20 @@ namespace server.Controllers
 		{
 			if (string.IsNullOrEmpty(request.OriginalUrl))
 			{
-				return BadRequest("URL is not validate");
+				return BadRequest( new ErrorResponse
+				{
+					ErrorCode = "ORIGINALURL_NOT_FOUND",
+					ErrorMessage = "Link Không hợp lệ!"
+				});
 			}
 			var existingOrigianalUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.OriginalUrl == request.OriginalUrl);
 			if(existingOrigianalUrl != null)
 			{
-				return BadRequest(new { message = "This URL has been shortened!" });
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "URL_EXISTED",
+					ErrorMessage = "URL này đã được rút gọn!"
+				});
 			}
 			string shortCode = request.Alias;
 			if (string.IsNullOrEmpty(request.Alias))
@@ -95,7 +107,11 @@ namespace server.Controllers
 				var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == shortCode);
 				if (existingUrl != null)
 				{
-					return BadRequest(new { message = "Alias already exists!" });
+					return BadRequest(new ErrorResponse
+					{
+						ErrorCode = "ALIAS_EXISTED",
+						ErrorMessage = "Alias này đã được sử dụng trước đó!"
+					});
 				}
 			}
 			var shortUrl = new ShortURL_Link
@@ -126,13 +142,18 @@ namespace server.Controllers
 			var url = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == code); // search shortURL trong database
 			if (url == null)
 			{
-				return NotFound("ShortURL not exist");
+				return NotFound(new ErrorResponse 
+				{ 
+					ErrorCode = "URL_NOT_EXISTED!",
+					ErrorMessage = "URL không tồn tại!"
+				});
+
 			}
 			if (url.CheckOS)
 			{
 				string UserAgent = Request.Headers["User-Agent"].ToString().ToUpper();
 				if (UserAgent.Contains("IPHONE") || UserAgent.Contains("IPAD") || UserAgent.Contains("MACINTOSH") 
-					|| UserAgent.Contains("WATCH") || UserAgent.Contains("WINDOWS"))
+					|| UserAgent.Contains("WATCH"))
 				{
 					return Ok(url.IosLink);
 				}
@@ -151,18 +172,30 @@ namespace server.Controllers
 			var url = await _context.ShortUrls.FindAsync(id);
 			if (url == null)
 			{
-				return NotFound("ShortURL not exist");
+				return NotFound(new ErrorResponse
+				{
+					ErrorCode = "URL_NOT_EXISTED!",
+					ErrorMessage = "URL không tồn tại!"
+				}); 
 			}
 			if (string.IsNullOrEmpty(request.OriginalUrl))
 			{
-				return BadRequest("URL is not validate");
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "ORIGINALURL_NOT_EXISTED!",
+					ErrorMessage = "URL gốc không tồn tại!"
+				});
 			}
 			if (url.OriginalUrl != request.OriginalUrl) // neu original thay doi thi moi can ktra 
 			{
 				var existingOriginalUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.OriginalUrl == request.OriginalUrl);
 				if (existingOriginalUrl != null)
 				{
-					return BadRequest(new { message = "This URL has been shortened!" });
+					return BadRequest(new ErrorResponse
+					{
+						ErrorCode = "URL_EXISTED",
+						ErrorMessage = "URL này đã được rút gọn!"
+					});
 				}
 			}
 			string shortCode = request.Alias;
@@ -177,7 +210,11 @@ namespace server.Controllers
 				var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == shortCode );
 				if (existingUrl != null)
 				{
-					return BadRequest( new { massage = "Alias already exists" });
+					return BadRequest(new ErrorResponse
+					{
+						ErrorCode = "ALIAS_EXISTED",
+						ErrorMessage = "Alias này đã được sử dụng trước đó!"
+					});
 				}
 			}
 
@@ -205,9 +242,12 @@ namespace server.Controllers
 			var url = await _context.ShortUrls.FindAsync(id);
 			if (url == null)
 			{
-				return NotFound("ShortURL not exist");
+				return NotFound(new ErrorResponse
+				{
+					ErrorCode = "URL_NOT_EXISTED!",
+					ErrorMessage = "URL không tồn tại!"
+				});
 			}
-
 			_context.ShortUrls.Remove(url);
 			await _context.SaveChangesAsync();
 

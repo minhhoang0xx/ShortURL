@@ -64,29 +64,46 @@ public class Authentication : ControllerBase
 			if (checkLogin == null)
 			{
 				Increase(account.UserName);
-				return BadRequest(new { message="This Username is not exist!" });
+				return BadRequest( new ErrorResponse
+				{
+					ErrorCode = "USERNAME_NOT EXISTED",
+					ErrorMessage = "Tài khoản hoặc mật khẩu không đúng!"
+				});
 			}
 			int attempts = Failed(account.UserName);
 			if (attempts >= 3)
 			{
 				if (string.IsNullOrEmpty(account.RecaptchaToken))
 				{
-					return BadRequest(new { message = "Please complete the CAPTCHA!" , requiresCaptcha = true });
-				}
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "CAPTCHA_NOT_FOUND",
+					ErrorMessage = "Hãy thực hiện CAPTCHA trước!",
+					RequiresCaptcha = true
+
+				});
+			}
 
 				bool isRecaptchaValid = await _recaptchaService.VerifyRecaptchaAsync(account.RecaptchaToken);
 				if (!isRecaptchaValid)
 				{
-					return BadRequest(new { message = "Invalid CAPTCHA!" });
-				}
+					return BadRequest(new ErrorResponse
+					{
+						ErrorCode = "CAPTCHA_INVALID",
+						ErrorMessage = "CAPTCHA chưa được xác thực!"
+					});
+			}
 			}
 			var checkPassword = HashToMD5(account.Password).ToUpper();
 			if(checkLogin.Password != checkPassword)
 			{
 				Increase(account.UserName);
-				return BadRequest(new { message = "Your Password is incorrect!" });
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "PASSWORD_INCORRECT",
+					ErrorMessage = "Tài khoản hoặc mật khẩu không đúng!"
+				});
 			}
-
 			Reset(account.UserName);
 			var token = _jwtService.GenerateToken(checkLogin.UserName.ToString());
             return Ok(new { message = "Login successfully!", token });
