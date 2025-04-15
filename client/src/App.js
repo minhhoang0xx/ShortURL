@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { routes } from './routes';
 import { Fragment } from 'react';
@@ -7,6 +7,13 @@ import DefaultComponent from "./components/DefaultComponent/DefaultComponent";
 import PrivateRoute from "./routes/PrivateRoute";
 
 function App() {
+  useEffect(() => {
+    window.onunhandledrejection = function (event) {
+        console.warn("Unhandled rejection:", event.reason);
+
+        event.preventDefault();
+    };
+}, []);
   return (
     <Router>
       <Routes>

@@ -43,11 +43,7 @@ const LandingPageStaxi = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (showCaptcha && !captchaToken) {
-            message.error("Vui lòng hoàn thành CAPTCHA!");
-            return;
-        }
-
+    
         const dataToSubmit = {
             ...formData,
             projectName: "Staxi",
@@ -74,25 +70,20 @@ const LandingPageStaxi = () => {
                 if (recaptchaRef.current) {
                     recaptchaRef.current.reset();
                 }
-            } else {
-                throw new Error("Tạo thất bại!");
             }
         } catch (error) {
-            console.error("API Error:", error);
-            let errorMessage = "Gửi thông tin thất bại";
-            if (error.response?.data?.message) {
-                errorMessage = error.response.data.message;
-                if (error.response.data.requiresCaptcha) {
-                    setShowCaptcha(true);
-                    setCaptchaToken(null);
-                    if (recaptchaRef.current) {
-                        recaptchaRef.current.reset();
-                    }
-                }
-            } else if (error.message) {
-                errorMessage = error.message;
+            let err = "Gửi form thất bại.";
+            if (error.response?.data?.errorMessage) {
+                err = error.response.data.errorMessage;
             }
-            message.error(errorMessage);
+            if (error.response?.data?.requiresCaptcha) {
+                setShowCaptcha(true);
+                setCaptchaToken(null);
+                if (recaptchaRef.current) {
+                    recaptchaRef.current.reset();
+                }
+            }
+            message.error(err);
         } finally {
             setLoading(false);
         }
@@ -425,7 +416,7 @@ const LandingPageStaxi = () => {
                     </div>
                 </div>
                 <div id="modal-1" className="S_footer_container-modal">
-                    <a href="#close" class="S_footer_overlay"></a>
+                    <a href="#close" className="S_footer_overlay"></a>
                     <div className="S_footer_container-modal-content">
                         <div className="S_footer_container-modal-header">
                             <h2>Chính sách vận chuyển và giao nhận</h2>
@@ -472,7 +463,7 @@ const LandingPageStaxi = () => {
                     </div>
                 </div>
                 <div id="modal-2" className="S_footer_container-modal">
-                    <a href="#close" class="S_footer_overlay"></a>
+                    <a href="#close" className="S_footer_overlay"></a>
                     <div className="S_footer_container-modal-content">
                         <div className="S_footer_container-modal-header">
                             <h2>Chính sách bảo hành</h2>
@@ -500,7 +491,7 @@ const LandingPageStaxi = () => {
                     </div>
                 </div>
                 <div id="modal-3" className="S_footer_container-modal">
-                    <a href="#close" class="S_footer_overlay"></a>
+                    <a href="#close" className="S_footer_overlay"></a>
                     <div className="S_footer_container-modal-content">
                         <div className="S_footer_container-modal-header">
                             <h2>Chính sách bảo mật</h2>
@@ -546,7 +537,7 @@ const LandingPageStaxi = () => {
                     </div>
                 </div>
                 <div id="modal-4" className="S_footer_container-modal">
-                    <a href="#close" class="S_footer_overlay"></a>
+                    <a href="#close" className="S_footer_overlay"></a>
                     <div className="S_footer_container-modal-content">
                         <div className="S_footer_container-modal-header">
                             <h2>Chính sách đổi trả & hoàn tiền</h2>
@@ -583,7 +574,7 @@ const LandingPageStaxi = () => {
                     </div>
                 </div>
                 <div id="modal-5" className="S_footer_container-modal">
-                    <a href="#close" class="S_footer_overlay"></a>
+                    <a href="#close" className="S_footer_overlay"></a>
                     <div className="S_footer_container-modal-content">
                         <div className="S_footer_container-modal-header">
                             <h2>Hình thức thanh toán</h2>
@@ -617,7 +608,7 @@ const LandingPageStaxi = () => {
                     </div>
                 </div>
                 <div id="modal-6" className="S_footer_container-modal">
-                    <a href="#close" class="S_footer_overlay"></a>
+                    <a href="#close" className="S_footer_overlay"></a>
                     <div className="S_footer_container-modal-content">
                         <div className="S_footer_container-modal-header">
                             <h2>Điều khoản sử dụng</h2>

@@ -99,7 +99,7 @@ const ListShortLink = () => {
       const urls = await ShortUrlService.getAllLink();
       const urlfetch = urls.$values;
       console.log("Data từ API:", urls);
-      const formattedData = urlfetch.map((url, index) => ({ ...url,key:url.id, STT: index + 1 }));
+      const formattedData = urlfetch.map((url, index) => ({ ...url, key: url.id, STT: index + 1 }));
       setData(formattedData);
       filterData(formattedData, selectedProject, searchText);
     } catch (error) {
@@ -176,11 +176,18 @@ const ListShortLink = () => {
       setRecordToDelete(null);
       fetchData()
     } catch (error) {
-      console.error("Failed to delete link:", error);
-      message.error("Xóa thất bại!");
+      let err = "Xóa thất bại!";
+      if(error.response?.data.errorMessage){
+        err = error.response?.data.errorMessage
+        message.error(err);
+      }else{
+        message.error(err);
+      }
     }
     setLoading(false)
   };
+
+
   const handleCancelDelete = () => {
     setDeleteModal(false);
     setRecordToDelete(null);
@@ -249,7 +256,7 @@ const ListShortLink = () => {
             />
             <Button type="primary" className="LSL_search-bar-Create"> <a onClick={(showCreateModal)}>Tạo mới</a></Button>
             <Button type="primary" className="LSL_search-bar-Excel"> <a onClick={handleExportExcel}>Xuất Excel</a></Button>
-            
+
           </Space>
         </div>
 

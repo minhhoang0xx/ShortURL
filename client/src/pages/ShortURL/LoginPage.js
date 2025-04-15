@@ -21,10 +21,6 @@ const LoginPage = () => {
         navigate('/');
     };
     const onFinish = async (data) => {
-        if (showCaptcha && !captchaToken) {
-            message.error("Vui lòng hoàn thành CAPTCHA!");
-            return;
-        }
         setLoading(true);
         const loginData = {
             UserName: data.UserName,
@@ -43,26 +39,37 @@ const LoginPage = () => {
                 if (recaptchaRef.current) {
                     recaptchaRef.current.reset();
                 }
-            }else{
+            } else {
                 message.error(response.message);
-            }   
+            }
         } catch (error) {
-            const newAttempts = attempts + 1;
-            setAttempts(newAttempts);
-            if (newAttempts >= 3) {
+            let err = "Đăng nhập thất bại!";
+            if (error.response?.data.requiresCaptcha) {
                 setShowCaptcha(true);
                 setCaptchaToken(null);
                 if (recaptchaRef.current) {
                     recaptchaRef.current.reset();
                 }
             }
-            if (error.response?.data?.message) {
-                message.error(error.response.data.message);
-            } else {
-                message.error('An error occurred. Please try again later.');
+            if (error.response?.data.errorMessage) {
+                const newAttempts = attempts + 1;
+                setAttempts(newAttempts);
+                if (newAttempts >= 3) {
+                    setShowCaptcha(true);
+                    setCaptchaToken(null);
+                    if (recaptchaRef.current) {
+                        recaptchaRef.current.reset();
+                    }
+                }
+                err = error.response?.data.errorMessage
+                message.error(err);
+            }else {
+                message.error('Đã có lỗi xảy ra, vui lòng thử lại.');
             }
+
             console.error('Error during login:', error);
         }
+
         setLoading(false);
     };
 

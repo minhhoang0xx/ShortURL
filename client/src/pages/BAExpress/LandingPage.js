@@ -42,10 +42,6 @@ const LandingPageBAExpress = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('submit', captchaToken)
-        if (showCaptcha && !captchaToken) {
-            message.error("Vui lòng hoàn thành CAPTCHA!");
-            return;
-        }
         const dataToSubmit = {
             ...formData,
             projectName: "BAExpress",
@@ -73,28 +69,23 @@ const LandingPageBAExpress = () => {
                 if (recaptchaRef.current) {
                     recaptchaRef.current.reset();
                 }
-            } else {
-                throw new Error("Tạo thất bại!");
-            }
+            } 
         } catch (error) {
-            console.error("API Error:", error);
-            let errorMessage = "Failed to submit form.";
-            if (error.response?.data?.message) {
-                errorMessage = error.response.data.message;
-                if (error.response.data.requiresCaptcha) {
-                    setShowCaptcha(true);
-                    setCaptchaToken(null);
-                    if (recaptchaRef.current) {
-                        recaptchaRef.current.reset();
-                    }
-                }
-            } else if (error.message) {
-                errorMessage = error.message;
+            let err = "Gửi form thất bại.";
+            if (error.response?.data?.errorMessage) {
+              err = error.response.data.errorMessage;
+            } 
+            if (error.response?.data?.requiresCaptcha) {
+              setShowCaptcha(true);
+              setCaptchaToken(null);
+              if (recaptchaRef.current) {
+                recaptchaRef.current.reset();
+              }
             }
-            message.error(errorMessage);
-        } finally {
+            message.error(err);
+          } finally {
             setLoading(false);
-        }
+          }
     };
     return (
         <div className="LandingPageBAExpress">
@@ -409,8 +400,7 @@ const LandingPageBAExpress = () => {
                             <nav>
                                 <ul>
                                     <div id="close"></div>
-                                    <li><a href="#CSdoitra" className="section-7_container-link">Chính sách đổi trả & hoàn tiền</a>
-                                    </li>
+                                    <li><a href="#CSdoitra" className="section-7_container-link">Chính sách đổi trả & hoàn tiền</a></li>
                                     <li><a href="#HTthanhtoan" className="section-7_container-link">Hình thức thanh toán</a></li>
                                     <li><a href="#DKsudung" className="section-7_container-link">Điều khoản sử dụng</a></li>
 
@@ -419,7 +409,7 @@ const LandingPageBAExpress = () => {
                         </div>
                         {/*  <!-- Start-Modal --> */}
                         <div id="CSvanchuyen" className="section-7_container-modal">
-                            <a href="#close" class="section-7_overlay"></a>
+                            <a href="#close" className="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
 
                                 <div className="section-7_container-modal-header">
@@ -467,7 +457,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="CSbaomat" className="section-7_container-modal">
-                        <a href="#close" class="section-7_overlay"></a>
+                        <a href="#close" className="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Chính sách bảo mật</h2>
@@ -513,7 +503,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="CSbaohanh" className="section-7_container-modal">
-                        <a href="#close" class="section-7_overlay"></a>
+                        <a href="#close" className="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Chính sách bảo hành</h2>
@@ -541,7 +531,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="CSdoitra" className="section-7_container-modal">
-                        <a href="#close" class="section-7_overlay"></a>
+                        <a href="#close" className="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Chính sách đổi trả & hoàn tiền</h2>
@@ -578,7 +568,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="HTthanhtoan" className="section-7_container-modal">
-                        <a href="#close" class="section-7_overlay"></a>
+                        <a href="#close" className="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Hình thức thanh toán</h2>
@@ -612,7 +602,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="DKsudung" className="section-7_container-modal">
-                        <a href="#close" class="section-7_overlay"></a>
+                        <a href="#close" className="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Điều khoản sử dụng</h2>

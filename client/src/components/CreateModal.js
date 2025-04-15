@@ -70,18 +70,16 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
         setQrLink(qr);
         console.log("QR Link:", qrLink);
         onCreate()
-      } else {
-        throw new Error("Tạo thất bại!");
       }
     } catch (error) {
       console.error("API Error:", error);
-      let err = "Failed to create link.";
-      if (error.response?.data?.message) {
-        err = error.response.data.message;
-      } else if (error.message) {
-        err = error.message;
+      let err = "Tạo không thành công!";
+      if (error.response?.data?.errorMessage) {
+        err = error.response.data.errorMessage;
+        message.error(err)
+      } else {
+        message.error(err);
       }
-      message.error(err);
     }
     setLoading(false)
   };
