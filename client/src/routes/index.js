@@ -1,10 +1,12 @@
-import ListShortLink from "../pages/ShortURL/ListShortLink";
-import NotFound from "../pages/ShortURL/NotFound";
-import LandingPageBAExpress from "../pages/BAExpress/LandingPage";    
-import RegisterPage from "../pages/ShortURL/RegisterPage";
-import LoginPage from "../pages/ShortURL/LoginPage";
-import RedirectPage from "../pages/ShortURL/RedirectPage";
-import LandingPageStaxi from "../pages/Staxi/LandingPage";
+import React from "react";
+
+const ListShortLink = React.lazy(() =>import("../pages/ShortURL/ListShortLink" )) ;
+const NotFound = React.lazy(() => import("../pages/ShortURL/NotFound"));
+const LandingPageBAExpress = React.lazy(() => import("../pages/BAExpress/LandingPage"))  ;    
+const RegisterPage = React.lazy(() => import( "../pages/ShortURL/RegisterPage")) ;
+const LoginPage = React.lazy(() => import("../pages/ShortURL/LoginPage"))  ;
+const RedirectPage = React.lazy(() => import("../pages/ShortURL/RedirectPage"))  ;
+const LandingPageStaxi = React.lazy(() => import("../pages/Staxi/LandingPage"))  ;
 
 export const routes =[
     {

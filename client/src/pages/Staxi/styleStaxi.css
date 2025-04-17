@@ -1164,6 +1164,9 @@
     .S_section-5{
       margin: 40px auto;
     }
+    .S_section-5-line{
+      margin-top: -30px;
+    }
     .S_section-5 h3 {
       font-size: 20px;
     }
@@ -1235,6 +1238,9 @@
       flex-wrap: nowrap;
       gap: 5%;
       padding: 0;
+    }
+    .S_footer{
+      padding: 20px 20px 0 20px
     }
   }
   
@@ -1339,5 +1345,16 @@
       flex-wrap: nowrap;
       gap: 5%;
       padding: 0;
+    }
+    .S_footer-contact h4{
+      font-size: 12px;
+    }
+    .S_footer-contact img{
+      width: 30%;
+      margin-top: 10px
+    }
+    .S_footer-contact p{
+      font-size: 10px;
+      margin-top: 5px;
     }
   }

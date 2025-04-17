@@ -80,7 +80,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       console.error("API Error:", error);
       let err = "Cập nhật thất bại";
       if (error.response?.data?.errorMessage) {
-        err=error.response.data.errorMessage
+        err = error.response.data.errorMessage
         message.error(err)
       } else {
         message.error(err)
@@ -192,7 +192,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
             </Form.Item>
           )}
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="CSL_button-create">
+            <Button type="primary" htmlType="submit" disabled={loading} className="CSL_button-create">
               Cập nhật
             </Button>
           </Form.Item>
@@ -203,7 +203,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
               {shortUrl}
               </div>
               <div className="CSL_qr-code">
-              {qrLink && <img src={qrLink} alt="QR Code"/>}
+              {qrLink && <img src={qrLink} disabled={loading} alt="QR Code"/>}
               </div>
             </div>
           </Form.Item>

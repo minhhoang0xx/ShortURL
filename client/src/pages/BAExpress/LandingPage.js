@@ -72,6 +72,7 @@ const LandingPageBAExpress = () => {
             } 
         } catch (error) {
             let err = "Gửi form thất bại.";
+            console.log('submit timesssss', attempts)
             if (error.response?.data?.errorMessage) {
               err = error.response.data.errorMessage;
             } 

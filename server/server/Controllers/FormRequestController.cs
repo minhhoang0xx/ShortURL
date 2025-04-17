@@ -59,7 +59,8 @@ namespace server.Controllers
 					return BadRequest(new ErrorResponse
 					{
 						ErrorCode = "RECAPTCHA_INVALID",
-						ErrorMessage = "Chưa xác thực CAPTCHA!"
+						ErrorMessage = "Chưa xác thực CAPTCHA!",
+						RequiresCaptcha = true
 					});
 				}
 			}
@@ -110,7 +111,9 @@ namespace server.Controllers
 					ErrorMessage="Thiếu một hoặc nhiều những thông tin!"
 				});
 			}
-			string clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "local";
+			string clientIp = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+			?? HttpContext.Connection.RemoteIpAddress?.ToString()
+			?? "local";
 			int attempts = Failed(clientIp);
 			if (attempts >= 3)
 			{

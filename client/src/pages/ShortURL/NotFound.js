@@ -1,5 +1,5 @@
 import React from "react";
-
+import "../ShortURL/style.css";
 const NotFound = () =>{
     return (
         <div className="notFound-container">

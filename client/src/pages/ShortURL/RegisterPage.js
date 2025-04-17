@@ -1,6 +1,7 @@
 import { Button, Form, Input, message } from "antd";
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import "../ShortURL/style.css";
 
 const RegisterPage = () => {
 

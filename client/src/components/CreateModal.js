@@ -8,6 +8,7 @@ import * as DomainService from '../services/DomainService';
 import { jwtDecode } from "jwt-decode";
 
 
+
 const CreateModal = ({ visible, onCancel, onCreate }) => {
   const [qrLink, setQrLink] = useState("");
   const [shortUrl, setShortUrl] = useState("");
@@ -196,7 +197,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
             </Form.Item>
           )}
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="CSL_button-create">
+            <Button type="primary" htmlType="submit" disabled={loading} className="CSL_button-create">
               Tạo mới
             </Button>
           </Form.Item>
@@ -206,8 +207,8 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
               <div className="CSL_short-url">
                 {shortUrl}
               </div>
-              <div className="CSL_qr-code">
-                {qrLink && <img src={qrLink} alt="QR Code" />}
+              <div className="CSL_qr-code" >
+                {qrLink && <img src={qrLink} alt="QR Code" disabled={loading} />}
               </div>
             </div>
           </Form.Item>

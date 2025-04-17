@@ -1,8 +1,9 @@
 import { Button, Checkbox, Form, Input, message } from "antd";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import * as AuthenticationService from "../../services/AuthenticationService";
+import "../ShortURL/style.css";
 
 const LoginPage = () => {
     const location = useLocation();
@@ -14,6 +15,13 @@ const LoginPage = () => {
     const [captchaToken, setCaptchaToken] = useState(null);
     const recaptchaRef = React.useRef(null);
 
+    useEffect(() => {
+        console.log('submit times', attempts)
+        localStorage.setItem("attempts", attempts.toString());
+        if (attempts >= 3) {
+            setShowCaptcha(true);
+        }
+    }, [attempts]);
     const handleNavigateRegister = () => {
         navigate('/Register');
     };
@@ -30,47 +38,37 @@ const LoginPage = () => {
         try {
             console.log("dataLogin", loginData);
             const response = await AuthenticationService.Login(loginData);
-            if (response.message === "Login successfully!") {
+            setAttempts(response.attempts);
+            console.log('submit timessssss', attempts)
+            if (response) {
                 message.success(response.message);
                 navigate('/ShortUrl');
-                setAttempts(0);
                 setShowCaptcha(false);
                 setCaptchaToken(null);
                 if (recaptchaRef.current) {
                     recaptchaRef.current.reset();
                 }
-            } else {
-                message.error(response.message);
             }
         } catch (error) {
             let err = "Đăng nhập thất bại!";
-            if (error.response?.data.requiresCaptcha) {
-                setShowCaptcha(true);
-                setCaptchaToken(null);
-                if (recaptchaRef.current) {
-                    recaptchaRef.current.reset();
-                }
-            }
+            console.log('submit', attempts)
+            console.log('ERR', error)
+            setAttempts(error.response.data.attempts)
             if (error.response?.data.errorMessage) {
-                const newAttempts = attempts + 1;
-                setAttempts(newAttempts);
-                if (newAttempts >= 3) {
+                err = error.response.data.errorMessage;
+                
+                if (error.response?.data?.requiresCaptcha) {
                     setShowCaptcha(true);
                     setCaptchaToken(null);
                     if (recaptchaRef.current) {
                         recaptchaRef.current.reset();
                     }
                 }
-                err = error.response?.data.errorMessage
-                message.error(err);
-            }else {
-                message.error('Đã có lỗi xảy ra, vui lòng thử lại.');
             }
-
-            console.error('Error during login:', error);
+            message.error(err);
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
     const onFinishFailed = (errorInfo) => {
@@ -80,7 +78,7 @@ const LoginPage = () => {
     return (
         <div className="login-container">
             <div className="login-form">
-                <h2 className="login-title">LOGIN</h2>
+                <h2 className="login-title">Đăng Nhập</h2>
                 <Form
                     name="SignIn"
                     labelCol={{ span: 5 }}

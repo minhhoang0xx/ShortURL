@@ -39,19 +39,19 @@ public class Authentication : ControllerBase
 				return sb.ToString(); //"x2" formats the byte as a two - digit hexadecimal
 			}
 		}
-		private void Increase(string username)
+		private void Increase(string clientIp)
 		{
-			failedAttempts.AddOrUpdate(username, 1, (key, oldValue) => oldValue + 1);
+			failedAttempts.AddOrUpdate(clientIp, 1, (key, oldValue) => oldValue + 1);
 		}
 
-		private void Reset(string username)
+		private void Reset(string clientIp)
 		{
-			failedAttempts.TryUpdate(username, 0, failedAttempts.GetValueOrDefault(username));
+			failedAttempts.TryUpdate(clientIp, 0, failedAttempts.GetValueOrDefault(clientIp));
 		}
 
-		private int Failed(string username)
+		private int Failed(string clientIp)
 		{
-			return failedAttempts.GetValueOrDefault(username);
+			return failedAttempts.GetValueOrDefault(clientIp);
 		}
 
 
@@ -59,18 +59,24 @@ public class Authentication : ControllerBase
 		[HttpPost("Login")]
 		public async Task<IActionResult> Login([FromBody] Admin_UserDTO account)
 		{
-		 
+			string clientIp = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+			?? HttpContext.Connection.RemoteIpAddress?.ToString()
+			?? "local";
 			var checkLogin = await _context.AdminUsers.FirstOrDefaultAsync(x => x.UserName == account.UserName);
 			if (checkLogin == null)
 			{
-				Increase(account.UserName);
+				Increase(clientIp);
 				return BadRequest( new ErrorResponse
 				{
 					ErrorCode = "USERNAME_NOT EXISTED",
-					ErrorMessage = "Tài khoản hoặc mật khẩu không đúng!"
+					ErrorMessage = "Tài khoản hoặc mật khẩu không đúng!",
+					attempts = Failed(clientIp),
+					RequiresCaptcha = Failed(clientIp) >= 3
 				});
+
 			}
-			int attempts = Failed(account.UserName);
+		
+		int attempts = Failed(clientIp);
 			if (attempts >= 3)
 			{
 				if (string.IsNullOrEmpty(account.RecaptchaToken))
@@ -79,6 +85,7 @@ public class Authentication : ControllerBase
 				{
 					ErrorCode = "CAPTCHA_NOT_FOUND",
 					ErrorMessage = "Hãy thực hiện CAPTCHA trước!",
+					attempts = Failed(clientIp),
 					RequiresCaptcha = true
 
 				});
@@ -90,23 +97,27 @@ public class Authentication : ControllerBase
 					return BadRequest(new ErrorResponse
 					{
 						ErrorCode = "CAPTCHA_INVALID",
-						ErrorMessage = "CAPTCHA chưa được xác thực!"
+						ErrorMessage = "CAPTCHA chưa được xác thực!",
+						attempts = Failed(clientIp),
+						RequiresCaptcha = Failed(clientIp) >= 3
 					});
 			}
 			}
 			var checkPassword = HashToMD5(account.Password).ToUpper();
 			if(checkLogin.Password != checkPassword)
 			{
-				Increase(account.UserName);
+				Increase(clientIp);
 				return BadRequest(new ErrorResponse
 				{
 					ErrorCode = "PASSWORD_INCORRECT",
-					ErrorMessage = "Tài khoản hoặc mật khẩu không đúng!"
+					ErrorMessage = "Tài khoản hoặc mật khẩu không đúng!",
+					attempts = Failed(clientIp),
+					RequiresCaptcha = Failed(clientIp) >= 3
 				});
 			}
-			Reset(account.UserName);
+			Reset(clientIp);
 			var token = _jwtService.GenerateToken(checkLogin.UserName.ToString());
-            return Ok(new { message = "Login successfully!", token });
+            return Ok(new { message = "Login successfully!", token, attempts = Failed(clientIp) });
 		}
 
 }

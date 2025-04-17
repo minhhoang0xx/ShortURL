@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import * as ShortUrlService from '../../services/ShortUrlService';
+import "../ShortURL/style.css";
 
 const RedirectPage = () => {
     const { alias } = useParams();
