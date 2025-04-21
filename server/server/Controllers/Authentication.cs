@@ -59,25 +59,24 @@ public class Authentication : ControllerBase
 		[HttpPost("Login")]
 		public async Task<IActionResult> Login([FromBody] Admin_UserDTO account)
 		{
+			
 			string clientIp = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
 			?? HttpContext.Connection.RemoteIpAddress?.ToString()
 			?? "local";
-			var checkLogin = await _context.AdminUsers.FirstOrDefaultAsync(x => x.UserName == account.UserName);
-			if (checkLogin == null)
+	
+			int attempts = Failed(clientIp);
+			if (attempts >= 3 && account.RecaptchaToken == null)
 			{
-				Increase(clientIp);
-				return BadRequest( new ErrorResponse
+				return BadRequest(new ErrorResponse
 				{
-					ErrorCode = "USERNAME_NOT EXISTED",
-					ErrorMessage = "Tài khoản hoặc mật khẩu không đúng!",
+					ErrorCode = "CAPTCHA_INVALID",
+					ErrorMessage = "CAPTCHA chưa được xác thực!",
 					attempts = Failed(clientIp),
 					RequiresCaptcha = Failed(clientIp) >= 3
 				});
 
-			}
-		
-		int attempts = Failed(clientIp);
-			if (attempts >= 3)
+		}
+		if (attempts >= 3)
 			{
 				if (string.IsNullOrEmpty(account.RecaptchaToken))
 				{
@@ -103,7 +102,20 @@ public class Authentication : ControllerBase
 					});
 			}
 			}
-			var checkPassword = HashToMD5(account.Password).ToUpper();
+		var checkLogin = await _context.AdminUsers.FirstOrDefaultAsync(x => x.UserName == account.UserName);
+		if (checkLogin == null)
+		{
+			Increase(clientIp);
+			return BadRequest(new ErrorResponse
+			{
+				ErrorCode = "USERNAME_NOT EXISTED",
+				ErrorMessage = "Tài khoản hoặc mật khẩu không đúng!",
+				attempts = Failed(clientIp),
+				RequiresCaptcha = Failed(clientIp) >= 3
+			});
+
+		}
+		var checkPassword = HashToMD5(account.Password).ToUpper();
 			if(checkLogin.Password != checkPassword)
 			{
 				Increase(clientIp);

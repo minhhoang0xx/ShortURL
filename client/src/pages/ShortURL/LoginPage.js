@@ -16,12 +16,16 @@ const LoginPage = () => {
     const recaptchaRef = React.useRef(null);
 
     useEffect(() => {
-        console.log('submit times', attempts)
-        localStorage.setItem("attempts", attempts.toString());
-        if (attempts >= 3) {
+        const storedAttempts = localStorage.getItem("attempts");
+        const current = storedAttempts ? parseInt(storedAttempts, 10) : 0;
+        setAttempts(current);
+        console.log('submit times', current);
+        localStorage.setItem("attempts", current.toString());
+        if (current >= 3) {
             setShowCaptcha(true);
         }
-    }, [attempts]);
+    }, [attempts]); 
+    
     const handleNavigateRegister = () => {
         navigate('/Register');
     };
@@ -53,9 +57,10 @@ const LoginPage = () => {
             let err = "Đăng nhập thất bại!";
             console.log('submit', attempts)
             console.log('ERR', error)
-            setAttempts(error.response.data.attempts)
-            if (error.response?.data.errorMessage) {
-                err = error.response.data.errorMessage;
+            setAttempts(error.response?.data?.attempts)
+            localStorage.setItem("attempts", error.response?.data?.attempts);
+            if (error.response?.data?.errorMessage) {
+                err = error.response?.data?.errorMessage;
                 
                 if (error.response?.data?.requiresCaptcha) {
                     setShowCaptcha(true);
