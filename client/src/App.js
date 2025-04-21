@@ -6,14 +6,7 @@ import 'antd/dist/reset.css';
 import DefaultComponent from "./components/DefaultComponent/DefaultComponent";
 import PrivateRoute from "./routes/PrivateRoute";
 
-function App() {
-  useEffect(() => {
-    window.onunhandledrejection = function (event) {
-        console.warn("Unhandled rejection:", event.reason);
-
-        event.preventDefault();
-    };
-}, []);
+function App() {  
   return (
     <Router>
       <Routes>
