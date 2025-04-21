@@ -15,16 +15,24 @@ const LoginPage = () => {
     const [captchaToken, setCaptchaToken] = useState(null);
     const recaptchaRef = React.useRef(null);
 
+
     useEffect(() => {
         const storedAttempts = localStorage.getItem("login_attempts");
-        const current = storedAttempts ? parseInt(storedAttempts, 10) : 0;
-        setAttempts(current);
-        console.log('submit times', current);
-        localStorage.setItem("login_attempts", current.toString());
-        if (current >= 3) {
-            setShowCaptcha(true);
+        if (storedAttempts) {
+                const parsed = JSON.parse(storedAttempts);
+                const now = Date.now();
+                if (parsed.expiry && now < parsed.expiry) {
+                    setAttempts(parsed.value);
+                    if (parsed.value >= 3) {    
+                    setShowCaptcha(true);
+                    }   
+                } else {
+                    localStorage.removeItem("login_attempts");
+                    setAttempts(0);
+                    setShowCaptcha(false);
+                }
         }
-    }, [attempts]); 
+    }, []); 
     
     const handleNavigateRegister = () => {
         navigate('/Register');
@@ -59,7 +67,8 @@ const LoginPage = () => {
             let err = "Đăng nhập thất bại!";
             setAttempts(error.response?.data?.attempts)
             console.log('submit', attempts)
-            localStorage.setItem("login_attempts", error.response?.data?.attempts);
+            const expiryTime = Date.now() + 60 * 60 * 1000;
+            localStorage.setItem("login_attempts", JSON.stringify({ value: error.response?.data?.attempts, expiry: expiryTime }));
             if (error.response?.data?.errorMessage) {
                 err = error.response?.data?.errorMessage;
                 if (error.response?.data?.requiresCaptcha) {

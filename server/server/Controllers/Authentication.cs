@@ -17,7 +17,8 @@ public class Authentication : ControllerBase
 		private readonly JwtService _jwtService;
 		private readonly URLContext _context;
 		private readonly RecaptchaService _recaptchaService;
-		private static ConcurrentDictionary<string, int> failedAttempts = new();
+		private static ConcurrentDictionary<string, (int Count, DateTime FirstAttempt)> submitAttempts = new();
+		private static readonly TimeSpan AttemptLifetime = TimeSpan.FromHours(1);
 		public	Authentication(URLContext context, RecaptchaService recaptchaService, JwtService jwtService)
 		{
 			_context = context;
@@ -41,22 +42,42 @@ public class Authentication : ControllerBase
 		}
 		private void Increase(string clientIp)
 		{
-			failedAttempts.AddOrUpdate(clientIp, 1, (key, oldValue) => oldValue + 1);
+			var now = DateTime.UtcNow;
+			submitAttempts.AddOrUpdate(
+				clientIp,
+				(key) => (1, now),
+				(key, oldValue) =>
+				{
+					if (now - oldValue.FirstAttempt > AttemptLifetime)
+					{
+						return (1, now);
+					}
+					return (oldValue.Count + 1, oldValue.FirstAttempt);
+				});
 		}
-
 		private void Reset(string clientIp)
 		{
-			failedAttempts.TryUpdate(clientIp, 0, failedAttempts.GetValueOrDefault(clientIp));
+			submitAttempts.TryUpdate(clientIp, (0, DateTime.UtcNow), submitAttempts.GetValueOrDefault(clientIp));
 		}
+
 
 		private int Failed(string clientIp)
 		{
-			return failedAttempts.GetValueOrDefault(clientIp);
+			if (submitAttempts.TryGetValue(clientIp, out var value))
+			{
+				if (DateTime.UtcNow - value.FirstAttempt > AttemptLifetime)
+				{
+					submitAttempts.TryUpdate(clientIp, (0, DateTime.UtcNow), value);
+					return 0;
+				}
+				return value.Count;
+			}
+			return 0;
 		}
 
 
 
-		[HttpPost("Login")]
+	[HttpPost("Login")]
 		public async Task<IActionResult> Login([FromBody] Admin_UserDTO account)
 		{
 			

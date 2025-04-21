@@ -202,7 +202,5 @@ namespace server.Controllers
 			}
 			return 0;
 		}
-
-
 	}
 }

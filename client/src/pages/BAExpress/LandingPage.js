@@ -398,7 +398,6 @@ const LandingPageBAExpress = () => {
                         <div className="section-7_container-left">
                             <nav>
                                 <ul>
-                                    <div id="close"></div>
                                     <li> <a href="#CSvanchuyen" className="section-7_container-link">Chính sách vận chuyển</a></li>
                                     <li><a href="#CSbaomat" className="section-7_container-link">Chính sách bảo mật</a></li>
                                     <li><a href="#CSbaohanh" className="section-7_container-link">Chính sách bảo hành</a></li>
@@ -409,7 +408,6 @@ const LandingPageBAExpress = () => {
                         <div className="section-7_container-right">
                             <nav>
                                 <ul>
-                                    <div id="close"></div>
                                     <li><a href="#CSdoitra" className="section-7_container-link">Chính sách đổi trả & hoàn tiền</a></li>
                                     <li><a href="#HTthanhtoan" className="section-7_container-link">Hình thức thanh toán</a></li>
                                     <li><a href="#DKsudung" className="section-7_container-link">Điều khoản sử dụng</a></li>
@@ -421,7 +419,6 @@ const LandingPageBAExpress = () => {
                         <div id="CSvanchuyen" className="section-7_container-modal">
                             <a href="#close" className="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
-
                                 <div className="section-7_container-modal-header">
                                     <h2>Chính sách vận chuyển và giao nhận</h2>
                                     <a href="#close" className="close-btn">&times;</a>

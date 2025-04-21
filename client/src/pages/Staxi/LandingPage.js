@@ -51,7 +51,6 @@ const LandingPageStaxi = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
         const dataToSubmit = {
             ...formData,
             projectName: "Staxi",
@@ -430,7 +429,7 @@ const LandingPageStaxi = () => {
                     <div className="S_footer_container-modal-content">
                         <div className="S_footer_container-modal-header">
                             <h2>Chính sách vận chuyển và giao nhận</h2>
-                            <a href="#close" className="close-btn">&times;</a>
+                            <a href="#close" className="S_close-btn">&times;</a>
                         </div>
                         <div className="S_footer_container-modal-body">
                             <p>Do sản phẩm của BAEXPRESS liên quan nhiều đến các dịch vụ kỹ thuật như tư vấn, triển khai
