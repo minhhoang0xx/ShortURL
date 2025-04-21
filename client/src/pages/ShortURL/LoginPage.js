@@ -16,11 +16,11 @@ const LoginPage = () => {
     const recaptchaRef = React.useRef(null);
 
     useEffect(() => {
-        const storedAttempts = localStorage.getItem("attempts");
+        const storedAttempts = localStorage.getItem("login_attempts");
         const current = storedAttempts ? parseInt(storedAttempts, 10) : 0;
         setAttempts(current);
         console.log('submit times', current);
-        localStorage.setItem("attempts", current.toString());
+        localStorage.setItem("login_attempts", current.toString());
         if (current >= 3) {
             setShowCaptcha(true);
         }
@@ -46,6 +46,8 @@ const LoginPage = () => {
             console.log('submit timessssss', attempts)
             if (response) {
                 message.success(response.message);
+                localStorage.setItem('token', response.token);
+                localStorage.removeItem('login_attempts')
                 navigate('/ShortUrl');
                 setShowCaptcha(false);
                 setCaptchaToken(null);
@@ -55,13 +57,11 @@ const LoginPage = () => {
             }
         } catch (error) {
             let err = "Đăng nhập thất bại!";
-            console.log('submit', attempts)
-            console.log('ERR', error)
             setAttempts(error.response?.data?.attempts)
-            localStorage.setItem("attempts", error.response?.data?.attempts);
+            console.log('submit', attempts)
+            localStorage.setItem("login_attempts", error.response?.data?.attempts);
             if (error.response?.data?.errorMessage) {
                 err = error.response?.data?.errorMessage;
-                
                 if (error.response?.data?.requiresCaptcha) {
                     setShowCaptcha(true);
                     setCaptchaToken(null);
@@ -70,6 +70,7 @@ const LoginPage = () => {
                     }
                 }
             }
+            console.log('ERR', error)
             message.error(err);
         } finally {
             setLoading(false);

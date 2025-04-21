@@ -11,8 +11,9 @@ namespace server.Controllers
 	public class FormRequestController : ControllerBase
 	{
 		private readonly URLContext _context;
-		private static ConcurrentDictionary<string, int> submitAttempts = new();
 		private readonly RecaptchaService _recaptchaService;
+		private static ConcurrentDictionary<string, (int Count, DateTime FirstAttempt)> submitAttempts = new();
+		private static readonly TimeSpan AttemptLifetime = TimeSpan.FromHours(1);
 		public FormRequestController(URLContext context, RecaptchaService recaptchaService)
 		{
 			_context = context;
@@ -167,18 +168,41 @@ namespace server.Controllers
 
 		}
 
-		private void Increase( string clientIp)
+		private void Increase(string clientIp)
 		{
-			submitAttempts.AddOrUpdate(clientIp, 1, (key, oldValue) => oldValue + 1);
+			var now = DateTime.UtcNow;
+			submitAttempts.AddOrUpdate(
+				clientIp,
+				(key) => (1, now),
+				(key, oldValue) =>
+				{
+					if (now - oldValue.FirstAttempt > AttemptLifetime)
+					{
+						return (1, now);
+					}
+					return (oldValue.Count + 1, oldValue.FirstAttempt);
+				});
 		}
+
 		private void Reset(string clientIp)
 		{
-			submitAttempts.TryUpdate(clientIp, 0, Failed(clientIp));
+			submitAttempts.TryUpdate(clientIp, (0, DateTime.UtcNow), submitAttempts.GetOrAdd(clientIp, (0, DateTime.UtcNow)));
 		}
+
 		private int Failed(string clientIp)
 		{
-			return submitAttempts.GetOrAdd(clientIp, 0);
+			if (submitAttempts.TryGetValue(clientIp, out var value))
+			{
+				if (DateTime.UtcNow - value.FirstAttempt > AttemptLifetime)
+				{
+					submitAttempts.TryUpdate(clientIp, (0, DateTime.UtcNow), value);
+					return 0;
+				}
+				return value.Count;
+			}
+			return 0;
 		}
+
 
 	}
 }

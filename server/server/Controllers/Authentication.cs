@@ -129,7 +129,7 @@ public class Authentication : ControllerBase
 			}
 			Reset(clientIp);
 			var token = _jwtService.GenerateToken(checkLogin.UserName.ToString());
-            return Ok(new { message = "Login successfully!", token, attempts = Failed(clientIp) });
+            return Ok(new { message = "Đăng nhập thành công", token, attempts = Failed(clientIp) });
 		}
 
 }

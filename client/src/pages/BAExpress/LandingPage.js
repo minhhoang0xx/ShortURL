@@ -12,12 +12,20 @@ const LandingPageBAExpress = () => {
     const recaptchaRef = useRef(null);
 
     useEffect(() => {
-        console.log('submit times', attempts)
-        localStorage.setItem("attempts", attempts.toString());
-        if (attempts >= 3) {
-            setShowCaptcha(true);
+        const stored = localStorage.getItem("attempts");
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            const now = Date.now();
+            if (parsed.expiry && now < parsed.expiry) {
+                setAttempts(parsed.value);
+                setShowCaptcha(parsed.value >= 3);
+            } else {
+                localStorage.removeItem("attempts");
+                setAttempts(0);
+                setShowCaptcha(false);
+            }
         }
-    }, [attempts]);
+    }, []);
 
     const [formData, setFormData] = useState({
         projectName: "",
@@ -52,7 +60,6 @@ const LandingPageBAExpress = () => {
             console.log("data", dataToSubmit);
             const response = await FormRequestService.saveRequestBAE(dataToSubmit);
             console.log("Response:", response);
-
             if (response && response.message) {
                 message.success(response.message);
                 setFormData({
@@ -62,6 +69,8 @@ const LandingPageBAExpress = () => {
                     phoneNumber: "",
                     message: "",
                 });
+                const expiryTime = Date.now() + 60 * 60 * 1000;
+                localStorage.setItem("attempts", JSON.stringify({ value: response.attempts, expiry: expiryTime }));
                 setAttempts(response.attempts);
                 console.log('sumbit times', attempts)
                 // setShowCaptcha(false);
@@ -69,24 +78,24 @@ const LandingPageBAExpress = () => {
                 if (recaptchaRef.current) {
                     recaptchaRef.current.reset();
                 }
-            } 
+            }
         } catch (error) {
             let err = "Gửi form thất bại.";
             console.log('submit timesssss', attempts)
             if (error.response?.data?.errorMessage) {
-              err = error.response.data.errorMessage;
-            } 
+                err = error.response.data.errorMessage;
+            }
             if (error.response?.data?.requiresCaptcha) {
-              setShowCaptcha(true);
-              setCaptchaToken(null);
-              if (recaptchaRef.current) {
-                recaptchaRef.current.reset();
-              }
+                setShowCaptcha(true);
+                setCaptchaToken(null);
+                if (recaptchaRef.current) {
+                    recaptchaRef.current.reset();
+                }
             }
             message.error(err);
-          } finally {
+        } finally {
             setLoading(false);
-          }
+        }
     };
     return (
         <div className="LandingPageBAExpress">
@@ -458,7 +467,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="CSbaomat" className="section-7_container-modal">
-                        <a href="#close" className="section-7_overlay"></a>
+                            <a href="#close" className="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Chính sách bảo mật</h2>
@@ -504,7 +513,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="CSbaohanh" className="section-7_container-modal">
-                        <a href="#close" className="section-7_overlay"></a>
+                            <a href="#close" className="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Chính sách bảo hành</h2>
@@ -532,7 +541,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="CSdoitra" className="section-7_container-modal">
-                        <a href="#close" className="section-7_overlay"></a>
+                            <a href="#close" className="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Chính sách đổi trả & hoàn tiền</h2>
@@ -569,7 +578,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="HTthanhtoan" className="section-7_container-modal">
-                        <a href="#close" className="section-7_overlay"></a>
+                            <a href="#close" className="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Hình thức thanh toán</h2>
@@ -603,7 +612,7 @@ const LandingPageBAExpress = () => {
                             </div>
                         </div>
                         <div id="DKsudung" className="section-7_container-modal">
-                        <a href="#close" className="section-7_overlay"></a>
+                            <a href="#close" className="section-7_overlay"></a>
                             <div className="section-7_container-modal-content">
                                 <div className="section-7_container-modal-header">
                                     <h2>Điều khoản sử dụng</h2>

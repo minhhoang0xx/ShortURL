@@ -57,7 +57,7 @@ const ListShortLink = () => {
       width: 560
     },
     {
-      title: 'Shortlink',
+      title: 'URL rút gọn',
       dataIndex: `shortLink`,
       key: 'shortLink',
       ellipsis: true,
@@ -68,6 +68,7 @@ const ListShortLink = () => {
       title: 'Ngày tạo',
       dataIndex: 'createAt',
       key: 'createAt',
+      className: "action-column",
       render: (date) => date ? dayjs(date).format('HH:mm DD/MM/YYYY') : 'N/A',
       width: 130
     },

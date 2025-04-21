@@ -13,12 +13,20 @@ const LandingPageStaxi = () => {
     const recaptchaRef = useRef(null);
 
     useEffect(() => {
-        console.log('submit times', attempts)
-        localStorage.setItem("attempts", attempts.toString());
-        if (attempts >= 3) {
-            setShowCaptcha(true);
+        const stored = localStorage.getItem("attempts");
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            const now = Date.now();
+            if (parsed.expiry && now < parsed.expiry) {
+                setAttempts(parsed.value);
+                setShowCaptcha(parsed.value >= 3);
+            } else {
+                localStorage.removeItem("attempts");
+                setAttempts(0);
+                setShowCaptcha(false);
+            }
         }
-    }, [attempts]);
+    }, []);
 
     const [formData, setFormData] = useState({
         projectName: "",
@@ -64,6 +72,8 @@ const LandingPageStaxi = () => {
                     address: "",
                     company: "",
                 });
+                const expiryTime = Date.now() + 60 * 60 * 1000;
+                localStorage.setItem("attempts", JSON.stringify({ value: response.attempts, expiry: expiryTime }));
                 setAttempts(response.attempts);
                 // setShowCaptcha(false);
                 setCaptchaToken(null);
