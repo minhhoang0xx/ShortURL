@@ -29,7 +29,7 @@ GO
 
 
 
-
+--------------------------------------------------------------------------------------------------------
 USE [LandingPageManagement]
 GO
 
@@ -59,10 +59,9 @@ GO
 
 
 
-
+----------------------------------------------------------------------------------------------------------
 USE [LandingPageManagement]
 GO
-
 /****** Object:  Table [dbo].[ShortURL.Domain]    Script Date: 4/15/2025 3:57:19 PM ******/
 SET ANSI_NULLS ON
 GO
@@ -82,6 +81,8 @@ CREATE TABLE [dbo].[ShortURL.Domain](
 GO
 
 
+-- *******************************************************************************************************
+------------------ Appstore & GooglePlay fit OS devide-----------------------------
 INSERT INTO [dbo].[ShortURL.Links] (
     ProjectName,
     OriginalUrl,
@@ -100,7 +101,7 @@ VALUES
     'https://app.g7taxi.vn/home/store',
     'https://staxi.vn',
     'staxi',
-    Null,
+    'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=http%3A%2F%2Flocalhost%3A3000%2Flink%2Fstaxi',
     GETDATE(),
     1,
     'market://details?id=com.binhanh.g7taxi&hl=vi&gl=US',
@@ -111,7 +112,7 @@ VALUES
 	'https://baexpress.io/store',
 	'https://baexpress.io',
 	'baexpress',
-	null,
+	'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=http%3A%2F%2Flocalhost%3A3000%2Flink%2Fbae',
 	GETDATE(),
 	1,
 	'market://details?id=com.binhanh.driver.baexpress&hl=vi&gl=US',
@@ -119,7 +120,7 @@ VALUES
 	null
 )
 
-
+------------------------------ Domain of project----------------------------- 
 INSERT INTO [dbo].[ShortURL.Domain] (
    Link,
    Name
