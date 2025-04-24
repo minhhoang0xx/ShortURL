@@ -42,30 +42,29 @@ builder.Services.AddAuthentication(options =>
 });
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy(name: MyAllowSpecificOrigins,
 		policy =>
 		{
-			policy.WithOrigins("http://localhost:3000")
+			policy.WithOrigins(allowedOrigins)
 				  .AllowAnyHeader()
 				  .AllowAnyMethod()
-				
-			;
+                  .AllowCredentials();
 		});
 });
 
 
 var app = builder.Build();
-app.UseCors(MyAllowSpecificOrigins);
 
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 app.UseRouting();
+app.UseCors(MyAllowSpecificOrigins);
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

@@ -79,18 +79,26 @@ body {
   .LSL_shortlink-table .ant-table-tbody > tr > td {
     border-bottom: 1px solid #e8e8e8;
   }
-  :where(.css-dev-only-do-not-override-1v613y0).ant-table-wrapper .ant-table-cell, :where(.css-dev-only-do-not-override-1v613y0).ant-table-wrapper .ant-table-thead>tr>th, :where(.css-dev-only-do-not-override-1v613y0).ant-table-wrapper .ant-table-tbody>tr>th, :where(.css-dev-only-do-not-override-1v613y0).ant-table-wrapper .ant-table-tbody>tr>td, :where(.css-dev-only-do-not-override-1v613y0).ant-table-wrapper tfoot>tr>th, :where(.css-dev-only-do-not-override-1v613y0).ant-table-wrapper tfoot>tr>td{
+  .ant-table-wrapper .ant-table-cell,
+  .ant-table-wrapper .ant-table-thead > tr > th,
+  .ant-table-wrapper .ant-table-tbody > tr > th,
+  .ant-table-wrapper .ant-table-tbody > tr > td,
+  .ant-table-wrapper tfoot > tr > th,
+  .ant-table-wrapper tfoot > tr > td {
     padding: 10px 5px;
   }
-  :where(.css-dev-only-do-not-override-1v613y0).ant-table-wrapper .ant-table-thead >tr>th, :where(.css-dev-only-do-not-override-1v613y0).ant-table-wrapper .ant-table-thead >tr>td
-  {
+  
+  .ant-table-wrapper .ant-table-thead > tr > th,
+  .ant-table-wrapper .ant-table-thead > tr > td {
     text-align: center;
   }
-  :where(.css-dev-only-do-not-override-1v613y0).ant-table-wrapper .ant-table-pagination.ant-pagination{
+  
+  .ant-table-wrapper .ant-table-pagination.ant-pagination {
     margin: 16px 0;
   }
-  :where(.css-dev-only-do-not-override-1v613y0).ant-btn{
-    gap: 0 !important
+  
+  .ant-btn {
+    gap: 0 !important;
   }
   .action-column{
     text-align: center;
