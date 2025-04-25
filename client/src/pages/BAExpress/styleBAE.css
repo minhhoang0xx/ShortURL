@@ -651,7 +651,7 @@ textarea {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
-    max-width: 80%;
+    max-width: 52%;
     max-height: 80%;
     overflow-y: auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -659,22 +659,35 @@ textarea {
 }
 .section-7_container-modal-header {
     display: flex;
-    justify-content: space-between;
+    /* justify-content: space-between; */
     align-items: center;
     border-bottom: 1px solid #ddd;
     padding-bottom: 10px;
     margin-bottom: 15px;
+    justify-content: center;
+    color: red;
 }
-
-.close-btn {
-    font-size: 24px;
+  .section-7_container-modal-header h2 {
+    margin: 0;
+    flex: 1;
+    text-align: center;
+    font-size: 26px;
     font-weight: bold;
+  }
+  
+ .close-btn {
+    position: absolute;
+    right: 20px;
+    font-size: 35px;
     text-decoration: none;
-    color: black;
-}
-
+    color: #000;
+    font-weight: bold;
+  }
 .close-btn:hover {
     color: red;
+} 
+.section-7_container-modal-body p{
+    text-align: justify;
 }
 
 /* end section 7 */

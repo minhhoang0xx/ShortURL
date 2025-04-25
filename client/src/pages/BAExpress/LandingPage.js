@@ -426,32 +426,32 @@ const LandingPageBAExpress = () => {
                                 <div className="section-7_container-modal-body">
                                     <p>Do sản phẩm của BAEXPRESS liên quan nhiều đến các dịch vụ kỹ thuật như tư vấn, triển khai
                                         lắp đặt, đấu ghép hệ thống, lập trình hệ thống, bảo hành, bảo trì…nên các chi phí về
-                                        giao nhận vận chuyển đều được thoả thuận trước giữa BAEXPRESS và khách hàng.
+                                        giao nhận vận chuyển đều được thoả thuận trước giữa BAEXPRESS và khách hàng.<br/>
                                         - Thông thường sau khi nhận được thông tin đặt hàng chúng tôi sẽ xử lý đơn hàng trong
                                         vòng 24h và phản hồi lại thông tin cho khách hàng về việc thanh toán và giao nhận. Thời
                                         gian giao hàng thường trong khoảng từ 3-5 ngày kể từ ngày chốt đơn hàng hoặc theo thỏa
-                                        thuận với khách khi đặt hàng.
+                                        thuận với khách khi đặt hàng.<br/>
                                         - Về phí vận chuyển, chúng tôi sử dụng dịch vụ vận chuyển ngoài nên cước phí vận chuyển
                                         sẽ được tính theo phí của các đơn vị vận chuyển tùy vào vị trí và khối lượng của đơn
-                                        hàng, khi liên hệ lại xác nhận đơn hàng với khách sẽ báo mức phí cụ thể cho khách hàng.
+                                        hàng, khi liên hệ lại xác nhận đơn hàng với khách sẽ báo mức phí cụ thể cho khách hàng.<br/>
                                         - Đối với Quý khách hàng ở tỉnh có nhu cầu mua số lượng lớn hoặc khách buôn sỉ nếu có
                                         nhu cầu mua sản phẩm, chúng tôi sẽ nhờ dịch vụ giao nhận của các công ty vận chuyển và
                                         phí sẽ được tính theo phí của các đơn vị cung cấp dịch vụ vận chuyển hoặc theo thoản
-                                        thuận hợp đồng giữa 2 bên.
+                                        thuận hợp đồng giữa 2 bên.<br/>
                                         - Đối với hàng có trị giá lớn chúng tôi tiến hành đóng dấu, niêm phong, chụp ảnh lại
                                         cách thức hàng hóa đã được đóng gói niêm phong và gửi cho người mua hàng để tiện kiểm
                                         tra khi nhận hàng dễ dàng cho Quý khách hàng có thể kiểm tra và chứng minh rằng hàng
                                         không bị thay đổi nội dung khi vận chuyển, đồng thời thông báo cho người mua thời gian
                                         dự kiến hàng sẽ tới tay người mua hàng, như vậy người mua hàng sẽ yên tâm rằng hàng hoá
-                                        đã được giao và chuẩn bị, thu xếp nhận hàng sớm.
+                                        đã được giao và chuẩn bị, thu xếp nhận hàng sớm.<br/>
                                         - Quý khách vui lòng trực tiếp kiểm tra kỹ hàng hoá ngay khi nhận hàng từ người chuyển
                                         phát hàng hoá, nếu có vấn đề liên quan tới việc chúng loại, chất lượng, số lượng hàng
                                         hoá không đúng như trong đơn đặt hàng, niêm phong đã bị thay đổi, thì Quý khách hãy lập
                                         biên bản ngay khi nhận hàng với đơn vị hoặc người chuyển phát và thông báo ngay cho
-                                        BAEXPRESS để cùng phối hợp đơn vị chuyển phát hàng hóa xử lý.
+                                        BAEXPRESS để cùng phối hợp đơn vị chuyển phát hàng hóa xử lý.<br/>
                                         - Trong mọi trường hợp như vậy, Quý khách không phải chịu bất kì trách nhiệm nào liên
                                         quan tới việc hàng hoá bị thay đổi, thất lạc, không đảm bảo về chất lượng và đủ số lượng
-                                        trong quá trình vận chuyển hàng hoá tới địa điểm nhận hàng của Quý khách.
+                                        trong quá trình vận chuyển hàng hoá tới địa điểm nhận hàng của Quý khách.<br/>
                                         - Khi đặt hàng, Quý khách vui lòng điền đầy đủ và chính xác các thông tin cần thiết theo
                                         yêu cầu để tạo điều kiện thuận lợi cho chúng tôi trong việc cung cấp hàng hóa và nhận
                                         thanh toán nhanh chóng. BAEXPRESS có quyền kiểm tra các thông tin này và có quyền từ
@@ -474,8 +474,7 @@ const LandingPageBAExpress = () => {
                                     <strong>1. Mục đích và phạm vi sử dụng:</strong>
                                     <p>Chúng tôi có thể thu thập thông tin của bạn trên website https://www.baexpress.io như
                                         thông tin về số lần ghé thăm website, bao gồm số trang bạn xem, số links (liên kết) bạn
-                                        click, những thông tin khác liên quan đến việc kết nối đến website
-                                        https://www.baexpress.io và các thông tin mà trình duyệt Web (Browser) bạn sử dụng mỗi
+                                        click, những thông tin khác liên quan đến việc kết nối đến website https://www.baexpress.io và các thông tin mà trình duyệt Web (Browser) bạn sử dụng mỗi
                                         khi truy cập vào https://www.baexpress.io gồm: địa chỉ IP, loại trình duyệt sử dụng,
                                         ngôn ngữ sử dụng, thời gian và những địa chỉ mà trình duyệt truy xuất đến.
                                         Để truy cập và sử dụng một số dịch vụ của https://www.baexpress.io, bạn có thể sẽ được

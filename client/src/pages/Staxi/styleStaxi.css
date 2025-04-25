@@ -764,7 +764,7 @@
     background-color: white;
     padding: 20px;
     border-radius: 10px;
-    max-width: 80%;
+    max-width: 52%;
     max-height: 80%;
     overflow-y: auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -773,7 +773,7 @@
   
   .S_footer_container-modal-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     border-bottom: 1px solid #ddd;
     padding-bottom: 10px;
@@ -789,9 +789,17 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: -1; 
 }
-  
+.S_footer_container-modal-header h2 {
+  margin: 0;
+    flex: 1;
+    text-align: center;
+    font-size: 26px;
+    font-weight: bold;
+}
   .S_close-btn {
-    font-size: 24px;
+    position: absolute;
+    right: 20px;
+    font-size: 35px;
     font-weight: bold;
     text-decoration: none;
     color: black;
@@ -803,6 +811,9 @@
   
   .S_footer_container-modal-body {
     color: black;
+  }
+  .S_footer_container-modal-body p {
+    text-align: justify;
   }
   
   /* -------------------end footer--------------- */
