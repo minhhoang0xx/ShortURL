@@ -116,7 +116,6 @@ const LandingPageStaxi = () => {
                             <li><a href="#section-5">Khách hàng</a></li>
                             <li><a href="#section-6">Sản phẩm cho taxi</a></li>
                             <li><a href="#footer">Tư vấn</a></li>
-                            <li><a href="/ShortUrl">Short URL</a></li>
                         </ul>
                     </nav>
                     <div className="S_header_contact">

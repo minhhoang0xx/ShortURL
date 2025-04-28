@@ -115,7 +115,6 @@ const LandingPageBAExpress = () => {
                             <li><a href="#4">Giải pháp toàn diện</a></li>
                             <li><a href="#5">Tính năng ưu việt</a></li>
                             <li><a href="#6">Đặt hàng ngay</a></li>
-                            <li><a href="/ShortURL">ShortUrl</a></li>
                         </ul>
                     </nav>
                     <div className="header_contact">

@@ -677,7 +677,8 @@ textarea {
   
  .close-btn {
     position: absolute;
-    right: 20px;
+    right: 10px;
+    top: -10px;
     font-size: 35px;
     text-decoration: none;
     color: #000;

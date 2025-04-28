@@ -4,7 +4,9 @@
   /* .S_landing-page {
     
   } */
-  
+  html {
+    scroll-behavior: smooth;
+}
   .S_orange {
     color: #f2480d;
   }
@@ -762,13 +764,15 @@
   
   .S_footer_container-modal-content {
     background-color: white;
-    padding: 20px;
+    right: 10px;
+    top: -10px;
     border-radius: 10px;
     max-width: 52%;
     max-height: 80%;
     overflow-y: auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     position: relative;
+    padding: 20px
   }
   
   .S_footer_container-modal-header {
