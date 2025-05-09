@@ -19,7 +19,7 @@ const RedirectPage = () => {
                     navigate('*');
                 }
             } catch (error) {
-                console.error('Error redirecting:', error);
+                console.error('Error redirecting:', error); 
                 navigate('*');
             }
         };

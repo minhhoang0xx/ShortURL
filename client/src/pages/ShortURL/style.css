@@ -68,6 +68,8 @@ body {
   .LSL_shortlink-table {
     margin-top: 20px;
     background-color: #ffffff;
+    width: 100%;
+    overflow-x: auto;
   }
   
   .LSL_shortlink-table .ant-table-thead > tr > th {

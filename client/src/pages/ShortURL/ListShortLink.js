@@ -34,19 +34,20 @@ const ListShortLink = () => {
       title: 'STT',
       dataIndex: 'STT',
       key: 'STT',
-      width: 40,
+      width: '3.76%',
+
     },
     {
       title: 'Dự án',
       dataIndex: 'projectName',
       key: 'projectName',
-      width: 100,
+      width: '6.9%'
     },
     {
       title: 'Tên đường dẫn',
       dataIndex: 'alias',
       key: 'alias',
-      width: 120,
+      width: '11.3%'
     },
     {
       title: 'URL gốc',
@@ -54,14 +55,14 @@ const ListShortLink = () => {
       key: 'originalUrl',
       ellipsis: true,
       render: (HyperLink) => <a href={HyperLink} target="_blank" rel="noreferrer" >{HyperLink}</a>,
-      width: 560
+      width: '36.56%'
     },
     {
       title: 'URL rút gọn',
       dataIndex: `shortLink`,
       key: 'shortLink',
       ellipsis: true,
-      width: 280,
+      width: '18.28%',
       render: (HyperLink) => <a href={HyperLink} target="_blank" rel="noreferrer" >{HyperLink}</a>,
     },
     {
@@ -70,18 +71,19 @@ const ListShortLink = () => {
       key: 'createAt',
       className: "action-column",
       render: (date) => date ? dayjs(date).format('HH:mm DD/MM/YYYY') : 'N/A',
-      width: 130
+      width: '12%'
     },
     {
       title: 'Người chỉnh sửa',
       dataIndex: 'userName',
       key: 'userName',
-      width: 130
+      width: '12%'
     },
     {
       title: 'Chức Năng',
       key: 'action',
       width: 90,
+      width: '8.2%',
       className: "action-column",
       render: (_, record) => (
         <Space size="middle">
