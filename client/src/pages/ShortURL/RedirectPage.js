@@ -28,7 +28,7 @@ const RedirectPage = () => {
 
     return (
         <div>
-            <h2>Đang chuyển hướng...</h2>
+            <h2>Đang tải trang...</h2>
         </div>
     );
 };
