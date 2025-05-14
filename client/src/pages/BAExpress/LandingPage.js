@@ -10,11 +10,11 @@ const LandingPageBAExpress = () => {
     const [attempts, setAttempts] = useState(() => parseInt(localStorage.getItem("attempts") || "0"));
     const [showCaptcha, setShowCaptcha] = useState(() => parseInt(localStorage.getItem("attempts") || "0") >= 3);
     const recaptchaRef = useRef(null);
-
+    const menuToggleRef = useRef(null);
     useEffect(() => {
         const stored = localStorage.getItem("attempts");
         if (stored) {
-            const parsed = JSON.parse(stored);
+            const parsed = JSON.parse(stored);  
             const now = Date.now();
             if (parsed.expiry && now < parsed.expiry) {
                 setAttempts(parsed.value);
@@ -45,6 +45,12 @@ const LandingPageBAExpress = () => {
 
     const handleCaptchaChange = (token) => {
         setCaptchaToken(token);
+    };
+
+    const handleMenuItemClick = () => {
+        if (menuToggleRef.current) {
+            menuToggleRef.current.checked = false; 
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -105,16 +111,16 @@ const LandingPageBAExpress = () => {
                     <div className="header_logo">
                         <img className="header_logo-img" src="/LandingPageBAExpress/logoHeader.png" alt="Logo" height="40" />
                     </div>
-                    <input type="checkbox" id="menu-toggle" />
+                    <input type="checkbox" id="menu-toggle" ref={menuToggleRef} />
                     <label htmlFor="menu-toggle" className="header_menu-icon">
                         <span className="header_menu-icon-line"></span>
                     </label>
                     <nav className="header_nav">
                         <ul className="header_nav-list">
-                            <li><a href="#3">Lý do lựa chọn</a></li>
-                            <li><a href="#4">Giải pháp toàn diện</a></li>
-                            <li><a href="#5">Tính năng ưu việt</a></li>
-                            <li><a href="#6">Đặt hàng ngay</a></li>
+                            <li><a href="#3" onClick={handleMenuItemClick}>Lý do lựa chọn</a></li>
+                            <li><a href="#4"onClick={handleMenuItemClick}>Giải pháp toàn diện</a></li>
+                            <li><a href="#5"onClick={handleMenuItemClick}>Tính năng ưu việt</a></li>
+                            <li><a href="#6"onClick={handleMenuItemClick}>Đặt hàng ngay</a></li>
                         </ul>
                     </nav>
                     <div className="header_contact">

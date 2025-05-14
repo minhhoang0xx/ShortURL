@@ -17,8 +17,7 @@ body {
 
 
 }
-.header-content {
-    display: flex;
+.header-content {   
     align-items: center;
     margin: 0 auto;
 }
@@ -68,8 +67,7 @@ body {
   .LSL_shortlink-table {
     margin-top: 20px;
     background-color: #ffffff;
-    width: 100%;
-    overflow-x: auto;
+    
   }
   
   .LSL_shortlink-table .ant-table-thead > tr > th {
@@ -273,4 +271,53 @@ body {
     margin-left: 10%;
 
 
+}
+@media screen and (max-width: 480px) {
+    .ant-form-item{
+        margin-bottom: 0;
+    }
+    .checkbox{
+           margin-left: -70px;
+    margin-top: 10px;
+    }
+  
+    .submit-button{
+        margin-left: -70px;
+    }
+    .login-form{
+        padding: 20px 0;
+    }
+    .login-title{
+        padding: 0;
+        margin: 0;
+        margin-bottom: 10px ;
+    }
+    .ant-form-item .ant-form-item-label{
+        padding: 0;
+    }
+    .notFound-container{
+        display: unset;
+    }
+    .ant-layout-header{
+        padding: 0 10px;
+    }
+    .header-content span{
+        font-size: 10px;
+    }
+    .logo{
+        height: 30px;
+    }
+    .notFound-title p{
+        font-size: 26px;
+    }
+    .notFound-image{
+        margin-top: 185px;
+    }
+    .notFound-title{
+        margin-top: 50px;
+        margin-bottom: 239px;
+    }
+    .footer-content{
+        font-size: 10px;
+    }
 }
