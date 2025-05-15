@@ -284,8 +284,20 @@ body {
     .submit-button{
         margin-left: -70px;
     }
-    .login-form{
+    .login-container {
+        background-image: url('../../../public/LandingPageBAExpress/section1.png');
+        background-size: cover;
+        background-position: center;
+    }
+    .login-form {
         padding: 20px 0;
+        padding: 20px 0;
+        box-shadow: 0 0 0px 1px #00000080;
+        border-radius: 10px;
+        background-color: white;
+        width: 80%;
+        background-size: cover;
+        color: white;
     }
     .login-title{
         padding: 0;

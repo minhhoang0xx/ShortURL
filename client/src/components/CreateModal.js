@@ -107,10 +107,14 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
     setQrLink("");
     setIsChecked(false);
   }
+  const handleCancel = () =>{
+    resetForm();
+    onCancel();
+  }
   return (
     <Modal
       open={visible}
-      onCancel={onCancel}
+      onCancel={handleCancel}
       // loading = {loading}
       footer={null}>
       <Content className="CSL_main-container">
