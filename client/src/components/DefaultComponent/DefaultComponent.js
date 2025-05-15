@@ -7,7 +7,7 @@ import Footer from "../HeaderFooterComponents/footer";
         <div> 
             <Header/>
             {children}
-            <Footer/>
+            {/* <Footer/> */}
         </div>
         )
 }

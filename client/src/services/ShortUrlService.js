@@ -2,7 +2,7 @@ import axios from 'axios';
 export const axiosJWT = axios.create(); 
 axiosJWT.interceptors.request.use(
     (config) => {
-      const token = localStorage.getItem('token'); // Điều chỉnh tùy cách lưu token
+      const token = localStorage.getItem('token'); 
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }

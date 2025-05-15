@@ -1,6 +1,6 @@
 import { Layout, Table, Input, Button, Select, Space, message, Spin } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import * as ShortUrlService from '../../services/ShortUrlService';
 import * as DownloadService from '../../services/DownloadService';
@@ -8,12 +8,11 @@ import UpdateModal from '../../components/UpdateModal';
 import DeleteModal from '../../components/DeleteModal';
 import CreateModal from '../../components/CreateModal';
 import { DeleteTwoTone, EditFilled } from '@ant-design/icons';
-import "../../pages/ShortURL/style.css"
+import '../../pages/ShortURL/style.css';
 import * as DomainService from '../../services/DomainService';
 import { jwtDecode } from 'jwt-decode';
 const { Content } = Layout;
 const { Option } = Select;
-
 
 const ListShortLink = () => {
   const navigate = useNavigate();
@@ -28,112 +27,135 @@ const ListShortLink = () => {
   const [createModal, setCreateModal] = useState(false);
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(false);
-  //-------------------------COLUMN--------------------------------
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
+
   const columns = [
     {
       title: 'STT',
-      dataIndex: 'STT',
       key: 'STT',
       width: '3.76%',
-
+      render: (_, __, index) => {
+        const pageSize = pagination.pageSize;
+        const currentPage = pagination.current;
+        return (currentPage - 1) * pageSize + index + 1;
+      },
     },
     {
       title: 'Dự án',
       dataIndex: 'projectName',
       key: 'projectName',
-      width: '6.9%'
+      width: '6.9%',
     },
     {
       title: 'Tên đường dẫn',
       dataIndex: 'alias',
       key: 'alias',
-      width: '11.3%'
+      width: '11.3%',
     },
     {
       title: 'URL gốc',
       dataIndex: 'originalUrl',
       key: 'originalUrl',
       ellipsis: true,
-      render: (HyperLink) => <a href={HyperLink} target="_blank" rel="noreferrer" >{HyperLink}</a>,
-      width: '36.56%'
+      render: (HyperLink) => (
+        <a href={HyperLink} target="_blank" rel="noreferrer">
+          {HyperLink}
+        </a>
+      ),
+      width: '36.56%',
     },
     {
       title: 'URL rút gọn',
-      dataIndex: `shortLink`,
+      dataIndex: 'shortLink',
       key: 'shortLink',
       ellipsis: true,
       width: '18.28%',
-      render: (HyperLink) => <a href={HyperLink} target="_blank" rel="noreferrer" >{HyperLink}</a>,
+      render: (HyperLink) => (
+        <a href={HyperLink} target="_blank" rel="noreferrer">
+          {HyperLink}
+        </a>
+      ),
     },
     {
       title: 'Ngày tạo',
       dataIndex: 'createAt',
       key: 'createAt',
-      className: "action-column",
-      render: (date) => date ? dayjs(date).format('HH:mm DD/MM/YYYY') : 'N/A',
-      width: '12%'
+      className: 'action-column',
+      render: (date) => (date ? dayjs(date).format('HH:mm DD/MM/YYYY') : 'N/A'),
+      width: '12%',
     },
     {
       title: 'Người chỉnh sửa',
       dataIndex: 'userName',
       key: 'userName',
-      width: '12%'
+      width: '12%',
     },
     {
       title: 'Chức Năng',
       key: 'action',
-      width: 90,
       width: '8.2%',
-      className: "action-column",
+      className: 'action-column',
       render: (_, record) => (
         <Space size="middle">
-          <a onClick={() => showModal(record)}><EditFilled /></a>
-          <a onClick={() => showDeleteConfirm(record)}><DeleteTwoTone twoToneColor="#ed0505" /></a>
+          <a onClick={() => showModal(record)}>
+            <EditFilled />
+          </a>
+          <a onClick={() => showDeleteConfirm(record)}>
+            <DeleteTwoTone twoToneColor="#ed0505" />
+          </a>
         </Space>
       ),
     },
   ];
-  //---------------------------------------------------------------
 
-  //-----------------DATA------------------------------------------
   const fetchData = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const urls = await ShortUrlService.getAllLink();
       const urlfetch = urls.$values;
-      console.log("Data từ API:", urls);
-      const formattedData = urlfetch.map((url, index) => ({ ...url, key: url.id, STT: index + 1 }));
+      console.log('Data từ API:', urls);
+      const formattedData = urlfetch.map((url) => ({ ...url, key: url.id }));
       setData(formattedData);
+      setPagination((prev) => ({ ...prev, total: formattedData.length }));
       filterData(formattedData, selectedProject, searchText);
     } catch (error) {
-      console.error("Failed to fetch data:", error);
+      console.error('Failed to fetch data:', error);
     }
-    setLoading(false)
+    setLoading(false);
   };
 
   const filterData = (sourceData, project, search) => {
     let result = [...sourceData];
     if (project && project !== 'all') {
-      result = result.filter(item =>
-        item.projectName && item.projectName.toLowerCase() === project.toLowerCase()
-      )
+      result = result.filter(
+        (item) =>
+          item.projectName && item.projectName.toLowerCase() === project.toLowerCase()
+      );
     }
     if (search) {
-      result = result.filter(item =>
-        item.alias && item.alias.toLowerCase().includes(search.toLowerCase())
-      )
+      result = result.filter(
+        (item) => item.alias && item.alias.toLowerCase().includes(search.toLowerCase())
+      );
     }
     setFilteredData(result);
+    setPagination((prev) => ({ ...prev, current: 1, total: result.length }));
   };
+
   const fetchDomains = async () => {
     const response = await DomainService.getAll();
-    setDomains(response.$values.map(domain => domain.name));
-  }
-  useEffect(() => { // cai nay de cho fetch chi chay 1 lan
+    setDomains(response.$values.map((domain) => domain.name));
+  };
+
+  useEffect(() => {
     fetchData();
     fetchDomains();
   }, []);
-  useEffect(() => { // loc lai data sau khi search hoac filter
+
+  useEffect(() => {
     filterData(data, selectedProject, searchText);
   }, [selectedProject, searchText, data]);
 
@@ -143,15 +165,14 @@ const ListShortLink = () => {
       navigate('/Login');
     }
   }, [navigate]);
+
   const showModal = (record) => {
     setSelectedRecord(record);
-    setLoading(true)
+    setLoading(true);
     setIsModalOpen(true);
-    setLoading(false)
+    setLoading(false);
   };
-  //---------------------------------------------------------------
 
-  //------------START UPDATE---------------------------------------
   const handleCancelUpdate = () => {
     setIsModalOpen(false);
     setSelectedRecord(null);
@@ -159,72 +180,75 @@ const ListShortLink = () => {
 
   const handleUpdate = () => {
     fetchData();
-  }
-  //-------------END UPDATE----------------------------------------
+  };
 
-  //-------------START DELETE--------------------------------------
   const showDeleteConfirm = (record) => {
-    setLoading(true)
+    setLoading(true);
     setRecordToDelete(record);
     setDeleteModal(true);
-    setLoading(false)
+    setLoading(false);
   };
+
   const handleConfirmDelete = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       await ShortUrlService.deleteShortLink(recordToDelete.id);
-      setData(prevData => prevData.filter(link => link.id !== recordToDelete.id));
-      message.success("Xóa thành công!");
+      setData((prevData) => prevData.filter((link) => link.id !== recordToDelete.id));
+      message.success('Xóa thành công!');
       setDeleteModal(false);
       setRecordToDelete(null);
-      fetchData()
+      fetchData();
     } catch (error) {
-      let err = "Xóa thất bại!";
-      if(error.response?.data.errorMessage){
-        err = error.response?.data.errorMessage
+      let err = 'Xóa thất bại!';
+      if (error.response?.data.errorMessage) {
+        err = error.response.data.errorMessage;
         message.error(err);
-      }else{
+      } else {
         message.error(err);
       }
     }
-    setLoading(false)
+    setLoading(false);
   };
-
 
   const handleCancelDelete = () => {
     setDeleteModal(false);
     setRecordToDelete(null);
   };
+
   const handleProjectChange = (value) => {
     setSelectedProject(value);
   };
-  //--------------------END DELETE----------------------------------
-  //--------------------start Create--------------------------------
+
   const showCreateModal = () => {
-    setLoading(true)
+    setLoading(true);
     setCreateModal(true);
-    setLoading(false)
-  }
+    setLoading(false);
+  };
+
   const handleCreate = () => {
-    fetchData()
-  }
+    fetchData();
+  };
+
   const handleCancelCreate = () => {
     setCreateModal(false);
-  }
-  //---------------------end Create---------------------------------
+  };
 
-  //====SEARCH=====
   const handleSearch = (value) => {
     setSearchText(value);
   };
-  //====EXPORT=====
+
   const handleExportExcel = async () => {
     setLoading(true);
     try {
-      const blob = await DownloadService.download();
-      console.log("excel", blob)
-      const url = window.URL.createObjectURL(blob);// create tam mot duong`dan~
-      const a = document.createElement("a"); // bat dau download
+      if (filteredData.length === 0) {
+        message.warning('Không có dữ liệu để xuất!');
+        setLoading(false);
+        return;
+      }
+      const blob = await DownloadService.download(filteredData);
+      console.log('excel', blob);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
       a.href = url;
       a.download = `Excel.xlsx`;
       document.body.appendChild(a);
@@ -232,21 +256,35 @@ const ListShortLink = () => {
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Export failed:", error);
-      message.error("Xuất Excel thất bại!");
+      console.error('Export failed:', error);
+      message.error('Xuất Excel thất bại!');
     }
     setLoading(false);
-  }
+  };
+
+  const handleTableChange = (newPagination) => {
+    setPagination({
+      ...pagination,
+      current: newPagination.current,
+      pageSize: newPagination.pageSize,
+    });
+  };
 
   return (
     <Layout>
       <Content className="LSL_main-container">
         <div className="LSL_search-bar">
           <Space>
-            <Select defaultValue="all" onChange={handleProjectChange} style={{ width: 120 }}>
+            <Select
+              defaultValue="all"
+              onChange={handleProjectChange}
+              style={{ width: 120 }}
+            >
               <Option value="all">Tất cả dự án</Option>
               {domains.map((domain) => (
-                <Option key={domain} value={domain}>{domain}</Option>
+                <Option key={domain} value={domain}>
+                  {domain}
+                </Option>
               ))}
             </Select>
             <Input.Search
@@ -257,9 +295,12 @@ const ListShortLink = () => {
               onChange={(e) => setSearchText(e.target.value)}
               style={{ width: 300 }}
             />
-            <Button type="primary" className="LSL_search-bar-Create"> <a onClick={(showCreateModal)}>Tạo mới</a></Button>
-            <Button type="primary" className="LSL_search-bar-Excel"> <a onClick={handleExportExcel}>Xuất Excel</a></Button>
-
+            <Button type="primary" className="LSL_search-bar-Create">
+              <a onClick={showCreateModal}>Tạo mới</a>
+            </Button>
+            <Button type="primary" className="LSL_search-bar-Excel">
+              <a onClick={handleExportExcel}>Xuất Excel</a>
+            </Button>
           </Space>
         </div>
 
@@ -267,12 +308,12 @@ const ListShortLink = () => {
           columns={columns}
           dataSource={filteredData}
           bordered
-          pagination={true}
+          pagination={pagination}
+          onChange={handleTableChange}
           loading={loading}
           className="LSL_shortlink-table"
         />
       </Content>
-
 
       <UpdateModal
         loading={loading}
@@ -295,7 +336,7 @@ const ListShortLink = () => {
         onCreate={handleCreate}
       />
     </Layout>
-  )
+  );
+};
 
-}
-export default ListShortLink
+export default ListShortLink;
