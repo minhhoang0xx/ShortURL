@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import "../Staxi/styleStaxi.css"
 import ReCAPTCHA from "react-google-recaptcha";
 import * as FormRequestService from "../../services/FormRequestService";
-import { message } from "antd";
+import { message, Spin } from "antd";
 
 
 const LandingPageStaxi = () => {
@@ -51,6 +51,7 @@ const LandingPageStaxi = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (loading) return;
         const dataToSubmit = {
             ...formData,
             projectName: "Staxi",
@@ -403,7 +404,12 @@ const LandingPageStaxi = () => {
                                     onChange={handleCaptchaChange}
                                 />
                             )}
-                            <button disabled={loading} type="submit">ĐĂNG KÝ NGAY</button>
+                             <button type="submit" disabled={loading}>
+                                        {loading ? (
+                                            <Spin size="small" style={{ marginRight: 8 }} />
+                                        ) : null}
+                                        {loading ? "Đang gửi..." : "ĐĂNG KÝ NGAY"}
+                                    </button>
                         </form>
                         <div className="S_footer-policies">
                             <ul>
