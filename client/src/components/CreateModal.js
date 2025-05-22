@@ -1,12 +1,12 @@
-import { Button, Form, Input, Modal, Radio, Select, Space, Switch, message } from "antd";
-import { LinkOutlined, SyncOutlined } from '@ant-design/icons';
+import { DatePickerProps,Button, Checkbox, DatePicker, Empty, Form, Input, Modal, Radio, Select, Space, Switch, message } from "antd";
+import { CopyOutlined, LinkOutlined, PlusOutlined, SyncOutlined } from '@ant-design/icons';
 import { Content } from "antd/es/layout/layout";
+import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import * as ShortUrlService from '../services/ShortUrlService';
 import * as DomainService from '../services/DomainService';
 import { jwtDecode } from "jwt-decode";
-
 
 
 const CreateModal = ({ visible, onCancel, onCreate }) => {
@@ -17,6 +17,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(false)
   const [isChecked, setIsChecked] = useState(false);
+  const dateFormat = 'DD/MM/YYYY';
 
   useEffect(() => {
     if (visible) {
@@ -55,6 +56,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       const selectedDomain = domains.find(domain => domain.link === data.domain);
       data.projectName = selectedDomain.name
       data.checkOS = isChecked ? true : false;
+      data.expiry = data.expiry ? dayjs(data.expiry).format('YYYY-MM-DD') : null;
       const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
       const decodedToken = jwtDecode(token);
       const userName = decodedToken["name"];
@@ -107,7 +109,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
     setQrLink("");
     setIsChecked(false);
   }
-  const handleCancel = () =>{
+  const handleCancel = () => {
     resetForm();
     onCancel();
   }
@@ -130,8 +132,9 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
         >
           <Form.Item
             name="originalUrl"
+            label="URL gốc"
             rules={[{ required: true, message: 'Vui lòng nhập URL gốc!' },
-              { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+            { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
             ]}
           >
             <div className="shortlink-form_Original">
@@ -148,9 +151,12 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
               <Form.Item
                 name="domain"
                 noStyle
+                label="Domain"
+                className="CSL_custom-link-domain"
                 rules={[{ required: true, message: 'Vui lòng chọn domain!' }]}
               >
-                <Select placeholder="Chọn Domain" style={{ width: '50%' }}>
+
+                <Select placeholder="Chọn Dự án" style={{ width: '50%' }} >
                   {domains.map((domain) => (
                     <Select.Option key={domain.id} value={domain.link}>
                       {domain.name}
@@ -162,6 +168,8 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
               <Form.Item
                 name="alias"
                 noStyle
+                label="Tên đường dẫn-Alias"
+                className="CSL_custom-link-alias"
                 rules={[
                   { required: true, message: 'Vui lòng nhập Alias' },
                   { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' },
@@ -175,16 +183,28 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
               </Form.Item>
             </Space.Compact>
           </Form.Item>
-          <Form.Item name="checkOS">
-            <Switch checked={isChecked} onClick={handleCheckOSChange} checkedChildren="CheckOS" unCheckedChildren="UnCheck">
-              Check OS
-            </Switch>
+
+          <Form.Item
+            name="expiry"
+            className="CSL_custom-time"
+            label="Hạn sử dụng liên kết:"
+          >
+        <DatePicker placeholder="DD-MM-YYYY" className="datePicker" format={dateFormat} 
+        disabledDate={(current) => current && current < dayjs().startOf('day')}
+        />
+          </Form.Item> 
+          <Form.Item name="checkOS" className="checkOs">
+            <Checkbox checked={isChecked} onClick={handleCheckOSChange}  />
+            <label> Tạo link tải APP</label>
+            {/* <Switch checked={isChecked} onClick={handleCheckOSChange} checkedChildren="" unCheckedChildren=""/>
+            <label> Tạo link tải APP</label> */}
           </Form.Item>
           {isChecked && (
             <Form.Item
               name="iosLink"
+              label="Link tới App Store"
               rules={[{ required: true, message: "Vui lòng nhập URL App Store!" },
-                { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+              { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
               ]}
             >
               <Input placeholder="Nhập URL App Store" />
@@ -193,8 +213,9 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
           {isChecked && (
             <Form.Item
               name="androidLink"
+              label="Link tới Google Play"
               rules={[{ required: true, message: "Vui lòng nhập URL Google Play!" },
-                { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+              { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
               ]}
             >
               <Input placeholder="Nhập URL Google Play" />
@@ -202,7 +223,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
           )}
           <Form.Item>
             <Button type="primary" htmlType="submit" disabled={loading} className="CSL_button-create">
-              Tạo mới
+              <PlusOutlined />  Tạo mới
             </Button>
           </Form.Item>
 
@@ -218,12 +239,15 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
           </Form.Item>
 
           <Form.Item>
-            <div>
-              <Button className="CSL_copy-btn" htmlType="button" onClick={copyToClipboard} disabled={!shortUrl}>Sao chép</Button>
+            <div className="CSL_group-button">
+              <div className="CSL_group-button1">
+                <Button className="CSL_copy-btn" htmlType="button" onClick={copyToClipboard} disabled={!shortUrl}><CopyOutlined />Sao chép</Button>
+              </div>
+              <div className="CSL_group-button2">
+                <Button className="CSL_link-btn" htmlType="button" onClick={openLink} disabled={!shortUrl}><LinkOutlined />Mở Link</Button>
+              </div>
             </div>
-            <div>
-              <Button className="CSL_link-btn" htmlType="button" onClick={openLink} disabled={!shortUrl}><LinkOutlined />Mở Link</Button>
-            </div>
+
           </Form.Item>
         </Form>
       </Content>

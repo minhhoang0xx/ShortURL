@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Button, Space, Select, message, Radio, Switch } from 'antd';
+import { Modal, Form, Input, Button, Space, Select, message, Radio, Switch, Checkbox, DatePicker } from 'antd';
 import { Content } from 'antd/es/layout/layout';
-import { LinkOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
+import { CopyOutlined, EditOutlined, LinkOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import * as ShortUrlService from '../services/ShortUrlService';
 import * as DomainService from '../services/DomainService';
@@ -15,19 +16,24 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(false)
   const [isChecked, setIsChecked] = useState(false);
+  const dateFormat = 'DD/MM/YYYY';
 
   useEffect(() => {
-
     if (visible && record) {
       resetForm();
-      form.setFieldsValue(record);
+      console.log("record.expiry:", record.expiry);
+      form.setFieldsValue({
+        ...record,
+        expiry: record.expiry ? dayjs(record.expiry, 'YYYY-MM-DDTHH:mm:ss') : null,
+      });
       fetchDomains();
       setShortUrl(record.shortLink);
-      setQrLink(record.qrCode)
-      setIsChecked(record.checkOS)
+      setQrLink(record.qrCode);
+      setIsChecked(record.checkOS);
       console.log("Form values after setting:", record);
+      console.log("record.expiry:", record.expiry);
     }
-  }, [visible, record]);
+  }, [visible, record, form]);
   const fetchDomains = async () => {
     const response = await DomainService.getAll();
     setDomains(response.$values);
@@ -59,6 +65,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       const selectedDomain = domains.find(domain => domain.link === data.domain);
       data.projectName = selectedDomain.name
       data.checkOS = isChecked ? true : false;
+      data.expiry = data.expiry ? dayjs(data.expiry).format('YYYY-MM-DD') : null;
       const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
       const decodedToken = jwtDecode(token);
       const userName = decodedToken["name"];
@@ -68,14 +75,14 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
       data.qrCode = qr;
       const response = await ShortUrlService.updateShortLink(record.id, data)
-      
+
       if (response && response.shortLink) {
         console.log("API Response:", response);
         message.success(`Cập nhật thành công!`);
         setShortUrl(response.shortLink);
         setQrLink(qr)
         onUpdate();
-      } 
+      }
     } catch (error) {
       console.error("API Error:", error);
       let err = "Cập nhật thất bại";
@@ -126,8 +133,9 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
         >
           <Form.Item
             name="originalUrl"
+            label="URL gốc"
             rules={[{ required: true, message: 'Vui lòng nhập URL gốc!' },
-              { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+            { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
             ]}
           >
             <Input placeholder="Nhập URL gốc" />
@@ -140,20 +148,24 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
             <Space.Compact style={{ width: '100%' }}>
               <Form.Item
                 name="domain"
+                label="Tên dự án"
+                className="CSL_custom-link-domain"
                 noStyle
                 rules={[{ required: true, message: 'Vui lòng chọn Dự án!' }]}
               >
-                <Select placeholder="Chọn Dự án" style={{ width: '50%' }}>
-                {domains.map((domain) => (
+                <Select placeholder="Chọn dự án" style={{ width: '50%' }}>
+                  {domains.map((domain) => (
                     <Select.Option key={domain.id} value={domain.link}>
                       {domain.name}
                     </Select.Option>
-                ))}
+                  ))}
                 </Select>
               </Form.Item>
               <span style={{ color: '#000', margin: '0 10px', fontSize: '20px' }}>/</span>
               <Form.Item
                 name="alias"
+                label="Tên đường dẫn-Alias"
+                className="CSL_custom-link-alias"
                 noStyle
                 rules={[
                   { required: true, message: 'Vui lòng nhập Alias' },
@@ -168,14 +180,26 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
               </Form.Item>
             </Space.Compact>
           </Form.Item>
-          <Form.Item name="checkOS">
-            <Switch checked={isChecked} onClick={handleCheckOSChange} checkedChildren="CheckOS" unCheckedChildren="UnCheck"/>
+          <Form.Item
+            name="expiry"
+            className="CSL_custom-time"
+            label="Hạn sử dụng liên kết:"
+          >
+            <DatePicker placeholder="DD-MM-YYYY" className="datePicker" format={dateFormat}
+        disabledDate={(current) => current && current < dayjs().startOf('day')}
+        />
+          </Form.Item>
+          <Form.Item name="checkOS" className="checkOs">
+            <Checkbox checked={isChecked} onClick={handleCheckOSChange}/>
+            <label> Tạo link tải APP</label>
+            {/* <Switch checked={isChecked} onClick={handleCheckOSChange} checkedChildren="CheckOS" unCheckedChildren="UnCheck"/> */}
           </Form.Item>
           {isChecked && (
             <Form.Item
               name="iosLink"
+              label="Link tới App Store"
               rules={[{ required: true, message: "Vui lòng nhập URL App Store!" },
-                { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+              { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
               ]}
             >
               <Input placeholder="Nhập URL App Store" />
@@ -184,8 +208,9 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
           {isChecked && (
             <Form.Item
               name="androidLink"
+              label="Link tới Google Play"
               rules={[{ required: true, message: "Vui lòng nhập URL Google Play!" },
-                { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+              { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
               ]}
             >
               <Input placeholder="Nhập URL Google Play" />
@@ -193,27 +218,29 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
           )}
           <Form.Item>
             <Button type="primary" htmlType="submit" disabled={loading} className="CSL_button-create">
-              Cập nhật
+              <EditOutlined /> Cập nhật
             </Button>
           </Form.Item>
 
           <Form.Item label="Kết quả:" className="CSL_form-result">
             <div className="CSL_result">
               <div className="CSL_short-url">
-              {shortUrl}
+                {shortUrl}
               </div>
               <div className="CSL_qr-code">
-              {qrLink && <img src={qrLink} disabled={loading} alt="QR Code"/>}
+                {qrLink && <img src={qrLink} disabled={loading} alt="QR Code" />}
               </div>
             </div>
           </Form.Item>
 
           <Form.Item>
-            <div>
-              <Button className="CSL_copy-btn" htmlType="button" onClick={copyToClipboard} disabled={!shortUrl}>Sao chép</Button>
-            </div>
-            <div>
-              <Button className="CSL_link-btn" htmlType="button" onClick={openLink} disabled={!shortUrl}><LinkOutlined />Mở Link</Button>
+            <div className="CSL_group-button">
+              <div className="CSL_group-button1">
+                <Button className="CSL_copy-btn" htmlType="button" onClick={copyToClipboard} disabled={!shortUrl}><CopyOutlined />Sao chép</Button>
+              </div>
+              <div className="CSL_group-button2">
+                <Button className="CSL_link-btn" htmlType="button" onClick={openLink} disabled={!shortUrl}><LinkOutlined />Mở Link</Button>
+              </div>
             </div>
           </Form.Item>
         </Form>

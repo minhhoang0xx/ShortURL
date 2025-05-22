@@ -10,14 +10,14 @@ body {
 
 /* ---------------------------------start header--------------------------------- */
 .header {
-    background-color: #0959A0;
+    background-color: #0747A6;
     color: #ffffff;
-    border-bottom: 2px solid #0959A0;
+    border-bottom: 2px solid #0747A6;
     justify-content: center;
 
 
 }
-.header-content {   
+.header-content {
     align-items: center;
     margin: 0 auto;
 }
@@ -27,10 +27,14 @@ body {
 }
 
 .logo {
-    height: 40px;
+    height: 35px;
     width: auto;
     padding-right: 20px;
     filter: brightness(0) invert(1);
+}
+.ant-layout-header{
+    height: 50px;
+    line-height: 50px;
 }
 /* ----------------------------------------end header----------------------------------- */
 
@@ -48,7 +52,7 @@ body {
     gap: 10px;
   }
   .LSL_search-bar Button {
-    background-color: #0959A0;
+    background-color: #0747A6;
     min-width: 100%;
   }
   /* .LSL_search-bar-Create{
@@ -56,22 +60,21 @@ body {
   } */
   .LSL_search-bar-Excel{
     background-color: white !important;
-    color: #0959A0;
-    border: 1px solid #0959A0;
+    color: #0747A6;
+    border: 1px solid #0747A6;
     font-weight: bold;
   }
   .LSL_search-bar-Excel:hover{
-    background-color: #0959A0 !important;
+    background-color: #0747A6 !important;
   
   }
   .LSL_shortlink-table {
     margin-top: 20px;
     background-color: #ffffff;
-    
   }
   
   .LSL_shortlink-table .ant-table-thead > tr > th {
-    background-color:#2D9CDB;
+    background-color:#0747A6;
     color: #ffffff;
     font-weight: bold;
   }
@@ -103,6 +106,9 @@ body {
   .action-column{
     text-align: center;
   }
+  .STT-column{
+    text-align: center;
+  }
 
   
 /* end List Link */
@@ -124,6 +130,9 @@ body {
 .shortlink-form_Original{
     display: flex;
 }
+.checkOs{
+    text-align: left;
+}
 .shortlink-form_Original button{
     border: none;
 }
@@ -131,8 +140,15 @@ body {
 .CSL_custom-link {
     font-weight: bold;
 }
+.CSL_custom-time {
+
+    text-align: left;
+}
+.datePicker{
+    width: 100%;
+}
 .CSL_form-result label {
-    color: #2FAFCB !important;
+    color: #0747A6 !important;
     border-bottom: 2px solid #ddd;
     width: 100%;
     font-weight: bold;
@@ -151,32 +167,60 @@ body {
     width: 150px;
     height: 150px;
 }
+.CSL_group-button{
+    display: flex;
+    justify-content: center;
+    gap: 4%
+}
+.CSL_group-button1 {
+    width: 48%;
+}
+.CSL_group-button2{
+    width: 48%;
 
+}
 .CSL_button-create {
     width: 100%;
-    background-color: #2D9CDB;
+    background-color: #0747A6;
+    color: #ffffff;
     transition: background-color 0.3s ease-in-out;
 }
 
 .CSL_button-create:hover {
-    background-color: #2e8cc3 !important;
+    background-color: #ffffff !important;
     transform: scale(1.0005);
+    color: #0747A6 !important;
 }
 
-.CSL_copy-btn {
+.CSL_copy-btn { 
     background-color: #999999;
     color: #ffffff;
     border: none;
     width: 100%;
     margin-bottom: 10px;
 }
+.CSL_copy-btn:hover{
+    background-color: #ffffff !important;
+    transform: scale(1.0005);
+    color: #0747A6 !important;
+}
 
 .CSL_link-btn {
-    background-color: #2D9CDB;
+    background-color: #0747A6;
     color: #ffffff;
     border: none;
     width: 100%;
 }
+.CSL_link-btn:hover{
+    background-color: #ffffff !important;
+    transform: scale(1.0005);
+    color: #0747A6 !important;
+}
+
+.ant-form-item{
+    margin-bottom: 10px;
+}
+
 /* end Create Link */
 
 /* Not Found */
@@ -197,10 +241,10 @@ body {
 
 /* ----------------------------------start footer-------------------------- */
 .footer {
-    background-color: #2D9CDB;
+    background-color: #0747A6;
     color: #ffffff;
     padding: 10px 20px;
-    border-top: 2px solid #2D9CDB;
+    border-top: 2px solid #0747A6;
     text-align: center;
 }
 
@@ -307,6 +351,7 @@ body {
     .ant-form-item .ant-form-item-label{
         padding: 0;
     }
+
     .notFound-container{
         display: unset;
     }

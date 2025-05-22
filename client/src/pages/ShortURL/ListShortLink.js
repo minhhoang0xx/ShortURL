@@ -7,7 +7,7 @@ import * as DownloadService from '../../services/DownloadService';
 import UpdateModal from '../../components/UpdateModal';
 import DeleteModal from '../../components/DeleteModal';
 import CreateModal from '../../components/CreateModal';
-import { DeleteTwoTone, EditFilled } from '@ant-design/icons';
+import { CopyFilled, CopyOutlined, CopyTwoTone, DeleteTwoTone, EditFilled, EditTwoTone } from '@ant-design/icons';
 import '../../pages/ShortURL/style.css';
 import * as DomainService from '../../services/DomainService';
 import { jwtDecode } from 'jwt-decode';
@@ -29,7 +29,7 @@ const ListShortLink = () => {
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 20,
     total: 0,
   });
 
@@ -37,6 +37,7 @@ const ListShortLink = () => {
     {
       title: 'STT',
       key: 'STT',
+      className: 'STT-column',
       width: '3.76%',
       render: (_, __, index) => {
         const pageSize = pagination.pageSize;
@@ -66,7 +67,7 @@ const ListShortLink = () => {
           {HyperLink}
         </a>
       ),
-      width: '36.56%',
+      width: '30.56%',
     },
     {
       title: 'URL rút gọn',
@@ -81,11 +82,19 @@ const ListShortLink = () => {
       ),
     },
     {
-      title: 'Ngày tạo',
+      title: 'Ngày cập nhật',
       dataIndex: 'createAt',
       key: 'createAt',
       className: 'action-column',
-      render: (date) => (date ? dayjs(date).format('HH:mm DD/MM/YYYY') : 'N/A'),
+      render: (date) => (date ? dayjs(date).format('HH:mm DD/MM/YYYY') : 'null'),
+      width: '12%',
+    },
+    {
+      title: 'Ngày hết hạn',
+      dataIndex: 'expiry',
+      key: 'expiry',
+      className: 'action-column',
+      render: (date) => (date ? dayjs(date).format(' DD/MM/YYYY') : 'null'),
       width: '12%',
     },
     {
@@ -95,18 +104,28 @@ const ListShortLink = () => {
       width: '12%',
     },
     {
+      title: 'Trạng Thái',
+      dataIndex: 'userName',
+      key: 'userName',
+      width: '8%',
+    },
+    {
       title: 'Chức Năng',
       key: 'action',
       width: '8.2%',
       className: 'action-column',
       render: (_, record) => (
         <Space size="middle">
+           <a onClick={() => copyToClipboard(record)}>
+            <CopyTwoTone twoToneColor="#818582"  />
+          </a>
           <a onClick={() => showModal(record)}>
-            <EditFilled />
+            <EditFilled/>
           </a>
           <a onClick={() => showDeleteConfirm(record)}>
             <DeleteTwoTone twoToneColor="#ed0505" />
           </a>
+         
         </Space>
       ),
     },
@@ -157,6 +176,7 @@ const ListShortLink = () => {
 
   useEffect(() => {
     filterData(data, selectedProject, searchText);
+    console.log('pagination',pagination)
   }, [selectedProject, searchText, data]);
 
   useEffect(() => {
@@ -232,6 +252,17 @@ const ListShortLink = () => {
   const handleCancelCreate = () => {
     setCreateModal(false);
   };
+    const copyToClipboard = (record) => {
+    if (record) {
+      navigator.clipboard.writeText(record.shortLink)
+        .then(() => {
+          message.success('Link đã được sao chép!');
+        })
+        .catch(() => {
+          message.error('Không thể sao chép link!');
+        });
+    }
+  };
 
   const handleSearch = (value) => {
     setSearchText(value);
@@ -295,11 +326,11 @@ const ListShortLink = () => {
               onChange={(e) => setSearchText(e.target.value)}
               style={{ width: 300 }}
             />
-            <Button type="primary" className="LSL_search-bar-Create">
-              <a onClick={showCreateModal}>Tạo mới</a>
+            <Button type="primary" className="LSL_search-bar-Create"onClick={showCreateModal}>
+              <a >Tạo mới</a>
             </Button>
-            <Button type="primary" className="LSL_search-bar-Excel">
-              <a onClick={handleExportExcel}>Xuất Excel</a>
+            <Button type="primary" className="LSL_search-bar-Excel"onClick={handleExportExcel}>
+              <a >Xuất Excel</a>
             </Button>
           </Space>
         </div>
@@ -308,7 +339,10 @@ const ListShortLink = () => {
           columns={columns}
           dataSource={filteredData}
           bordered
-          pagination={pagination}
+          pagination={{
+            ...pagination,
+            showTotal: (total) => `Tổng số: ${total}`, 
+          }}
           onChange={handleTableChange}
           loading={loading}
           className="LSL_shortlink-table"
