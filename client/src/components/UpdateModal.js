@@ -16,6 +16,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(false)
   const [isChecked, setIsChecked] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
   const dateFormat = 'DD/MM/YYYY';
 
   useEffect(() => {
@@ -30,6 +31,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       setShortUrl(record.shortLink);
       setQrLink(record.qrCode);
       setIsChecked(record.checkOS);
+      setIsExpired(record.status === false || (record.expiry && new Date(record.expiry) < new Date()));
       console.log("Form values after setting:", record);
       console.log("record.expiry:", record.expiry);
     }
@@ -61,7 +63,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     console.log('Received values:', data);
     setLoading(true)
     try {
-      onUpdate();
+   
       const selectedDomain = domains.find(domain => domain.link === data.domain);
       data.projectName = selectedDomain.name
       data.checkOS = isChecked ? true : false;
@@ -74,6 +76,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       const linkShort = `${data.domain}/${data.alias}`;
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
       data.qrCode = qr;
+      data.status = data.expiry && new Date(data.expiry) < new Date() ? false : true;
       const response = await ShortUrlService.updateShortLink(record.id, data)
 
       if (response && response.shortLink) {
@@ -81,6 +84,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
         message.success(`Cập nhật thành công!`);
         setShortUrl(response.shortLink);
         setQrLink(qr)
+        setIsExpired(data.expiry && new Date(data.expiry) < new Date());
         onUpdate();
       }
     } catch (error) {
@@ -116,6 +120,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     setShortUrl("");
     setQrLink("")
     setIsChecked(false)
+    setIsExpired(false);
     form.resetFields();
   }
 
@@ -135,10 +140,11 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
             name="originalUrl"
             label="URL gốc"
             rules={[{ required: true, message: 'Vui lòng nhập URL gốc!' },
-            { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+            { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!'}
             ]}
+            
           >
-            <Input placeholder="Nhập URL gốc" />
+            <Input disabled={isExpired} placeholder="Nhập URL gốc" />
           </Form.Item>
 
           <Form.Item
@@ -147,13 +153,14 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
           >
             <Space.Compact style={{ width: '100%' }}>
               <Form.Item
+               
                 name="domain"
                 label="Tên dự án"
                 className="CSL_custom-link-domain"
                 noStyle
                 rules={[{ required: true, message: 'Vui lòng chọn Dự án!' }]}
               >
-                <Select placeholder="Chọn dự án" style={{ width: '50%' }}>
+                <Select  disabled={isExpired} placeholder="Chọn dự án" style={{ width: '50%' }}>
                   {domains.map((domain) => (
                     <Select.Option key={domain.id} value={domain.link}>
                       {domain.name}
@@ -163,6 +170,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
               </Form.Item>
               <span style={{ color: '#000', margin: '0 10px', fontSize: '20px' }}>/</span>
               <Form.Item
+                
                 name="alias"
                 label="Tên đường dẫn-Alias"
                 className="CSL_custom-link-alias"
@@ -176,7 +184,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
                   }
                 ]}
               >
-                <Input placeholder="Tên đường dẫn - Alias" style={{ width: '50%' }} />
+                <Input disabled={isExpired} placeholder="Tên đường dẫn - Alias" style={{ width: '50%' }} />
               </Form.Item>
             </Space.Compact>
           </Form.Item>
@@ -186,11 +194,11 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
             label="Hạn sử dụng liên kết:"
           >
             <DatePicker placeholder="DD-MM-YYYY" className="datePicker" format={dateFormat}
-        disabledDate={(current) => current && current < dayjs().startOf('day')}
+        // disabledDate={(current) => current && current < dayjs().startOf('day')}
         />
           </Form.Item>
-          <Form.Item name="checkOS" className="checkOs">
-            <Checkbox checked={isChecked} onClick={handleCheckOSChange}/>
+          <Form.Item  name="checkOS" className="checkOs">
+            <Checkbox disabled={isExpired} checked={isChecked} onClick={handleCheckOSChange}/>
             <label> Tạo link tải APP</label>
             {/* <Switch checked={isChecked} onClick={handleCheckOSChange} checkedChildren="CheckOS" unCheckedChildren="UnCheck"/> */}
           </Form.Item>
@@ -216,8 +224,8 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
               <Input placeholder="Nhập URL Google Play" />
             </Form.Item>
           )}
-          <Form.Item>
-            <Button type="primary" htmlType="submit" disabled={loading} className="CSL_button-create">
+          <Form.Item >
+            <Button  type="primary" htmlType="submit" disabled={loading} className="CSL_button-create">
               <EditOutlined /> Cập nhật
             </Button>
           </Form.Item>
@@ -225,7 +233,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
           <Form.Item label="Kết quả:" className="CSL_form-result">
             <div className="CSL_result">
               <div className="CSL_short-url">
-                {shortUrl}
+                {shortUrl} {isExpired && <span style={{ color: 'red' }}>(Quá Hạn)</span>}
               </div>
               <div className="CSL_qr-code">
                 {qrLink && <img src={qrLink} disabled={loading} alt="QR Code" />}
@@ -236,10 +244,10 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
           <Form.Item>
             <div className="CSL_group-button">
               <div className="CSL_group-button1">
-                <Button className="CSL_copy-btn" htmlType="button" onClick={copyToClipboard} disabled={!shortUrl}><CopyOutlined />Sao chép</Button>
+                <Button className="CSL_copy-btn" htmlType="button" onClick={copyToClipboard} disabled={!shortUrl || isExpired}><CopyOutlined />Sao chép</Button>
               </div>
               <div className="CSL_group-button2">
-                <Button className="CSL_link-btn" htmlType="button" onClick={openLink} disabled={!shortUrl}><LinkOutlined />Mở Link</Button>
+                <Button className="CSL_link-btn" htmlType="button" onClick={openLink} disabled={!shortUrl || isExpired}><LinkOutlined />Mở Link</Button>
               </div>
             </div>
           </Form.Item>

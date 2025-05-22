@@ -64,7 +64,7 @@ const LoginPage = () => {
                 }
             }
         } catch (error) {
-            let err = "Đăng nhập thất bại1!";
+            let err = "Đăng nhập thất bại!";
             setAttempts(error.response?.data?.attempts)
             console.log('submit', attempts)
             const expiryTime = Date.now() + 60 * 60 * 1000;
@@ -106,25 +106,23 @@ const LoginPage = () => {
                     autoComplete="off"
                 >
                     <Form.Item
-                        label="UserName"
+                        label="Tên đăng nhập:"
                         name="UserName"
                         rules={[
-                            { required: true, message: 'Vui lòng nhập tên tài khoản!' },
-
+                            { required: true, message: 'Vui lòng nhập tên tài khoản!' }
                         ]}
                     >
                         <Input />
                     </Form.Item>
 
                     <Form.Item
-                        label="Password"
+                        label="Mật khẩu"
                         name="Password"
                         rules={[
-                            { required: true, message: 'Vui lòng nhập mật khẩu!' },
-                            
+                            { required: true, message: 'Vui lòng nhập mật khẩu!' }
                         ]}
                     >
-                        <Input.Password />
+                        <Input.Password autoComplete="current-password"/>
                     </Form.Item>
 
                     {showCaptcha && (
@@ -141,14 +139,15 @@ const LoginPage = () => {
                         name="remember"
                         valuePropName="checked"
                         wrapperCol={{ offset: 5, span: 19 }}
+                        className="checkbox"
                     >
                         <Checkbox>Ghi nhớ tôi</Checkbox>
-                        <p>
+                        {/* <p>
                             Không có tài khoản?{' '}
                             <span className="register-link" onClick={handleNavigateRegister}>
                                 Đăng ký
                             </span>
-                        </p>
+                        </p> */}
                     </Form.Item>
 
                     <Form.Item wrapperCol={{ offset: 6, span: 16 }}>

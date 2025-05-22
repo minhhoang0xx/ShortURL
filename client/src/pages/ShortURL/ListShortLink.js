@@ -56,6 +56,8 @@ const ListShortLink = () => {
       dataIndex: 'alias',
       key: 'alias',
       width: '11.3%',
+      sorter: (a, b) => a.alias.localeCompare(b.alias),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'URL gốc',
@@ -71,15 +73,23 @@ const ListShortLink = () => {
     },
     {
       title: 'URL rút gọn',
+      
       dataIndex: 'shortLink',
       key: 'shortLink',
       ellipsis: true,
       width: '18.28%',
-      render: (HyperLink) => (
-        <a href={HyperLink} target="_blank" rel="noreferrer">
+      render: (HyperLink, record) => (
+        <a href={HyperLink} target="_blank" rel="noreferrer"
+          onClick={(e) => {
+            if (record.status === false) {
+              e.preventDefault();
+              message.error('Shortlink đã hết hạn, không thể mở!');
+            }
+          }}
+        >
           {HyperLink}
         </a>
-      ),
+        ),
     },
     {
       title: 'Ngày cập nhật',
@@ -88,14 +98,23 @@ const ListShortLink = () => {
       className: 'action-column',
       render: (date) => (date ? dayjs(date).format('HH:mm DD/MM/YYYY') : 'null'),
       width: '12%',
+      sorter: (a, b) => dayjs(a.createAt).unix() - dayjs(b.createAt).unix(), 
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Ngày hết hạn',
       dataIndex: 'expiry',
       key: 'expiry',
       className: 'action-column',
-      render: (date) => (date ? dayjs(date).format(' DD/MM/YYYY') : 'null'),
+      render: (date) => (date ? dayjs(date).format(' DD/MM/YYYY') : 'Vô thời hạn'),
       width: '12%',
+      sorter: (a, b) => {
+        if (!a.expiry && !b.expiry) return 0;
+        if (!a.expiry) return 1; 
+        if (!b.expiry) return -1;
+        return dayjs(a.expiry).unix() - dayjs(b.expiry).unix();
+      },
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Người chỉnh sửa',
@@ -105,9 +124,17 @@ const ListShortLink = () => {
     },
     {
       title: 'Trạng Thái',
-      dataIndex: 'userName',
-      key: 'userName',
+      dataIndex: 'status',
+      className: 'action-column',
+      key: 'status',
       width: '8%',
+      render: (status) => (
+        <span className={status ? 'status-active' : 'status-expired'}>
+          {status ? 'Hoạt động' : 'Quá Hạn'}
+        </span>
+      ),
+      sorter: (a, b) => (a.status === b.status ? 0 : a.status ? -1 : 1),
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Chức Năng',
@@ -120,7 +147,7 @@ const ListShortLink = () => {
             <CopyTwoTone twoToneColor="#818582"  />
           </a>
           <a onClick={() => showModal(record)}>
-            <EditFilled/>
+            <EditTwoTone twoToneColor="#2d6ed6"/>
           </a>
           <a onClick={() => showDeleteConfirm(record)}>
             <DeleteTwoTone twoToneColor="#ed0505" />
@@ -253,6 +280,10 @@ const ListShortLink = () => {
     setCreateModal(false);
   };
     const copyToClipboard = (record) => {
+      if (record.status === false) {
+        message.error('Shortlink đã hết hạn, không thể sao chép!');
+        return;
+      }
     if (record) {
       navigator.clipboard.writeText(record.shortLink)
         .then(() => {
@@ -323,7 +354,7 @@ const ListShortLink = () => {
               enterButton="Tìm kiếm"
               size="middle"
               onSearch={handleSearch}
-              onChange={(e) => setSearchText(e.target.value)}
+              // onChange={(e) => setSearchText(e.target.value)}
               style={{ width: 300 }}
             />
             <Button type="primary" className="LSL_search-bar-Create"onClick={showCreateModal}>
@@ -339,6 +370,7 @@ const ListShortLink = () => {
           columns={columns}
           dataSource={filteredData}
           bordered
+          rowClassName={(record) => (record.status === false ? 'row-disabled' : '')}
           pagination={{
             ...pagination,
             showTotal: (total) => `Tổng số: ${total}`, 

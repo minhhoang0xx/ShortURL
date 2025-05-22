@@ -17,6 +17,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(false)
   const [isChecked, setIsChecked] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
   const dateFormat = 'DD/MM/YYYY';
 
   useEffect(() => {
@@ -66,11 +67,14 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       const linkShort = `${data.domain}/${data.alias}`;
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
       data.qrCode = qr;
+      data.status = true;
+      data.status = data.expiry && new Date(data.expiry) < new Date() ? false : true;
       const response = await ShortUrlService.createShortLink(data)
       if (response && response.shortLink) {
         message.success(`Tạo thành công!`);
         setShortUrl(linkShort);
         setQrLink(qr);
+        setIsExpired(data.expiry && new Date(data.expiry) < new Date());
         console.log("QR Link:", qrLink);
         onCreate()
       }
@@ -87,7 +91,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
     setLoading(false)
   };
   const copyToClipboard = () => {
-    if (shortUrl) {
+    if (shortUrl && !isExpired) {
       navigator.clipboard.writeText(shortUrl)
         .then(() => {
           message.success('Link đã được sao chép!');
@@ -107,6 +111,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
     form.resetFields();
     setShortUrl("");
     setQrLink("");
+    setIsChecked(false);
     setIsChecked(false);
   }
   const handleCancel = () => {
@@ -156,7 +161,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
                 rules={[{ required: true, message: 'Vui lòng chọn domain!' }]}
               >
 
-                <Select placeholder="Chọn Dự án" style={{ width: '50%' }} >
+                <Select placeholder="Chọn Dự án" style={{ width: '30%' }} >
                   {domains.map((domain) => (
                     <Select.Option key={domain.id} value={domain.link}>
                       {domain.name}
@@ -179,7 +184,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
                   }
                 ]}
               >
-                <Input placeholder="Tên đường dẫn - Alias" style={{ width: '50%' }} />
+                <Input placeholder="Tên đường dẫn - Alias" style={{ width: '70%' }} />
               </Form.Item>
             </Space.Compact>
           </Form.Item>
@@ -230,7 +235,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
           <Form.Item label="Kết quả:" className="CSL_form-result">
             <div className="CSL_result">
               <div className="CSL_short-url">
-                {shortUrl}
+                {shortUrl} {isExpired && <span style={{ color: 'red' }}>(Quá Hạn)</span>}
               </div>
               <div className="CSL_qr-code" >
                 {qrLink && <img src={qrLink} alt="QR Code" disabled={loading} />}

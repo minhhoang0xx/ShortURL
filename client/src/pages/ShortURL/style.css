@@ -220,6 +220,37 @@ body {
 .ant-form-item{
     margin-bottom: 10px;
 }
+.status-active {
+    padding: 1px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: white;
+    font-weight: bold;
+    background-color: #0058A6; 
+    display: inline-block;
+    text-align: center;
+    /* min-width: 80px; */
+  }
+  
+  .status-expired {
+    padding: 1px 14px;
+    font-size: 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    color: white;
+    background-color: #F03939;
+    display: inline-block;
+    text-align: center;
+    /* min-width: 80px; */
+  }
+  .row-disabled {
+    /* background-color: #f5f5f5 !important; */
+    color: #999 !important;
+  }
+  .row-disabled a{
+    color: #999 !important;
+  }
+  
 
 /* end Create Link */
 

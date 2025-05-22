@@ -13,5 +13,6 @@
 		public string? AndroidLink { get; set; }
 		public string? CreatedByUser { get; set; }
 		public DateTime? Expiry { get; set; }
+		public bool Status { get; set; } = true;
 	}
 }
