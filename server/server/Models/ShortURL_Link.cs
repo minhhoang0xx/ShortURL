@@ -19,6 +19,7 @@ namespace server.Models
 		public string? IosLink { get; set; }
 		public string? AndroidLink { get; set; }
 		public string? CreatedByUser { get; set; }
+		public DateTime? Expiry {  get; set; }
 
 	}
 }

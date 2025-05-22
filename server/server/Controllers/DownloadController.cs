@@ -40,6 +40,7 @@ namespace server.Controllers
 					worksheet.Cells[1, 5].Value = "ShortLink";
 					worksheet.Cells[1, 6].Value = "Ngày cập nhật";
 					worksheet.Cells[1, 7].Value = "Người cập nhật";
+					worksheet.Cells[1, 8].Value = "Ngày hết hạn";
 					int row = 2;
 					int index = 1;
 					foreach (var url in shortUrls)
@@ -51,6 +52,7 @@ namespace server.Controllers
 						worksheet.Cells[row, 5].Value = $"{url.Domain}/{url.Alias}";
 						worksheet.Cells[row, 6].Value = url.CreateAt.ToString("HH:mm dd/MM/yyyy");
 						worksheet.Cells[row, 7].Value = url.CreatedByUser;
+						worksheet.Cells[row, 8].Value = url.Expiry; 
 						row++;
 					}
 					worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();

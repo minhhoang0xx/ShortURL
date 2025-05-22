@@ -40,7 +40,9 @@ namespace server.Controllers
 				checkOS = url.CheckOS,
 				iosLink = url.IosLink,
 				androidLink = url.AndroidLink,
-				userName = url.CreatedByUser ?? "unknow"
+				userName = url.CreatedByUser ?? "unknow",
+				expiry = url.Expiry
+
 			});
 
 			return Ok(result);
@@ -74,7 +76,8 @@ namespace server.Controllers
 				checkOS = url.CheckOS,
 				iosLink = url.IosLink,
 				androidLink = url.AndroidLink,
-				createdByUser = url.CreatedByUser
+				createdByUser = url.CreatedByUser,
+				expiry = url.Expiry
 			});
 		}
 
@@ -104,15 +107,23 @@ namespace server.Controllers
 			{
 				shortCode = GenerateRandomURL();
 			}else{
-				var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == shortCode);
-				if (existingUrl != null)
+				var existingAlias = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == shortCode && x.Domain == request.Domain);
+				if (existingAlias != null  )
 				{
 					return BadRequest(new ErrorResponse
 					{
 						ErrorCode = "ALIAS_EXISTED",
-						ErrorMessage = "Alias này đã được sử dụng trước đó!"
+						ErrorMessage = "Alias này đã được sử dụng trước đó cho dự án này!"
 					});
 				}
+			}
+			if (request.Expiry.HasValue && request.Expiry < DateTime.Now)
+			{
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "INVALID_EXPIRY_DATE",
+					ErrorMessage = "Ngày hết hạn không được nhỏ hơn ngày hiện tại!"
+				});
 			}
 			var shortUrl = new ShortURL_Link
 			{
@@ -125,7 +136,8 @@ namespace server.Controllers
 				CheckOS = request.CheckOS,
 				IosLink = request.IosLink,
 				AndroidLink = request.AndroidLink,
-				CreatedByUser = request.CreatedByUser
+				CreatedByUser = request.CreatedByUser,
+				Expiry = request.Expiry
 			};
 			_context.ShortUrls.Add(shortUrl);
 			await _context.SaveChangesAsync();
@@ -182,7 +194,7 @@ namespace server.Controllers
 			{
 				return BadRequest(new ErrorResponse
 				{
-					ErrorCode = "ORIGINALURL_NOT_EXISTED!",
+					ErrorCode = "ORIGINALURL_NOT_EXISTED!", 
 					ErrorMessage = "URL gốc không tồn tại!"
 				});
 			}
@@ -204,18 +216,25 @@ namespace server.Controllers
 				shortCode = GenerateRandomURL();
 			}
 			// Neu shortCode khac voi alias hien tai
-			if (url.Alias != shortCode)
-			{
+			
 				// Kiem tra neu alias moi da ton tai
-				var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == shortCode );
-				if (existingUrl != null)
-				{
-					return BadRequest(new ErrorResponse
+			var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == shortCode && x.Domain == request.Domain && x.OriginalUrl != url.OriginalUrl);
+			if (existingUrl != null)
+			{
+				return BadRequest(new ErrorResponse
 					{
-						ErrorCode = "ALIAS_EXISTED",
-						ErrorMessage = "Alias này đã được sử dụng trước đó!"
-					});
-				}
+					ErrorCode = "ALIAS_EXISTED",
+					ErrorMessage = "Alias này đã được sử dụng trước đó cho dự án này!"
+				});
+			}
+			
+			if (request.Expiry.HasValue && request.Expiry < DateTime.Now)
+			{
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "INVALID_EXPIRY_DATE",
+					ErrorMessage = "Ngày hết hạn không được nhỏ hơn ngày hiện tại!"
+				});
 			}
 
 			url.Alias = shortCode;
@@ -227,6 +246,7 @@ namespace server.Controllers
 			url.CheckOS = request.CheckOS;
 			url.AndroidLink = request.AndroidLink;
 			url.IosLink = request.IosLink;
+			url.Expiry = request.Expiry;
 
 			_context.ShortUrls.Update(url);
 			await _context.SaveChangesAsync();
