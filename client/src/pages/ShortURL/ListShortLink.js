@@ -1,4 +1,4 @@
-import { Layout, Table, Input, Button, Select, Space, message, Spin } from 'antd';
+import { Layout, Table, Input, Button, Select, Space, message, Spin, QRCode } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -58,6 +58,7 @@ const ListShortLink = () => {
       width: '11.3%',
       sorter: (a, b) => a.alias.localeCompare(b.alias),
       sortDirections: ['ascend', 'descend'],
+      showSorterTooltip: false,
     },
     {
       title: 'URL gốc',
@@ -95,17 +96,20 @@ const ListShortLink = () => {
       title: 'Ngày cập nhật',
       dataIndex: 'createAt',
       key: 'createAt',
+      showSorterTooltip: false,
       className: 'action-column',
       render: (date) => (date ? dayjs(date).format('HH:mm DD/MM/YYYY') : 'null'),
       width: '12%',
       sorter: (a, b) => dayjs(a.createAt).unix() - dayjs(b.createAt).unix(), 
       sortDirections: ['ascend', 'descend'],
+      defaultSortOrder: 'descend',
     },
     {
       title: 'Ngày hết hạn',
       dataIndex: 'expiry',
       key: 'expiry',
       className: 'action-column',
+      showSorterTooltip: false,
       render: (date) => (date ? dayjs(date).format(' DD/MM/YYYY') : 'Vô thời hạn'),
       width: '12%',
       sorter: (a, b) => {
@@ -118,14 +122,15 @@ const ListShortLink = () => {
     },
     {
       title: 'Người chỉnh sửa',
-      dataIndex: 'userName',
-      key: 'userName',
+      dataIndex: 'createdByUser',
+      key: 'createdByUser',
       width: '12%',
     },
     {
       title: 'Trạng Thái',
       dataIndex: 'status',
       className: 'action-column',
+      showSorterTooltip: false,
       key: 'status',
       width: '8%',
       render: (status) => (
@@ -164,7 +169,7 @@ const ListShortLink = () => {
       const urls = await ShortUrlService.getAllLink();
       const urlfetch = urls.$values;
       console.log('Data từ API:', urls);
-      const formattedData = urlfetch.map((url) => ({ ...url, key: url.id }));
+      const formattedData = urlfetch.map((url) => ({ ...url, key: url.id}));
       setData(formattedData);
       setPagination((prev) => ({ ...prev, total: formattedData.length }));
       filterData(formattedData, selectedProject, searchText);
@@ -302,27 +307,35 @@ const ListShortLink = () => {
   const handleExportExcel = async () => {
     setLoading(true);
     try {
-      if (filteredData.length === 0) {
-        message.warning('Không có dữ liệu để xuất!');
-        setLoading(false);
-        return;
-      }
-      const blob = await DownloadService.download(filteredData);
-      console.log('excel', blob);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Excel.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
+        if (filteredData.length === 0) {
+            message.warning('Không có dữ liệu để xuất!');
+            setLoading(false);
+            return;
+        }
+        console.log('dowload', filteredData);
+        const response = await DownloadService.download(filteredData);
+
+        const blob = response.data;
+        const contentDisposition = response.headers['content-disposition'];
+        let fileName = `ShortURL_${dayjs().format('YYYY_M_D_HH_mm_ss')}.xlsx`; 
+        if (contentDisposition && contentDisposition.includes('attachment; filename=')) {
+            fileName = contentDisposition.split('filename=')[1].replace(/"/g, '');
+        }
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Export failed:', error);
-      message.error('Xuất Excel thất bại!');
+        console.error('Xuất file thất bại:', error);
+        message.error(`Xuất Excel thất bại!`);
     }
     setLoading(false);
-  };
+};
 
   const handleTableChange = (newPagination) => {
     setPagination({

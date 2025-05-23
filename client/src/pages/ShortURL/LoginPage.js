@@ -1,9 +1,13 @@
+
+
 import { Button, Checkbox, Form, Input, message } from "antd";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import * as AuthenticationService from "../../services/AuthenticationService";
 import "../ShortURL/style.css";
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import Password from "antd/es/input/Password";
 
 const LoginPage = () => {
     const location = useLocation();
@@ -15,25 +19,29 @@ const LoginPage = () => {
     const [captchaToken, setCaptchaToken] = useState(null);
     const recaptchaRef = React.useRef(null);
 
-
     useEffect(() => {
         const storedAttempts = localStorage.getItem("login_attempts");
         if (storedAttempts) {
-                const parsed = JSON.parse(storedAttempts);
-                const now = Date.now();
-                if (parsed.expiry && now < parsed.expiry) {
-                    setAttempts(parsed.value);
-                    if (parsed.value >= 3) {    
+            const parsed = JSON.parse(storedAttempts);
+            const now = Date.now();
+            if (parsed.expiry && now < parsed.expiry) {
+                setAttempts(parsed.value);
+                if (parsed.value >= 3) {
                     setShowCaptcha(true);
-                    }   
-                } else {
-                    localStorage.removeItem("login_attempts");
-                    setAttempts(0);
-                    setShowCaptcha(false);
                 }
+            } else {
+                localStorage.removeItem("login_attempts");
+                setAttempts(0);
+                setShowCaptcha(false);
+            }
         }
-    }, []); 
-    
+        const rememberedUser = localStorage.getItem('rememberedUser');
+        if (rememberedUser) {
+            const { UserName, Password } = JSON.parse(rememberedUser);
+            form.setFieldsValue({ UserName,Password, remember: true });
+        }
+    }, []);
+
     const handleNavigateRegister = () => {
         navigate('/Register');
     };
@@ -51,11 +59,16 @@ const LoginPage = () => {
             console.log("dataLogin", loginData);
             const response = await AuthenticationService.Login(loginData);
             setAttempts(response.attempts);
-            console.log('submit timessssss', attempts)
+            console.log('submit timessssss', attempts);
             if (response) {
                 message.success(response.message);
                 localStorage.setItem('token', response.token);
-                localStorage.removeItem('login_attempts')
+                localStorage.removeItem('login_attempts');
+                if (data.remember) {
+                    localStorage.setItem('rememberedUser', JSON.stringify({ UserName: data.UserName, Password: data.Password }));
+                } else {
+                    localStorage.removeItem('rememberedUser');
+                }
                 navigate('/ShortUrl');
                 setShowCaptcha(false);
                 setCaptchaToken(null);
@@ -65,8 +78,8 @@ const LoginPage = () => {
             }
         } catch (error) {
             let err = "Đăng nhập thất bại!";
-            setAttempts(error.response?.data?.attempts)
-            console.log('submit', attempts)
+            setAttempts(error.response?.data?.attempts);
+            console.log('submit', attempts);
             const expiryTime = Date.now() + 60 * 60 * 1000;
             localStorage.setItem("login_attempts", JSON.stringify({ value: error.response?.data?.attempts, expiry: expiryTime }));
             if (error.response?.data?.errorMessage) {
@@ -79,7 +92,7 @@ const LoginPage = () => {
                     }
                 }
             }
-            console.log('ERR', error)
+            console.log('ERR', error);
             message.error(err);
         } finally {
             setLoading(false);
@@ -91,42 +104,39 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="login-container">
-            <div className="login-form">
-                <h2 className="login-title">Đăng Nhập</h2>
+        <div className="login-page-container">
+            <div className="login-form-container">
+                <div className="login-form-container-logo">
+                    <img src="/logo.png" alt="Logo BA GPS" />
+                </div>
+                <h2 className="login-title">Đăng nhập hệ thống</h2>
                 <Form
                     name="SignIn"
-                    labelCol={{ span: 5 }}
-                    wrapperCol={{ span: 19 }}
-                    style={{ maxWidth: '70%', width: '70%' }}
                     initialValues={{ remember: true }}
                     onFinish={onFinish}
                     onFinishFailed={onFinishFailed}
                     form={form}
                     autoComplete="off"
+                    className="login-form"
                 >
+                    <div className="form-label">Tài khoản</div>
                     <Form.Item
-                        label="Tên đăng nhập:"
                         name="UserName"
-                        rules={[
-                            { required: true, message: 'Vui lòng nhập tên tài khoản!' }
-                        ]}
+                        rules={[{ required: true, message: 'Vui lòng nhập tên tài khoản!' }]}
                     >
-                        <Input />
+                        <Input placeholder="Nhập tên đăng nhập" prefix={<UserOutlined />} />
                     </Form.Item>
 
+                    <div className="form-label">Mật khẩu</div>
                     <Form.Item
-                        label="Mật khẩu"
                         name="Password"
-                        rules={[
-                            { required: true, message: 'Vui lòng nhập mật khẩu!' }
-                        ]}
+                        rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
                     >
-                        <Input.Password autoComplete="current-password"/>
+                        <Input.Password placeholder="Nhập mật khẩu" prefix={<LockOutlined />} autoComplete="current-password" />
                     </Form.Item>
 
                     {showCaptcha && (
-                        <Form.Item wrapperCol={{ offset: 5, span: 19 }}>
+                        <Form.Item>
                             <ReCAPTCHA
                                 ref={recaptchaRef}
                                 sitekey={process.env.REACT_APP_CAPTCHA_KEY}
@@ -135,41 +145,23 @@ const LoginPage = () => {
                         </Form.Item>
                     )}
 
-                    <Form.Item
-                        name="remember"
-                        valuePropName="checked"
-                        wrapperCol={{ offset: 5, span: 19 }}
-                        className="checkbox"
-                    >
+                    <Form.Item name="remember" valuePropName="unchecked">
                         <Checkbox>Ghi nhớ tôi</Checkbox>
-                        {/* <p>
-                            Không có tài khoản?{' '}
-                            <span className="register-link" onClick={handleNavigateRegister}>
-                                Đăng ký
-                            </span>
-                        </p> */}
                     </Form.Item>
 
-                    <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
+                    <Form.Item className="submit">
                         <Button
                             type="primary"
                             htmlType="submit"
                             className="submit-button"
-                            loading={loading} // Hiển thị loading trên nút
+                            loading={loading}
                         >
                             Đăng nhập
-                        </Button>
-                        <Button
-                            color="default"
-                            variant="filled"
-                            className="back-button"
-                            onClick={handleNavigateHome}
-                        >
-                            Trang chủ
                         </Button>
                     </Form.Item>
                 </Form>
             </div>
+            <div className="login-background"></div>
         </div>
     );
 };

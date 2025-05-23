@@ -41,7 +41,7 @@ namespace server.Controllers
 				checkOS = url.CheckOS,
 				iosLink = url.IosLink,
 				androidLink = url.AndroidLink,
-				userName = url.CreatedByUser ?? "unknow",
+				CreatedByUser = url.CreatedByUser ?? "unknow",
 				expiry = url.Expiry,
 				status = url.Expiry.HasValue && url.Expiry < DateTime.Now ? false : url.Status
 

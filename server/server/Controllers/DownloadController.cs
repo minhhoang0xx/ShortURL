@@ -1,10 +1,14 @@
-﻿using Azure.Core;
+﻿
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using server.Data;
 using server.Models;
+using OfficeOpenXml.Style;
+using System.Collections.Generic;
+using System.IO;
+using System.Drawing;
 
 namespace server.Controllers
 {
@@ -32,16 +36,46 @@ namespace server.Controllers
 				using (var package = new ExcelPackage())
 				{
 					var worksheet = package.Workbook.Worksheets.Add("ShortUrls");
+					// Tiêu đề Form
+					worksheet.Cells[1, 1].Value = "SHORT URLs";
+					worksheet.Cells[1, 1, 1, 10].Merge = true; 
+					worksheet.Cells[1, 1].Style.Font.Name = "Times New Roman";
+					worksheet.Cells[1, 1].Style.Font.Size = 16;
+					worksheet.Cells[1, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+					worksheet.Cells[1, 1].Style.Font.Bold = true;
+					worksheet.Cells[1, 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
+					worksheet.Cells[1, 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(167, 200, 250));
+					worksheet.Cells[1, 1].Style.Border.BorderAround(ExcelBorderStyle.Medium);
 
-					worksheet.Cells[1, 1].Value = "STT";
-					worksheet.Cells[1, 2].Value = "Dự án";
-					worksheet.Cells[1, 3].Value = "Tên đường dẫn";
-					worksheet.Cells[1, 4].Value = "URL gốc";
-					worksheet.Cells[1, 5].Value = "ShortLink";
-					worksheet.Cells[1, 6].Value = "Ngày cập nhật";
-					worksheet.Cells[1, 7].Value = "Người cập nhật";
-					worksheet.Cells[1, 8].Value = "Ngày hết hạn";
-					int row = 2;
+					worksheet.Cells[2, 1].Value = "STT";
+					worksheet.Cells[2, 2].Value = "Dự án";
+					worksheet.Cells[2, 3].Value = "Tên đường dẫn";
+					worksheet.Cells[2, 4].Value = "URL gốc";
+					worksheet.Cells[2, 5].Value = "ShortLink";
+					worksheet.Cells[2, 6].Value = "QrCode";
+					worksheet.Cells[2, 7].Value = "Ngày cập nhật";
+					worksheet.Cells[2, 8].Value = "Ngày hết hạn";
+					worksheet.Cells[2, 9].Value = "Người cập nhật";
+					worksheet.Cells[2, 10].Value = "Trạng thái";
+
+
+					var headerRange = worksheet.Cells[2, 1, 2, 10];
+					headerRange.Style.Font.Name = "Times New Roman";
+					headerRange.Style.Font.Size = 12;
+					headerRange.Style.Font.Bold = true;
+					headerRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+					headerRange.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+					headerRange.Style.Border.BorderAround(ExcelBorderStyle.Thin);
+					headerRange.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+					headerRange.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+					headerRange.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+					headerRange.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+
+					worksheet.Column(4).Width = 50;
+					worksheet.Column(5).Width = 30;
+					worksheet.Column(6).Width = 20;
+
+					int row = 3;
 					int index = 1;
 					foreach (var url in shortUrls)
 					{
@@ -50,16 +84,58 @@ namespace server.Controllers
 						worksheet.Cells[row, 3].Value = url.Alias;
 						worksheet.Cells[row, 4].Value = url.OriginalUrl;
 						worksheet.Cells[row, 5].Value = $"{url.Domain}/{url.Alias}";
-						worksheet.Cells[row, 6].Value = url.CreateAt.ToString("HH:mm dd/MM/yyyy");
-						worksheet.Cells[row, 7].Value = url.CreatedByUser;
-						worksheet.Cells[row, 8].Value = url.Expiry; 
+						worksheet.Cells[row, 6].Value = url.QrCode;
+						worksheet.Cells[row, 7].Value = url.CreateAt.ToString("HH:mm dd/MM/yyyy");
+						worksheet.Cells[row, 8].Value = url.Expiry?.ToString("00:00 dd/MM/yyyy") ?? "Vô thời hạn";
+						worksheet.Cells[row, 9].Value = url.CreatedByUser;
+						worksheet.Cells[row, 10].Value = url.Status ? "Hoạt động" : "Quá Hạn"; ;
+		
+
+						// căn chỉnh thông tin
+						worksheet.Cells[row, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+						worksheet.Cells[row, 3].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+						worksheet.Cells[row, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+						worksheet.Cells[row, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+						worksheet.Cells[row, 6].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+						worksheet.Cells[row, 7].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+						worksheet.Cells[row, 8].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+						worksheet.Cells[row, 9].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+						worksheet.Cells[row, 10].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+						if (!url.Status)
+						{
+							worksheet.Cells[row, 10].Style.Font.Color.SetColor(System.Drawing.Color.Red);
+						}
+
+						// Đặt font cho dữ liệu
+						worksheet.Cells[row, 1, row, 10].Style.Font.Name = "Times New Roman";
+						worksheet.Cells[row, 1, row, 10].Style.Font.Size = 10;
+						worksheet.Cells[row, 1, row, 10].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+						worksheet.Cells[row, 1, row, 10].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+						worksheet.Cells[row, 1, row, 10].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+
 						row++;
 					}
-					worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+				
+					for (int col = 1; col <= 10; col++)
+					{
+						if (col != 4 && col != 6 && col != 5) 
+							worksheet.Column(col).AutoFit();
+					}
+					var dataRange = worksheet.Cells[2, 1, row - 1, 10];
+					dataRange.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+					dataRange.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+					dataRange.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+					dataRange.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+
+					string timestamp = DateTime.Now.ToString("yyyy_M_d_HH_mm_ss");
+					string fileName = $"ShortURL_{timestamp}.xlsx";
+
 					var stream = new MemoryStream();
 					package.SaveAs(stream);
 					stream.Position = 0;
-					return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
 				}
 			}	
             catch (Exception ex)
