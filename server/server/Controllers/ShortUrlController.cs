@@ -38,12 +38,12 @@ namespace server.Controllers
 				shortLink = $"{url.Domain}/{url.Alias}",
 				createAt = url.CreateAt,
 				qrCode = url.QrCode,
-				checkOS = url.CheckOS,
+				checkOS = url.CheckOS ?? false,
 				iosLink = url.IosLink,
 				androidLink = url.AndroidLink,
 				CreatedByUser = url.CreatedByUser ?? "unknow",
 				expiry = url.Expiry,
-				status = url.Expiry.HasValue && url.Expiry < DateTime.Now ? false : url.Status
+				status = url.Expiry.HasValue && url.Expiry < DateTime.Now ? false : (url.Status ?? true) 
 
 			});
 
@@ -81,12 +81,12 @@ namespace server.Controllers
 				shortLink,
 				createAt = url.CreateAt,
 				qrCode = url.QrCode,
-				checkOS = url.CheckOS,
+				checkOS = url.CheckOS ?? false,
 				iosLink = url.IosLink,
 				androidLink = url.AndroidLink,
 				createdByUser = url.CreatedByUser,
 				expiry = url.Expiry,
-				status = url.Status
+				status = url.Status ?? true
 			});
 		}
 
@@ -181,7 +181,7 @@ namespace server.Controllers
 					ErrorMessage = "Shortlink đã hết hạn!"
 				});
 			}
-			if (!url.Status)
+			if (url.Status == false)
 			{
 				return BadRequest(new ErrorResponse
 				{
@@ -189,17 +189,17 @@ namespace server.Controllers
 					ErrorMessage = "Shortlink không còn hoạt động!"
 				});
 			}
-			if (url.CheckOS)
+			if (url.CheckOS == true)
 			{
 				string UserAgent = Request.Headers["User-Agent"].ToString().ToUpper();
 				if (UserAgent.Contains("IPHONE") || UserAgent.Contains("IPAD") || UserAgent.Contains("MACINTOSH") 
 					|| UserAgent.Contains("WATCH"))
 				{
-					return Ok(url.IosLink);
+					return Ok(url.IosLink ?? url.OriginalUrl);
 				}
 				else if (UserAgent.Contains("ANDROID"))
 				{
-					return Ok(url.AndroidLink) ;
+					return Ok(url.AndroidLink ?? url.OriginalUrl) ;
 				}
 			}
 			return Ok(url.OriginalUrl);
@@ -246,7 +246,7 @@ namespace server.Controllers
 			}
 			// Neu shortCode khac voi alias hien tai
 			// Kiem tra neu alias moi da ton tai
-			var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == shortCode && x.Domain == request.Domain && x.OriginalUrl != url.OriginalUrl);
+			var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == shortCode && x.Domain == request.Domain && x.ShortId != id);
 			if (existingUrl != null)
 			{
 				return BadRequest(new ErrorResponse
@@ -255,16 +255,6 @@ namespace server.Controllers
 					ErrorMessage = "Alias này đã được sử dụng trước đó cho dự án này!"
 				});
 			}
-			
-			//if (request.Expiry.HasValue && request.Expiry < DateTime.Now)
-			//{
-			//	return BadRequest(new ErrorResponse
-			//	{
-			//		ErrorCode = "INVALID_EXPIRY_DATE",
-			//		ErrorMessage = "Ngày hết hạn không được nhỏ hơn ngày hiện tại!"
-			//	});
-			//}
-
 			url.Alias = shortCode;
 			url.ProjectName = request.ProjectName;
 			url.OriginalUrl = request.OriginalUrl;
@@ -276,7 +266,8 @@ namespace server.Controllers
 			url.AndroidLink = request.AndroidLink;
 			url.IosLink = request.IosLink;
 			url.Expiry = request.Expiry;
-			url.Status = request.Expiry.HasValue && request.Expiry < DateTime.Now ? false : true;
+			url.Status = request.Expiry.HasValue && request.Expiry < DateTime.Now ? false : (request.Status ?? true);
+
 
 			_context.ShortUrls.Update(url);
 			await _context.SaveChangesAsync();
