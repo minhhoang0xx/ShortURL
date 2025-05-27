@@ -50,14 +50,25 @@
         margin-bottom: 20px;
         display: flex;
         gap: 10px;
+        width: 100%;
     }
     .LSL_search-bar Button {
         background-color: #0747A6;
         min-width: 100%;
     }
-    /* .LSL_search-bar-Create{
-        background-color:#2FAFCB !important;
-    } */
+    .LSL_search-bar-domain {
+        width: 150px;
+    }
+    .LSL_search-bar-status {
+        width: 150px;
+    }
+    .LSL_search-bar-user{
+        width: 150px;
+    }
+    .LSL_search-bar-input{
+        width: 450px;
+    }
+
     .LSL_search-bar-Excel{
         background-color: white !important;
         color: #0747A6;
@@ -109,8 +120,16 @@
     .STT-column{
         text-align: center;
     }
-
-    
+    .row-highlight {
+        background-color: #d5f0fd !important; 
+      }
+      .cell-highlight {
+        background-color: #d5f0fd !important;
+      }
+      .ant-table-row:hover > .cell-highlight {
+        background-color: #FAFAFA !important; 
+      }
+  
     /* end List Link */
 
     /* start Create Link */
@@ -243,13 +262,16 @@
         text-align: center;
         /* min-width: 80px; */
     }
-    .row-disabled {
-        /* background-color: #f5f5f5 !important; */
+    /* .row-disabled {
         color: #999 !important;
-    }
-    .row-disabled a{
+    } */
+    /* .row-disabled a{
         color: #999 !important;
-    }
+    } */
+    .shortlink-disabled {
+        color: #999 !important;
+        cursor: not-allowed;
+      }
  
     
 
@@ -470,13 +492,4 @@
       
 
     }
-
-
-
-
-
-
-
-
-
 

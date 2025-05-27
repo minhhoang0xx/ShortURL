@@ -1,4 +1,4 @@
-import { Layout, Table, Input, Button, Select, Space, message, Spin, QRCode } from 'antd';
+import { Layout, Table, Input, Button, Select, Space, message, Spin, QRCode, DatePicker } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -13,6 +13,8 @@ import * as DomainService from '../../services/DomainService';
 import { jwtDecode } from 'jwt-decode';
 const { Content } = Layout;
 const { Option } = Select;
+const { RangePicker } = DatePicker
+const dateFormat = 'DD/MM/YYYY';
 
 const ListShortLink = () => {
   const navigate = useNavigate();
@@ -21,11 +23,15 @@ const ListShortLink = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [searchText, setSearchText] = useState('');
-  const [selectedProject, setSelectedProject] = useState('all');
   const [deleteModal, setDeleteModal] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState(null);
   const [createModal, setCreateModal] = useState(false);
   const [domains, setDomains] = useState([]);
+  const [dateRange, setDateRange] = useState([null, null]);
+  const [selectedProject, setSelectedProject] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedUser, setSelectedUser] = useState('all');
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -74,13 +80,14 @@ const ListShortLink = () => {
     },
     {
       title: 'URL rút gọn',
-      
+
       dataIndex: 'shortLink',
       key: 'shortLink',
       ellipsis: true,
       width: '18.28%',
       render: (HyperLink, record) => (
         <a href={HyperLink} target="_blank" rel="noreferrer"
+          className={record.status === false ? 'shortlink-disabled' : ''}
           onClick={(e) => {
             if (record.status === false) {
               e.preventDefault();
@@ -90,7 +97,7 @@ const ListShortLink = () => {
         >
           {HyperLink}
         </a>
-        ),
+      ),
     },
     {
       title: 'Ngày cập nhật',
@@ -98,11 +105,21 @@ const ListShortLink = () => {
       key: 'createAt',
       showSorterTooltip: false,
       className: 'action-column',
-      render: (date) => (date ? dayjs(date).format('HH:mm DD/MM/YYYY') : 'null'),
+      render: (date, record) => (
+        <span className={record.checkOS ? 'highlight-date' : ''}>
+          {date ? dayjs(date).format('HH:mm DD/MM/YYYY') : 'null'}
+        </span>
+      ),
       width: '12%',
-      sorter: (a, b) => dayjs(a.createAt).unix() - dayjs(b.createAt).unix(), 
+      sorter: (a, b) => dayjs(a.createAt).unix() - dayjs(b.createAt).unix(),
       sortDirections: ['ascend', 'descend'],
       defaultSortOrder: 'descend',
+      onCell: (record) => {
+        if (record.status === true && record.checkOS) {
+          return { className: 'cell-highlight' };
+        }
+        return {};
+      },
     },
     {
       title: 'Ngày hết hạn',
@@ -114,7 +131,7 @@ const ListShortLink = () => {
       width: '12%',
       sorter: (a, b) => {
         if (!a.expiry && !b.expiry) return 0;
-        if (!a.expiry) return 1; 
+        if (!a.expiry) return 1;
         if (!b.expiry) return -1;
         return dayjs(a.expiry).unix() - dayjs(b.expiry).unix();
       },
@@ -148,16 +165,16 @@ const ListShortLink = () => {
       className: 'action-column',
       render: (_, record) => (
         <Space size="middle">
-           <a onClick={() => copyToClipboard(record)}>
-            <CopyTwoTone twoToneColor="#818582"  />
+          <a onClick={() => copyToClipboard(record)}>
+            <CopyTwoTone twoToneColor="#818582" />
           </a>
           <a onClick={() => showModal(record)}>
-            <EditTwoTone twoToneColor="#2d6ed6"/>
+            <EditTwoTone twoToneColor="#2d6ed6" />
           </a>
           <a onClick={() => showDeleteConfirm(record)}>
             <DeleteTwoTone twoToneColor="#ed0505" />
           </a>
-         
+
         </Space>
       ),
     },
@@ -167,49 +184,105 @@ const ListShortLink = () => {
     setLoading(true);
     try {
       const urls = await ShortUrlService.getAllLink();
-      const urlfetch = urls.$values;
+      const urlfetch = urls.$values || urls;
       console.log('Data từ API:', urls);
-      const formattedData = urlfetch.map((url) => ({ ...url, key: url.id}));
+      const formattedData = urlfetch.map((url) => ({ ...url, key: url.id }));
       setData(formattedData);
+      setFilteredData(formattedData);
       setPagination((prev) => ({ ...prev, total: formattedData.length }));
-      filterData(formattedData, selectedProject, searchText);
+      // filterData(formattedData, selectedProject, searchText);
     } catch (error) {
       console.error('Failed to fetch data:', error);
+      message.error('Lấy dữ liệu thất bại!');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+  const fetchDomains = async () => {
+    try {
+      const response = await DomainService.getAll();
+      setDomains(response.$values.map((domain) => domain.name) || [])
+    } catch (error) {
+      console.error('Failed to fetch domains:', error);
+      message.error('Lấy danh sách dự án thất bại!');
+    } finally {
+      setLoading(false);
+    }
+  };
+  const fetchUsers = async () => {
+    try {
+      const response = await ShortUrlService.getAllLink();
+      const user = response.$values
+      const uniqueUsers = [
+        ...new Set(
+          user
+            .map((url) => url.createdByUser)
+            .filter((user) => user && user !== 'unknown')
+        ),
+      ];
+      setUsers(uniqueUsers);
+      console.log('user fetch', uniqueUsers)
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+      message.error('Lấy danh sách người dùng thất bại!');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const filterData = (sourceData, project, search) => {
+  const filterData = (sourceData) => {
     let result = [...sourceData];
-    if (project && project !== 'all') {
+    if (selectedProject && selectedProject !== 'all') {
       result = result.filter(
         (item) =>
-          item.projectName && item.projectName.toLowerCase() === project.toLowerCase()
+          item.projectName &&
+          item.projectName.toLowerCase() === selectedProject.toLowerCase()
       );
     }
-    if (search) {
+    if (selectedStatus && selectedStatus !== 'all') {
       result = result.filter(
-        (item) => item.alias && item.alias.toLowerCase().includes(search.toLowerCase())
+        (item) => item.status === (selectedStatus === 'active')
+      );
+    }
+    if (selectedUser && selectedUser !== 'all') {
+      result = result.filter(
+        (item) =>
+          item.createdByUser &&
+          item.createdByUser.toLowerCase() === selectedUser.toLowerCase()
+      );
+    }
+
+  if (Array.isArray(dateRange) && dateRange.length === 2 && dateRange[0] && dateRange[1]) {
+    const start = dayjs(dateRange[0]).startOf('day');
+    const end = dayjs(dateRange[1]).endOf('day');
+    result = result.filter(
+      (item) =>
+        item.createAt &&
+        dayjs(item.createAt).isValid() &&
+        dayjs(item.createAt).isAfter(start) &&
+        dayjs(item.createAt).isBefore(end)
+    );
+  }
+    if (searchText) {
+      result = result.filter(
+        (item) =>
+          item.alias && item.alias.toLowerCase().includes(searchText.toLowerCase())
       );
     }
     setFilteredData(result);
     setPagination((prev) => ({ ...prev, current: 1, total: result.length }));
+    if (result.length === 0) {
+      message.warning('Không tìm thấy kết quả!');
+    }
   };
 
-  const fetchDomains = async () => {
-    const response = await DomainService.getAll();
-    setDomains(response.$values.map((domain) => domain.name));
-  };
 
   useEffect(() => {
     fetchData();
     fetchDomains();
-  }, []);
+    fetchUsers();
 
-  useEffect(() => {
-    filterData(data, selectedProject, searchText);
-    console.log('pagination',pagination)
-  }, [selectedProject, searchText, data]);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
@@ -218,11 +291,13 @@ const ListShortLink = () => {
     }
   }, [navigate]);
 
+  const handleSearch = () => {
+    filterData(data);
+  };
+
   const showModal = (record) => {
     setSelectedRecord(record);
-    setLoading(true);
     setIsModalOpen(true);
-    setLoading(false);
   };
 
   const handleCancelUpdate = () => {
@@ -235,10 +310,8 @@ const ListShortLink = () => {
   };
 
   const showDeleteConfirm = (record) => {
-    setLoading(true);
     setRecordToDelete(record);
     setDeleteModal(true);
-    setLoading(false);
   };
 
   const handleConfirmDelete = async () => {
@@ -246,20 +319,17 @@ const ListShortLink = () => {
     try {
       await ShortUrlService.deleteShortLink(recordToDelete.id);
       setData((prevData) => prevData.filter((link) => link.id !== recordToDelete.id));
+      setFilteredData((prevData) => prevData.filter((link) => link.id !== recordToDelete.id));
       message.success('Xóa thành công!');
       setDeleteModal(false);
       setRecordToDelete(null);
       fetchData();
     } catch (error) {
-      let err = 'Xóa thất bại!';
-      if (error.response?.data.errorMessage) {
-        err = error.response.data.errorMessage;
-        message.error(err);
-      } else {
-        message.error(err);
-      }
+      const err = error.response?.data?.errorMessage || 'Xóa thất bại!';
+      message.error(err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleCancelDelete = () => {
@@ -267,14 +337,10 @@ const ListShortLink = () => {
     setRecordToDelete(null);
   };
 
-  const handleProjectChange = (value) => {
-    setSelectedProject(value);
-  };
+
 
   const showCreateModal = () => {
-    setLoading(true);
     setCreateModal(true);
-    setLoading(false);
   };
 
   const handleCreate = () => {
@@ -284,11 +350,11 @@ const ListShortLink = () => {
   const handleCancelCreate = () => {
     setCreateModal(false);
   };
-    const copyToClipboard = (record) => {
-      if (record.status === false) {
-        message.error('Shortlink đã hết hạn, không thể sao chép!');
-        return;
-      }
+  const copyToClipboard = (record) => {
+    if (record.status === false) {
+      message.error('Shortlink đã hết hạn, không thể sao chép!');
+      return;
+    }
     if (record) {
       navigator.clipboard.writeText(record.shortLink)
         .then(() => {
@@ -300,42 +366,40 @@ const ListShortLink = () => {
     }
   };
 
-  const handleSearch = (value) => {
-    setSearchText(value);
-  };
+
 
   const handleExportExcel = async () => {
     setLoading(true);
     try {
-        if (filteredData.length === 0) {
-            message.warning('Không có dữ liệu để xuất!');
-            setLoading(false);
-            return;
-        }
-        console.log('dowload', filteredData);
-        const response = await DownloadService.download(filteredData);
+      if (filteredData.length === 0) {
+        message.warning('Không có dữ liệu để xuất!');
+        setLoading(false);
+        return;
+      }
+      console.log('dowload', filteredData);
+      const response = await DownloadService.download(filteredData);
 
-        const blob = response.data;
-        const contentDisposition = response.headers['content-disposition'];
-        let fileName = `ShortURL_${dayjs().format('YYYY_M_D_HH_mm_ss')}.xlsx`; 
-        if (contentDisposition && contentDisposition.includes('attachment; filename=')) {
-            fileName = contentDisposition.split('filename=')[1].replace(/"/g, '');
-        }
+      const blob = response.data;
+      const contentDisposition = response.headers['content-disposition'];
+      let fileName = `ShortURL_${dayjs().format('YYYY_M_D_HH_mm_ss')}.xlsx`;
+      if (contentDisposition && contentDisposition.includes('attachment; filename=')) {
+        fileName = contentDisposition.split('filename=')[1].replace(/"/g, '');
+      }
 
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-        console.error('Xuất file thất bại:', error);
-        message.error(`Xuất Excel thất bại!`);
+      console.error('Xuất file thất bại:', error);
+      message.error(`Xuất Excel thất bại!`);
     }
     setLoading(false);
-};
+  };
 
   const handleTableChange = (newPagination) => {
     setPagination({
@@ -344,38 +408,80 @@ const ListShortLink = () => {
       pageSize: newPagination.pageSize,
     });
   };
-
+  const handleReset = () => {
+    setSelectedProject('all');
+    setSelectedStatus('all');
+    setSelectedUser('all');
+    setDateRange([null, null]);
+    setSearchText('');
+    setFilteredData(data);
+    setPagination((prev) => ({ ...prev, current: 1, total: data.length }));
+  };
   return (
     <Layout>
       <Content className="LSL_main-container">
         <div className="LSL_search-bar">
           <Space>
+          <Button type="primary" className="LSL_search-bar-Excel" onClick={handleReset}>
+              <a >Làm mới</a>
+            </Button>
+            <RangePicker
+              className='LSL_search-bar-time'
+              format={dateFormat}
+              value={dateRange}
+              onChange={(dates) => setDateRange(dates)}
+              placeholder={['Từ ngày', 'Đến ngày']} 
+            />
             <Select
-              defaultValue="all"
-              onChange={handleProjectChange}
-              style={{ width: 120 }}
+              value={selectedProject}
+              onChange={setSelectedProject}
+              className='LSL_search-bar-domain'
             >
-              <Option value="all">Tất cả dự án</Option>
+              <Option value="all">Dự án</Option>
               {domains.map((domain) => (
                 <Option key={domain} value={domain}>
                   {domain}
                 </Option>
               ))}
             </Select>
+            <Select
+              value={selectedStatus}
+              onChange={setSelectedStatus}
+              className='LSL_search-bar-status'
+            >
+              <Option value="all">Trạng thái</Option>
+              <Option value="active">Hoạt động</Option>
+              <Option value="expired">Quá Hạn</Option>
+            </Select>
+            <Select
+              value={selectedUser}
+              onChange={setSelectedUser}
+              className="LSL_search-bar-user"
+            >
+              <Option value="all">Người cập nhật</Option>
+              {users.map((user) => (
+                <Option key={user} value={user}>
+                  {user}
+                </Option>
+              ))}
+            </Select>
+
             <Input.Search
               placeholder="Tìm kiếm theo đường dẫn"
               enterButton="Tìm kiếm"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
               size="middle"
               onSearch={handleSearch}
-              // onChange={(e) => setSearchText(e.target.value)}
-              style={{ width: 300 }}
+              className='LSL_search-bar-input'
             />
-            <Button type="primary" className="LSL_search-bar-Create"onClick={showCreateModal}>
+            <Button type="primary" className="LSL_search-bar-Create" onClick={showCreateModal}>
               <a >Tạo mới</a>
             </Button>
-            <Button type="primary" className="LSL_search-bar-Excel"onClick={handleExportExcel}>
+            <Button type="primary" className="LSL_search-bar-Excel" onClick={handleExportExcel}>
               <a >Xuất Excel</a>
             </Button>
+           
           </Space>
         </div>
 
@@ -383,10 +489,12 @@ const ListShortLink = () => {
           columns={columns}
           dataSource={filteredData}
           bordered
-          rowClassName={(record) => (record.status === false ? 'row-disabled' : '')}
+          rowClassName={(record) => 
+            record.status === false ? 'row-disabled' : record.checkOS === true ? 'row-highlight' : ''
+          }
           pagination={{
             ...pagination,
-            showTotal: (total) => `Tổng số: ${total}`, 
+            showTotal: (total) => `Tổng số: ${total}`,
           }}
           onChange={handleTableChange}
           loading={loading}
