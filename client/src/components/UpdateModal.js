@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Button, Space, Select, message, Radio, Switch, Checkbox, DatePicker } from 'antd';
+import { Modal, Form, Input, Button, Space, Select, message, Radio, Switch, Checkbox, DatePicker, QRCode } from 'antd';
 import { Content } from 'antd/es/layout/layout';
 import dayjs from 'dayjs';
 import { CopyOutlined, EditOutlined, LinkOutlined } from '@ant-design/icons';
@@ -11,7 +11,7 @@ import { jwtDecode } from 'jwt-decode';
 const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const [form] = Form.useForm();
   const [shortUrl, setShortUrl] = useState("");
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const [qrLink, setQrLink] = useState("");
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(false)
@@ -63,7 +63,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     console.log('Received values:', data);
     setLoading(true)
     try {
-   
+
       const selectedDomain = domains.find(domain => domain.link === data.domain);
       data.projectName = selectedDomain.name
       data.checkOS = isChecked ? true : false;
@@ -111,6 +111,52 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     }
   };
 
+  const doDownload = (url, fileName) => {
+    setLoading(true)
+    try{
+      const a = document.createElement('a');
+      a.download = fileName;
+      a.href = url;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch{
+      message.error("Tải QR Code thất bại.")
+    }finally{
+      setLoading(false)
+    }
+
+  }
+  const downloadCanvasQRCode = () => {
+    const img = document.getElementById('qr-image');
+    if (!img) {
+      message.error('Không tìm thấy ảnh QR.');
+      return;
+    }
+    setLoading(true);
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.src = img.src;
+  
+    image.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = image.width;
+      canvas.height = image.height;
+  
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(image, 0, 0);
+  
+      const url = canvas.toDataURL('image/png');
+      const fileName =  `${shortUrl}.png`;
+      doDownload(url, fileName);
+    };
+  
+    image.onerror = () => {
+      console.error('Không tải được ảnh QR từ nguồn.');
+      setLoading(false);
+    };
+  };
+  
   const openLink = () => {
     if (shortUrl) {
       window.open(shortUrl, '_blank');
@@ -138,11 +184,11 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
         >
           <Form.Item
             name="originalUrl"
-            label="URL gốc"
+            label={<span>URL gốc <span style={{ color: 'red' }}>*</span></span>}
             rules={[{ required: true, message: 'Vui lòng nhập URL gốc!' },
-            { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!'}
+            { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
             ]}
-            
+
           >
             <Input disabled={isExpired} placeholder="Nhập URL gốc" />
           </Form.Item>
@@ -153,14 +199,12 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
           >
             <Space.Compact style={{ width: '100%' }}>
               <Form.Item
-               
                 name="domain"
-                label="Tên dự án"
+                label={<span>Domain <span style={{ color: 'red' }}>*</span></span>}
                 className="CSL_custom-link-domain"
-                noStyle
                 rules={[{ required: true, message: 'Vui lòng chọn Dự án!' }]}
               >
-                <Select  disabled={isExpired} placeholder="Chọn dự án" style={{ width: '50%' }}>
+                <Select disabled={isExpired} placeholder="Chọn dự án" >
                   {domains.map((domain) => (
                     <Select.Option key={domain.id} value={domain.link}>
                       {domain.name}
@@ -168,13 +212,15 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
                   ))}
                 </Select>
               </Form.Item>
-              <span style={{ color: '#000', margin: '0 10px', fontSize: '20px' }}>/</span>
+              <Form.Item label=" ">
+                <span style={{ color: '#000', margin: '0 10px', fontSize: '20px' }}>/</span>
+              </Form.Item>
               <Form.Item
-                
+
                 name="alias"
-                label="Tên đường dẫn-Alias"
+                label={<span>Tên đường dẫn-Alias <span style={{ color: 'red' }}>*</span></span>}
                 className="CSL_custom-link-alias"
-                noStyle
+
                 rules={[
                   { required: true, message: 'Vui lòng nhập Alias' },
                   { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' },
@@ -184,7 +230,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
                   }
                 ]}
               >
-                <Input disabled={isExpired} placeholder="Tên đường dẫn - Alias" style={{ width: '50%' }} />
+                <Input disabled={isExpired} placeholder="Tên đường dẫn - Alias" />
               </Form.Item>
             </Space.Compact>
           </Form.Item>
@@ -194,38 +240,38 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
             label="Hạn sử dụng liên kết:"
           >
             <DatePicker placeholder="DD-MM-YYYY" className="datePicker" format={dateFormat}
-        // disabledDate={(current) => current && current < dayjs().startOf('day')}
-        />
+            // disabledDate={(current) => current && current < dayjs().startOf('day')}
+            />
           </Form.Item>
-          <Form.Item  name="checkOS" className="checkOs">
-            <Checkbox disabled={isExpired} checked={isChecked} onClick={handleCheckOSChange}/>
+          <Form.Item name="checkOS" className="checkOs">
+            <Checkbox disabled={isExpired} checked={isChecked} onClick={handleCheckOSChange} />
             <label> Tạo link tải APP</label>
             {/* <Switch checked={isChecked} onClick={handleCheckOSChange} checkedChildren="CheckOS" unCheckedChildren="UnCheck"/> */}
           </Form.Item>
           {isChecked && (
             <Form.Item
               name="iosLink"
-              label="Link tới App Store"
+              label={<span>Link tới App Store <span style={{ color: 'red' }}>*</span></span>}
               rules={[{ required: true, message: "Vui lòng nhập URL App Store!" },
               { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
               ]}
             >
-              <Input placeholder="Nhập URL App Store" />
+              <Input disabled={isExpired} placeholder="Nhập URL App Store" />
             </Form.Item>
           )}
           {isChecked && (
             <Form.Item
               name="androidLink"
-              label="Link tới Google Play"
+              label={<span>Link tới Google Play <span style={{ color: 'red' }}>*</span></span>}
               rules={[{ required: true, message: "Vui lòng nhập URL Google Play!" },
               { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
               ]}
             >
-              <Input placeholder="Nhập URL Google Play" />
+              <Input disabled={isExpired} placeholder="Nhập URL Google Play" />
             </Form.Item>
           )}
           <Form.Item >
-            <Button  type="primary" htmlType="submit" disabled={loading} className="CSL_button-create">
+            <Button type="primary" htmlType="submit" disabled={loading} className="CSL_button-create">
               <EditOutlined /> Cập nhật
             </Button>
           </Form.Item>
@@ -236,7 +282,13 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
                 {shortUrl} {isExpired && <span style={{ color: 'red' }}>(Quá Hạn)</span>}
               </div>
               <div className="CSL_qr-code">
-                {qrLink && <img src={qrLink} disabled={loading} alt="QR Code" />}
+                {qrLink && (
+                  <>
+                    <img src={qrLink} disabled={loading} alt="QR Code" id="qr-image" style={{ maxWidth: 200 }} />
+                    {/* <QRCode value={shortUrl} icon="/logo.png"/> */}
+                    {/* <Button type="primary" disabled={loading} onClick={downloadCanvasQRCode}>Tải xuống</Button> */}
+                  </>
+                )}
               </div>
             </div>
           </Form.Item>

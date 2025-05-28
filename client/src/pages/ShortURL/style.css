@@ -54,7 +54,8 @@
     }
     .LSL_search-bar Button {
         background-color: #0747A6;
-        min-width: 100%;
+        width: 100px;
+        font-weight:500 ;
     }
     .LSL_search-bar-domain {
         width: 150px;
@@ -68,15 +69,31 @@
     .LSL_search-bar-input{
         width: 450px;
     }
+    .LSL_search-bar-Create{
+        background: #26B99A !important;
+    }
+    .LSL_search-bar-Create:hover{
+        background: #fff !important; 
+        color: #0747A6 !important;
+        border: 1px solid #0747A6 !important;
+    }
+    .LSL_search-bar-Search:hover{
+        background: #fff !important; 
+        color: #0747A6 !important;
+        border: 1px solid #0747A6 !important;
+    }
 
     .LSL_search-bar-Excel{
         background-color: white !important;
         color: #0747A6;
         border: 1px solid #0747A6;
-        font-weight: bold;
+        font-weight:500 ;
+        width: 100px;
     }
     .LSL_search-bar-Excel:hover{
-        background-color: #0747A6 !important;
+        background: #0747A6 !important; 
+        color: #fff !important;
+        border: none;
     
     }
     .LSL_shortlink-table {
@@ -128,6 +145,7 @@
       }
       .ant-table-row:hover > .cell-highlight {
         background-color: #FAFAFA !important; 
+        
       }
   
     /* end List Link */
@@ -181,10 +199,14 @@
         margin-bottom: 15px; 
         word-break: break-all;
     }
+    .CSL_qr-code{
+        display: inline-grid;
+    }
 
     .CSL_qr-code img {
         width: 150px;
         height: 150px;
+        padding-bottom: 10px;
     }
     .CSL_group-button{
         display: flex;
@@ -202,13 +224,12 @@
         width: 100%;
         background-color: #0747A6;
         color: #ffffff;
-        transition: background-color 0.3s ease-in-out;
     }
 
     .CSL_button-create:hover {
         background-color: #ffffff !important;
-        transform: scale(1.0005);
         color: #0747A6 !important;
+        border: 1px solid #0747A6;
     }
 
     .CSL_copy-btn { 
@@ -220,8 +241,8 @@
     }
     .CSL_copy-btn:hover{
         background-color: #ffffff !important;
-        transform: scale(1.0005);
         color: #0747A6 !important;
+        border: 1px solid #0747A6 !important;
     }
 
     .CSL_link-btn {
@@ -232,8 +253,21 @@
     }
     .CSL_link-btn:hover{
         background-color: #ffffff !important;
-        transform: scale(1.0005);
         color: #0747A6 !important;
+        border: 1px solid #0747A6 !important;
+    }
+    .CSL_custom-link-alias{
+        width: 70%;
+    }
+    .CSL_custom-link-domain{
+        width: 30%;
+        font-weight: 400;
+    }
+    .CSL_custom-link-alias label{
+        font-weight: 400;
+    }
+    .CSL_custom-link-domain label{
+        font-weight: 400;
     }
 
     .ant-form-item{
@@ -245,7 +279,7 @@
         font-size: 12px;
         color: white;
         font-weight: bold;
-        background-color: #0058A6; 
+        background-color: #0747A6; 
         display: inline-block;
         text-align: center;
         /* min-width: 80px; */
@@ -272,6 +306,9 @@
         color: #999 !important;
         cursor: not-allowed;
       }
+    .ant-form-item-label > label.ant-form-item-required::before {
+        display: none !important;
+    } 
  
     
 
@@ -421,10 +458,6 @@
     .submit-button:hover,
     .submit-button:focus {
         background-color: #053b8c;
-    }
-    :where(.css-dev-only-do-not-override-1v613y0).ant-btn-variant-solid:not(:disabled):not(.ant-btn-disabled):hover {
-        background: #053b8c;
-        color: #fff;
     }
 
     .login-background::before {

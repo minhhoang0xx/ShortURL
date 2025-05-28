@@ -1,4 +1,4 @@
-import { DatePickerProps,Button, Checkbox, DatePicker, Empty, Form, Input, Modal, Radio, Select, Space, Switch, message } from "antd";
+import { DatePickerProps, Button, Checkbox, DatePicker, Empty, Form, Input, Modal, Radio, Select, Space, Switch, message, QRCode } from "antd";
 import { CopyOutlined, LinkOutlined, PlusOutlined, SyncOutlined } from '@ant-design/icons';
 import { Content } from "antd/es/layout/layout";
 import dayjs from 'dayjs';
@@ -101,6 +101,51 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
         });
     }
   };
+  const doDownload = (url, fileName) => {
+    setLoading(true)
+    try {
+      const a = document.createElement('a');
+      a.download = fileName;
+      a.href = url;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {
+      message.error("Tải QR Code thất bại.")
+    } finally {
+      setLoading(false)
+    }
+
+  }
+  const downloadCanvasQRCode = () => {
+    const img = document.getElementById('qr-image');
+    if (!img) {
+      message.error('Không tìm thấy ảnh QR.');
+      return;
+    }
+    setLoading(true);
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.src = img.src;
+
+    image.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = image.width;
+      canvas.height = image.height;
+
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(image, 0, 0);
+
+      const url = canvas.toDataURL('image/png');
+      const fileName = `${shortUrl}.png`;
+      doDownload(url, fileName);
+    };
+
+    image.onerror = () => {
+      console.error('Không tải được ảnh QR từ nguồn.');
+      setLoading(false);
+    };
+  };
 
   const openLink = () => {
     if (shortUrl) {
@@ -137,7 +182,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
         >
           <Form.Item
             name="originalUrl"
-            label="URL gốc"
+            label={<span>URL gốc <span style={{ color: 'red' }}>*</span></span>}
             rules={[{ required: true, message: 'Vui lòng nhập URL gốc!' },
             { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
             ]}
@@ -155,13 +200,12 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
             <Space.Compact style={{ width: '100%' }}>
               <Form.Item
                 name="domain"
-                noStyle
-                label="Domain"
+                label={<span>Domain <span style={{ color: 'red' }}>*</span></span>}
                 className="CSL_custom-link-domain"
                 rules={[{ required: true, message: 'Vui lòng chọn domain!' }]}
               >
 
-                <Select placeholder="Chọn Dự án" style={{ width: '30%' }} >
+                <Select placeholder="Chọn dự án" >
                   {domains.map((domain) => (
                     <Select.Option key={domain.id} value={domain.link}>
                       {domain.name}
@@ -169,11 +213,12 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
                   ))}
                 </Select>
               </Form.Item>
-              <span style={{ color: '#000', margin: '0 10px', fontSize: '20px' }}>/</span>
+              <Form.Item label=" ">
+                <span style={{ color: '#000', margin: '0 10px', fontSize: '20px' }}>/</span>
+              </Form.Item>
               <Form.Item
                 name="alias"
-                noStyle
-                label="Tên đường dẫn-Alias"
+                label={<span>Tên đường dẫn-Alias <span style={{ color: 'red' }}>*</span></span>}
                 className="CSL_custom-link-alias"
                 rules={[
                   { required: true, message: 'Vui lòng nhập Alias' },
@@ -184,7 +229,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
                   }
                 ]}
               >
-                <Input placeholder="Tên đường dẫn - Alias" style={{ width: '70%' }} />
+                <Input placeholder="Tên đường dẫn - Alias" />
               </Form.Item>
             </Space.Compact>
           </Form.Item>
@@ -194,12 +239,12 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
             className="CSL_custom-time"
             label="Hạn sử dụng liên kết:"
           >
-        <DatePicker placeholder="DD-MM-YYYY" className="datePicker" format={dateFormat} 
-        disabledDate={(current) => current && current < dayjs().startOf('day')}
-        />
-          </Form.Item> 
+            <DatePicker placeholder="DD-MM-YYYY" className="datePicker" format={dateFormat}
+              disabledDate={(current) => current && current < dayjs().startOf('day')}
+            />
+          </Form.Item>
           <Form.Item name="checkOS" className="checkOs">
-            <Checkbox checked={isChecked} onClick={handleCheckOSChange}  />
+            <Checkbox checked={isChecked} onClick={handleCheckOSChange} />
             <label> Tạo link tải APP</label>
             {/* <Switch checked={isChecked} onClick={handleCheckOSChange} checkedChildren="" unCheckedChildren=""/>
             <label> Tạo link tải APP</label> */}
@@ -207,7 +252,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
           {isChecked && (
             <Form.Item
               name="iosLink"
-              label="Link tới App Store"
+              label={<span>Link tới App Store <span style={{ color: 'red' }}>*</span></span>}
               rules={[{ required: true, message: "Vui lòng nhập URL App Store!" },
               { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
               ]}
@@ -218,7 +263,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
           {isChecked && (
             <Form.Item
               name="androidLink"
-              label="Link tới Google Play"
+              label={<span>Link tới Google Play <span style={{ color: 'red' }}>*</span></span>}
               rules={[{ required: true, message: "Vui lòng nhập URL Google Play!" },
               { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
               ]}
@@ -237,8 +282,14 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
               <div className="CSL_short-url">
                 {shortUrl} {isExpired && <span style={{ color: 'red' }}>(Quá Hạn)</span>}
               </div>
-              <div className="CSL_qr-code" >
-                {qrLink && <img src={qrLink} alt="QR Code" disabled={loading} />}
+              <div className="CSL_qr-code">
+                {qrLink && (
+                  <>
+                    <img src={qrLink} disabled={loading} alt="QR Code" id="qr-image" style={{ maxWidth: 200 }} />
+                    {/* <QRCode value={shortUrl} icon="/logo.png"/> */}
+                    {/* <Button type="primary" disabled={loading} onClick={downloadCanvasQRCode}>Tải xuống</Button> */}
+                  </>
+                )}
               </div>
             </div>
           </Form.Item>

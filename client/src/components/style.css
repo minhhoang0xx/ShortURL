@@ -1,36 +1,47 @@
-
 .custom-delete-modal .ant-modal-header .ant-modal-title {
-  font-size: 28px; 
+  font-size: 28px;
   font-weight: bold;
-  text-align: center; 
+  text-align: center;
 }
 
 .custom-delete-modal .ant-modal-body {
   padding: 10px;
-  font-size: 16px; 
-  text-align: center; 
+  font-size: 16px;
+  text-align: center;
 }
 
 .custom-delete-modal .ant-modal-footer {
   display: flex;
-  justify-content: center; 
-  gap: 10px; 
-  margin:0;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
 }
 
 .custom-delete-modal .cancel-button {
-  background-color: #E1E1E1; 
+  background-color: #E1E1E1;
   border: none;
-  color: #000; 
+  color: #000;
   border-radius: 8px;
-  padding: 24px 16px; 
+  padding: 24px 16px;
   width: 50%;
 }
+
+.custom-delete-modal .cancel-button:hover {
+  background: #fff !important;
+  color: #0747A6 !important;
+  border: 1px solid #0747A6 !important;
+}
+
 .custom-delete-modal .confirm-button {
   background-color: #0747A6;
-  border: none; 
-  color: #fff; 
-  border-radius: 8px; 
-  padding: 24px 16px; 
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  padding: 24px 16px;
   width: 50%;
+}
+.custom-delete-modal .confirm-button:hover{
+  background: #fff !important;
+  color: #0747A6 !important;
+  border: 1px solid #0747A6 !important;
 }

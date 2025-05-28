@@ -7,7 +7,7 @@ import * as DownloadService from '../../services/DownloadService';
 import UpdateModal from '../../components/UpdateModal';
 import DeleteModal from '../../components/DeleteModal';
 import CreateModal from '../../components/CreateModal';
-import { CopyFilled, CopyOutlined, CopyTwoTone, DeleteTwoTone, EditFilled, EditTwoTone } from '@ant-design/icons';
+import { CopyFilled, CopyOutlined, CopyTwoTone, DeleteTwoTone, EditFilled, EditTwoTone, PlusOutlined, PlusSquareFilled, PlusSquareOutlined } from '@ant-design/icons';
 import '../../pages/ShortURL/style.css';
 import * as DomainService from '../../services/DomainService';
 import { jwtDecode } from 'jwt-decode';
@@ -159,7 +159,7 @@ const ListShortLink = () => {
       sortDirections: ['ascend', 'descend'],
     },
     {
-      title: 'Chức Năng',
+      title: 'Chọn',
       key: 'action',
       width: '8.2%',
       className: 'action-column',
@@ -241,7 +241,7 @@ const ListShortLink = () => {
     }
     if (selectedStatus && selectedStatus !== 'all') {
       result = result.filter(
-        (item) => item.status === (selectedStatus === 'active')
+        (item) => item.status === (selectedStatus === 'active'? true: false)
       );
     }
     if (selectedUser && selectedUser !== 'all') {
@@ -422,9 +422,9 @@ const ListShortLink = () => {
       <Content className="LSL_main-container">
         <div className="LSL_search-bar">
           <Space>
-          <Button type="primary" className="LSL_search-bar-Excel" onClick={handleReset}>
+          {/* <Button type="primary" className="LSL_search-bar-Excel" onClick={handleReset}>
               <a >Làm mới</a>
-            </Button>
+            </Button> */}
             <RangePicker
               className='LSL_search-bar-time'
               format={dateFormat}
@@ -466,17 +466,19 @@ const ListShortLink = () => {
               ))}
             </Select>
 
-            <Input.Search
+            <Input
               placeholder="Tìm kiếm theo đường dẫn"
-              enterButton="Tìm kiếm"
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
               size="middle"
-              onSearch={handleSearch}
               className='LSL_search-bar-input'
+              onChange={(e) => setSearchText(e.target.value)}
             />
+            <Button type="primary" className="LSL_search-bar-Search" onClick={handleSearch} >
+              <a >Tìm kiếm</a>
+            </Button>
             <Button type="primary" className="LSL_search-bar-Create" onClick={showCreateModal}>
               <a >Tạo mới</a>
+
             </Button>
             <Button type="primary" className="LSL_search-bar-Excel" onClick={handleExportExcel}>
               <a >Xuất Excel</a>
