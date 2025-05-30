@@ -15,10 +15,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<URLContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-	options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-});
+//builder.Services.AddControllers().AddJsonOptions(options =>
+//{
+//	options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+//});
+builder.Services.AddControllers();
 builder.Services.AddHttpClient("RecaptchaClient");
 builder.Services.AddScoped<RecaptchaService>();
 builder.Services.AddEndpointsApiExplorer();

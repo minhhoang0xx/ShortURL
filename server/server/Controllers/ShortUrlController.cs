@@ -1,15 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using OfficeOpenXml;
 using server.Data;
 using server.Models;
-using System;
-using System.Xml.Serialization;
-using Microsoft.AspNetCore.Authorization;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace server.Controllers
 {
@@ -48,6 +41,44 @@ namespace server.Controllers
 			});
 
 			return Ok(result);
+		}
+		//[Authorize]
+		[AllowAnonymous]
+		[HttpGet("getAllByUser")]
+		public async Task<IActionResult> getAllByUser(string user)
+		{
+			if (string.IsNullOrWhiteSpace(user))
+			{
+				return BadRequest("User không được để trống.");
+			}
+			var urls = await _context.ShortUrls
+				.Where(url => url.CreatedByUser == user)
+				.ToListAsync();
+			if (!urls.Any())
+			{
+				return NotFound($"Không tìm thấy dữ liệu cho user: {user}");
+			}
+			var result = urls.Select(url => new
+			{
+				id = url.ShortId,
+				projectName = url.ProjectName,
+				originalUrl = url.OriginalUrl,
+				domain = url.Domain,
+				alias = url.Alias,
+				shortLink = $"{url.Domain}/{url.Alias}",
+				createAt = url.CreateAt,
+				qrCode = url.QrCode,
+				checkOS = url.CheckOS ?? false,
+				iosLink = url.IosLink,
+				androidLink = url.AndroidLink,
+				CreatedByUser = url.CreatedByUser ?? "unknow",
+				expiry = url.Expiry,
+				status = url.Expiry.HasValue && url.Expiry < DateTime.Now ? false : (url.Status ?? true)
+
+			});
+
+			return Ok(result);
+			
 		}
 		// Lay thong tin URL bang ID
 		[Authorize]
@@ -294,6 +325,70 @@ namespace server.Controllers
 
 			return Ok(new { message = "URL deleted successfully", id = id });
 		}
+
+		[Authorize]
+		[HttpDelete("deleteMany")]
+		public async Task<IActionResult> DeleteManyUrls([FromBody] List<int> ids)
+		{
+			try
+			{
+				if (ids == null || !ids.Any())
+				{
+					return BadRequest(new ErrorResponse
+					{
+						ErrorCode = "INVALID_IDS",
+						ErrorMessage = "Danh sách ID không được để trống."
+					});
+				}
+
+				var temp = ids;
+				var lstTemp = _context.ShortUrls.Where(p => temp.Contains(p.ShortId)).ToList();
+
+				var deletedIds = new List<int>();
+
+				foreach (var item in ids)
+				{
+					var urls = _context.ShortUrls.First(p => p.ShortId == item);
+					_context.ShortUrls.Remove(urls);
+					await _context.SaveChangesAsync();
+					deletedIds.Add(item);
+				}
+
+				return Ok(new
+				{
+					message = "Các URL đã được xóa thành công.",
+					deletedIds
+				});
+
+
+				//if (!urls.Any())
+				//{
+				//	return NotFound(new ErrorResponse
+				//	{
+				//		ErrorCode = "URLS_NOT_FOUND",
+				//		ErrorMessage = "Không tìm thấy URL nào trong danh sách ID cung cấp."
+				//	});
+				//}
+
+				//var deletedIds = urls.Select(url => url.ShortId).ToList();
+				//_context.ShortUrls.RemoveRange(urls);
+				//await _context.SaveChangesAsync();
+
+				//return Ok(new
+				//{
+				//	message = "Các URL đã được xóa thành công.",
+				//	deletedIds
+				//});
+			}
+			catch (Exception ex)
+			{
+				return Ok(new
+				{
+					message = string.Format("Lỗi: {0}", ex.Message)
+				});
+			}
+		}
+
 		private string GenerateRandomURL(int length = 10)
 		{
 			const string chars = "qwertyuioplkjhgfdsazxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM";
