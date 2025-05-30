@@ -1,4 +1,4 @@
-import { Layout, Table, Input, Button, Select, Space, message, Spin, QRCode, DatePicker } from 'antd';
+import { Layout, Table, Input, Button, Select, Space, message, Spin, QRCode, DatePicker, Checkbox, Modal } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -11,6 +11,7 @@ import { CopyFilled, CopyOutlined, CopyTwoTone, DeleteTwoTone, EditFilled, EditT
 import '../../pages/ShortURL/style.css';
 import * as DomainService from '../../services/DomainService';
 import { jwtDecode } from 'jwt-decode';
+import DeleteManyModal from '../../components/DeleteManyModal';
 const { Content } = Layout;
 const { Option } = Select;
 const { RangePicker } = DatePicker
@@ -32,6 +33,9 @@ const ListShortLink = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedUser, setSelectedUser] = useState('all');
   const [users, setUsers] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [currentUser, setCurrentUser] = useState('');
+  const [showDeleteManyModal, setShowDeleteManyModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -40,6 +44,23 @@ const ListShortLink = () => {
   });
 
   const columns = [
+    {
+      title: (
+        <Checkbox
+          checked={selectedRows.length === filteredData.length && filteredData.length > 0}
+          onChange={(e) => handleCheckAll(e.target.checked)}
+        />
+      ),
+      key: 'checkbox',
+      width: '3.76%',
+      className: 'checkbox-column',
+      render: (_, record) => (
+        <Checkbox
+          checked={selectedRows.includes(record.key)}
+          onChange={(e) => handleRowCheckboxChange(e, record.key)}
+        />
+      ),
+    },
     {
       title: 'STT',
       key: 'STT',
@@ -137,12 +158,12 @@ const ListShortLink = () => {
       },
       sortDirections: ['ascend', 'descend'],
     },
-    {
-      title: 'Người chỉnh sửa',
-      dataIndex: 'createdByUser',
-      key: 'createdByUser',
-      width: '12%',
-    },
+    // {
+    //   title: 'Người chỉnh sửa',
+    //   dataIndex: 'createdByUser',
+    //   key: 'createdByUser',
+    //   width: '12%',
+    // },
     {
       title: 'Trạng Thái',
       dataIndex: 'status',
@@ -179,21 +200,59 @@ const ListShortLink = () => {
       ),
     },
   ];
+  const handleCheckAll = (checked) => {
+    if (checked) {
+      setSelectedRows(filteredData.map((record) => record.key));
+    } else {
+      setSelectedRows([]);
+    }
+  };
+  const handleRowCheckboxChange = (e, key) => {
+    if (e.target.checked) {
+      setSelectedRows((prev) => [...prev, key]);
+    } else {
+      setSelectedRows((prev) => prev.filter((id) => id !== key));
+    }
+  };
+
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const urls = await ShortUrlService.getAllLink();
-      const urlfetch = urls.$values || urls;
+      const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
+      if (!token) {
+        message.error('Không tìm thấy token, vui lòng đăng nhập lại!');
+        navigate('/Login');
+        return;
+      }
+      const decodedToken = jwtDecode(token);
+      const user = decodedToken["name"];
+      setCurrentUser(user)
+      console.log('userName', user);
+      let urls;
+      if (user === "ADMIN") {
+        urls = await ShortUrlService.getAllLink();
+        const userList = urls.$values || urls;
+        const uniqueUsers = [
+          ...new Set(
+            userList
+              .map((url) => url.createdByUser)
+              .filter((user) => user && user !== 'unknown')
+          ),
+        ];
+        setUsers(uniqueUsers);
+      } else {
+        urls = await ShortUrlService.getAllByUser(user);
+      }
       console.log('Data từ API:', urls);
+      const urlfetch = urls.$values || urls;
       const formattedData = urlfetch.map((url) => ({ ...url, key: url.id }));
       setData(formattedData);
       setFilteredData(formattedData);
       setPagination((prev) => ({ ...prev, total: formattedData.length }));
-      // filterData(formattedData, selectedProject, searchText);
     } catch (error) {
       console.error('Failed to fetch data:', error);
-      message.error('Lấy dữ liệu thất bại!');
+      message.error(error.response?.data?.errorMessage || 'Lấy dữ liệu thất bại!');
     } finally {
       setLoading(false);
     }
@@ -201,30 +260,10 @@ const ListShortLink = () => {
   const fetchDomains = async () => {
     try {
       const response = await DomainService.getAll();
-      setDomains(response.$values.map((domain) => domain.name) || [])
+      setDomains(response.map((domain) => domain.name) || [])
     } catch (error) {
       console.error('Failed to fetch domains:', error);
       message.error('Lấy danh sách dự án thất bại!');
-    } finally {
-      setLoading(false);
-    }
-  };
-  const fetchUsers = async () => {
-    try {
-      const response = await ShortUrlService.getAllLink();
-      const user = response.$values
-      const uniqueUsers = [
-        ...new Set(
-          user
-            .map((url) => url.createdByUser)
-            .filter((user) => user && user !== 'unknown')
-        ),
-      ];
-      setUsers(uniqueUsers);
-      console.log('user fetch', uniqueUsers)
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
-      message.error('Lấy danh sách người dùng thất bại!');
     } finally {
       setLoading(false);
     }
@@ -241,7 +280,7 @@ const ListShortLink = () => {
     }
     if (selectedStatus && selectedStatus !== 'all') {
       result = result.filter(
-        (item) => item.status === (selectedStatus === 'active'? true: false)
+        (item) => item.status === (selectedStatus === 'active' ? true : false)
       );
     }
     if (selectedUser && selectedUser !== 'all') {
@@ -252,17 +291,17 @@ const ListShortLink = () => {
       );
     }
 
-  if (Array.isArray(dateRange) && dateRange.length === 2 && dateRange[0] && dateRange[1]) {
-    const start = dayjs(dateRange[0]).startOf('day');
-    const end = dayjs(dateRange[1]).endOf('day');
-    result = result.filter(
-      (item) =>
-        item.createAt &&
-        dayjs(item.createAt).isValid() &&
-        dayjs(item.createAt).isAfter(start) &&
-        dayjs(item.createAt).isBefore(end)
-    );
-  }
+    if (Array.isArray(dateRange) && dateRange.length === 2 && dateRange[0] && dateRange[1]) {
+      const start = dayjs(dateRange[0]).startOf('day');
+      const end = dayjs(dateRange[1]).endOf('day');
+      result = result.filter(
+        (item) =>
+          item.createAt &&
+          dayjs(item.createAt).isValid() &&
+          dayjs(item.createAt).isAfter(start) &&
+          dayjs(item.createAt).isBefore(end)
+      );
+    }
     if (searchText) {
       result = result.filter(
         (item) =>
@@ -275,40 +314,30 @@ const ListShortLink = () => {
       message.warning('Không tìm thấy kết quả!');
     }
   };
-
-
   useEffect(() => {
     fetchData();
     fetchDomains();
-    fetchUsers();
-
   }, []);
-
   useEffect(() => {
     const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
     if (!token) {
       navigate('/Login');
     }
   }, [navigate]);
-
   const handleSearch = () => {
     filterData(data);
   };
-
   const showModal = (record) => {
     setSelectedRecord(record);
     setIsModalOpen(true);
   };
-
   const handleCancelUpdate = () => {
     setIsModalOpen(false);
     setSelectedRecord(null);
   };
-
   const handleUpdate = () => {
     fetchData();
   };
-
   const showDeleteConfirm = (record) => {
     setRecordToDelete(record);
     setDeleteModal(true);
@@ -320,6 +349,7 @@ const ListShortLink = () => {
       await ShortUrlService.deleteShortLink(recordToDelete.id);
       setData((prevData) => prevData.filter((link) => link.id !== recordToDelete.id));
       setFilteredData((prevData) => prevData.filter((link) => link.id !== recordToDelete.id));
+      setSelectedRows((prev) => prev.filter((id) => id !== recordToDelete.id));
       message.success('Xóa thành công!');
       setDeleteModal(false);
       setRecordToDelete(null);
@@ -331,22 +361,46 @@ const ListShortLink = () => {
       setLoading(false);
     }
   };
-
   const handleCancelDelete = () => {
     setDeleteModal(false);
     setRecordToDelete(null);
   };
-
+  const showDeleteManyConfirm = () => {
+    setShowDeleteManyModal(true);
+  };
+  const cancelShowDeleteMany = () => {
+    setShowDeleteManyModal(false);
+  };
+  const handleDeleteMany = async () => {
+    if (selectedRows.length === 0) {
+      message.warning('Vui lòng chọn ít nhất một mục để xóa!');
+      return;
+    }
+    setLoading(true);
+    try {
+      console.log('id',selectedRows )
+      const response = await ShortUrlService.deleteManyShortLinks(selectedRows);
+      setData((prevData) => prevData.filter((link) => !selectedRows.includes(link.key)));
+      setFilteredData((prevData) => prevData.filter((link) => !selectedRows.includes(link.key)));
+      setSelectedRows([]);
+      setShowDeleteManyModal(false);
+      message.success('Xóa các URL thành công!');
+    } catch (error) {
+      console.log('err',error.response?.data?.errorMessage, error)
+      message.error('Xóa các URL thất bại!');
+      await fetchData();
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   const showCreateModal = () => {
     setCreateModal(true);
   };
-
   const handleCreate = () => {
     fetchData();
   };
-
   const handleCancelCreate = () => {
     setCreateModal(false);
   };
@@ -365,9 +419,6 @@ const ListShortLink = () => {
         });
     }
   };
-
-
-
   const handleExportExcel = async () => {
     setLoading(true);
     try {
@@ -400,7 +451,6 @@ const ListShortLink = () => {
     }
     setLoading(false);
   };
-
   const handleTableChange = (newPagination) => {
     setPagination({
       ...pagination,
@@ -413,16 +463,18 @@ const ListShortLink = () => {
     setSelectedStatus('all');
     setSelectedUser('all');
     setDateRange([null, null]);
+    setSelectedRows([]);
     setSearchText('');
     setFilteredData(data);
     setPagination((prev) => ({ ...prev, current: 1, total: data.length }));
   };
+
   return (
     <Layout>
       <Content className="LSL_main-container">
         <div className="LSL_search-bar">
           <Space>
-          {/* <Button type="primary" className="LSL_search-bar-Excel" onClick={handleReset}>
+            {/* <Button type="primary" className="LSL_search-bar-Excel" onClick={handleReset}>
               <a >Làm mới</a>
             </Button> */}
             <RangePicker
@@ -430,7 +482,7 @@ const ListShortLink = () => {
               format={dateFormat}
               value={dateRange}
               onChange={(dates) => setDateRange(dates)}
-              placeholder={['Từ ngày', 'Đến ngày']} 
+              placeholder={['Từ ngày', 'Đến ngày']}
             />
             <Select
               value={selectedProject}
@@ -453,24 +505,27 @@ const ListShortLink = () => {
               <Option value="active">Hoạt động</Option>
               <Option value="expired">Quá Hạn</Option>
             </Select>
-            <Select
-              value={selectedUser}
-              onChange={setSelectedUser}
-              className="LSL_search-bar-user"
-            >
-              <Option value="all">Người cập nhật</Option>
-              {users.map((user) => (
-                <Option key={user} value={user}>
-                  {user}
-                </Option>
-              ))}
-            </Select>
+            {currentUser === 'ADMIN' && (
+              <Select
+                value={selectedUser}
+                onChange={setSelectedUser}
+                className="LSL_search-bar-user"
+              >
+                <Option value="all">Người cập nhật</Option>
+                {users.map((user) => (
+                  <Option key={user} value={user}>
+                    {user}
+                  </Option>
+                ))}
+              </Select>
+            )}
 
             <Input
               placeholder="Tìm kiếm theo đường dẫn"
               value={searchText}
               size="middle"
               className='LSL_search-bar-input'
+              onPressEnter={handleSearch}
               onChange={(e) => setSearchText(e.target.value)}
             />
             <Button type="primary" className="LSL_search-bar-Search" onClick={handleSearch} >
@@ -483,7 +538,7 @@ const ListShortLink = () => {
             <Button type="primary" className="LSL_search-bar-Excel" onClick={handleExportExcel}>
               <a >Xuất Excel</a>
             </Button>
-           
+            {selectedRows.length !== 0 && (<Button type="primary" onClick={showDeleteManyConfirm}>Xóa dữ liệu</Button>)}
           </Space>
         </div>
 
@@ -491,7 +546,7 @@ const ListShortLink = () => {
           columns={columns}
           dataSource={filteredData}
           bordered
-          rowClassName={(record) => 
+          rowClassName={(record) =>
             record.status === false ? 'row-disabled' : record.checkOS === true ? 'row-highlight' : ''
           }
           pagination={{
@@ -523,6 +578,13 @@ const ListShortLink = () => {
         visible={createModal}
         onCancel={handleCancelCreate}
         onCreate={handleCreate}
+      />
+      <DeleteManyModal
+        visible={showDeleteManyModal}
+        onConfirm={handleDeleteMany}
+        onCancel={cancelShowDeleteMany}
+        count={selectedRows.length}
+        loading={loading}
       />
     </Layout>
   );

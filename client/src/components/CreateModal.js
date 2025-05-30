@@ -28,7 +28,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
   }, [visible]);
   const fetchDomains = async () => {
     const response = await DomainService.getAll();
-    setDomains(response.$values);
+    setDomains(response);
     console.log("doamin", response)
   };
 
@@ -179,12 +179,13 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
           style={{ width: '100%' }}
           form={form}
           onValuesChange={handleFormValuesChange}
+          onPressEnter={onFinish}
         >
           <Form.Item
             name="originalUrl"
             label={<span>URL gốc <span style={{ color: 'red' }}>*</span></span>}
             rules={[{ required: true, message: 'Vui lòng nhập URL gốc!' },
-            { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+            { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' }
             ]}
           >
             <div className="shortlink-form_Original">
@@ -202,7 +203,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
                 name="domain"
                 label={<span>Domain <span style={{ color: 'red' }}>*</span></span>}
                 className="CSL_custom-link-domain"
-                rules={[{ required: true, message: 'Vui lòng chọn domain!' }]}
+                rules={[{ required: true, message: 'Chọn domain!' }]}
               >
 
                 <Select placeholder="Chọn dự án" >
@@ -221,11 +222,11 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
                 label={<span>Tên đường dẫn-Alias <span style={{ color: 'red' }}>*</span></span>}
                 className="CSL_custom-link-alias"
                 rules={[
-                  { required: true, message: 'Vui lòng nhập Alias' },
+                  { required: true, message: 'Vui lòng nhập Alias!' },
                   { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' },
                   {
                     pattern: /^[a-zA-Z0-9]+$/,
-                    message: 'Alias chỉ được chứa chữ cái (a-z, A-Z) và số (0-9)!'
+                    message: 'Alias phải chứa chữ cái (a-z, A-Z) và số (0-9).'
                   }
                 ]}
               >

@@ -118,6 +118,7 @@ const LoginPage = () => {
                     form={form}
                     autoComplete="off"
                     className="login-form"
+                    onPressEnter={onFinish}
                 >
                     <div className="form-label">Tài khoản</div>
                     <Form.Item
