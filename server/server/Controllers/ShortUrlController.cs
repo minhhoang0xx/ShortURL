@@ -21,6 +21,14 @@ namespace server.Controllers
 		public async Task<IActionResult> getAllUrl()
 		{
 			var urls = await _context.ShortUrls.ToListAsync();
+			if (!urls.Any())
+			{
+				return NotFound(new ErrorResponse
+				{
+					ErrorCode = "NO_DATA!",
+					ErrorMessage = $"Hệ thống chưa có dữ liệu"
+				});
+			}
 			var result = urls.Select(url => new
 			{
 				id = url.ShortId,
@@ -42,21 +50,30 @@ namespace server.Controllers
 
 			return Ok(result);
 		}
-		//[Authorize]
-		[AllowAnonymous]
+
+		[Authorize]
 		[HttpGet("getAllByUser")]
 		public async Task<IActionResult> getAllByUser(string user)
 		{
 			if (string.IsNullOrWhiteSpace(user))
 			{
-				return BadRequest("User không được để trống.");
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "USER_INVALID!",
+					ErrorMessage = "User không có."
+				});
 			}
 			var urls = await _context.ShortUrls
 				.Where(url => url.CreatedByUser == user)
 				.ToListAsync();
 			if (!urls.Any())
 			{
-				return NotFound($"Không tìm thấy dữ liệu cho user: {user}");
+				return NotFound(new ErrorResponse
+				{
+					ErrorCode = "NO_DATA_FOR_USER!",
+					ErrorMessage = $"Tài khoản: [{user}] chưa có dữ liệu"
+				});
+
 			}
 			var result = urls.Select(url => new
 			{
@@ -80,7 +97,7 @@ namespace server.Controllers
 			return Ok(result);
 			
 		}
-		// Lay thong tin URL bang ID
+
 		[Authorize]
 		[HttpGet("getLink/{id}")]
 		public async Task<IActionResult> GetUrlInfo(int id)
@@ -133,27 +150,32 @@ namespace server.Controllers
 					ErrorMessage = "Link Không hợp lệ!"
 				});
 			}
-			var existingOrigianalUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.OriginalUrl == request.OriginalUrl);
-			if(existingOrigianalUrl != null)
+
+			var existingOG = await _context.ShortUrls
+				.Where(url => url.CreatedByUser == request.CreatedByUser && url.OriginalUrl == request.OriginalUrl )
+				.FirstOrDefaultAsync();
+			//var existingOG = urls.FirstOrDefault(x => x.OriginalUrl == request.OriginalUrl);
+			if (existingOG != null)
 			{
 				return BadRequest(new ErrorResponse
 				{
 					ErrorCode = "URL_EXISTED",
-					ErrorMessage = "URL này đã được rút gọn!"
+					ErrorMessage = $"URL này đã được rút gọn với alias: {existingOG.Alias} "
 				});
 			}
+
 			string shortCode = request.Alias;
 			if (string.IsNullOrEmpty(request.Alias))
 			{
 				shortCode = GenerateRandomURL();
 			}else{
 				var existingAlias = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == shortCode && x.Domain == request.Domain);
-				if (existingAlias != null  )
+				if (existingAlias != null  ) 
 				{
 					return BadRequest(new ErrorResponse
 					{
 						ErrorCode = "ALIAS_EXISTED",
-						ErrorMessage = "Alias này đã được sử dụng trước đó cho dự án này!"
+						ErrorMessage = $"{shortCode} đã được {existingAlias.CreatedByUser} sử dụng trước đó cho {existingAlias.ProjectName} "
 					});
 				}
 			}
@@ -191,8 +213,10 @@ namespace server.Controllers
 		[HttpGet("{code}")] // "code" trong domain
 		public async Task<IActionResult> RedirectUrl(string code)
 		{
-			
-			var url = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == code); // search shortURL trong database
+			string domainFromHeader = Request.Headers["Domain"].ToString();
+			Console.WriteLine($"Base URL: {domainFromHeader}");
+			var urls = await _context.ShortUrls.Where(x => x.Alias == code).ToListAsync();
+			var url = urls.FirstOrDefault(x => x.Domain == domainFromHeader);
 			if (url == null)
 			{
 				return NotFound(new ErrorResponse 
@@ -258,15 +282,27 @@ namespace server.Controllers
 					ErrorMessage = "URL gốc không tồn tại!"
 				});
 			}
+			if (string.IsNullOrEmpty(request.Domain))
+			{
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "DOMAIN_REQUIRED",
+					ErrorMessage = "Domain không được để trống!"
+				});
+			}
+
+
 			if (url.OriginalUrl != request.OriginalUrl) // neu original thay doi thi moi can ktra 
 			{
-				var existingOriginalUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.OriginalUrl == request.OriginalUrl);
-				if (existingOriginalUrl != null)
+				var existingOG = await _context.ShortUrls
+				.Where(x => x.CreatedByUser == request.CreatedByUser && x.OriginalUrl == request.OriginalUrl)
+				.FirstOrDefaultAsync();
+				if (existingOG != null)
 				{
 					return BadRequest(new ErrorResponse
 					{
 						ErrorCode = "URL_EXISTED",
-						ErrorMessage = "URL này đã được rút gọn!"
+						ErrorMessage = $"URL này đã được rút gọn với alias: {existingOG.Alias} "
 					});
 				}
 			}
@@ -283,7 +319,7 @@ namespace server.Controllers
 				return BadRequest(new ErrorResponse
 					{
 					ErrorCode = "ALIAS_EXISTED",
-					ErrorMessage = "Alias này đã được sử dụng trước đó cho dự án này!"
+					ErrorMessage = $"{shortCode} đã được {existingUrl.CreatedByUser} sử dụng trước đó cho {existingUrl.ProjectName} "
 				});
 			}
 			url.Alias = shortCode;
@@ -347,15 +383,6 @@ namespace server.Controllers
 				var deletedIds = new List<int>();
 				_context.ShortUrls.RemoveRange(lstTemp);
 				await _context.SaveChangesAsync();
-
-
-				//foreach (var item in ids)
-				//{
-				//	var urls = _context.ShortUrls.First(p => p.ShortId == item);
-				//	_context.ShortUrls.Remove(urls);
-				//	await _context.SaveChangesAsync();
-				//	deletedIds.Add(item);
-				//}
 
 				return Ok(new
 				{

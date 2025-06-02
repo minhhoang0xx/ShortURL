@@ -29,7 +29,11 @@ export const getLink = async (id) => {
   return res.data;
 }
 export const getLinkByAlias = async (alias) => {
-  const res = await axios.get(`${process.env.REACT_APP_API_URL}/ShortUrl/${alias}`);
+  const res = await axios.get(`${process.env.REACT_APP_API_URL}/ShortUrl/${alias}`,{
+    headers: {
+      'Domain': window.location.origin + '/link'  
+    }
+  });
   return res.data;
 }
 export const updateShortLink = async (id, data) => {
@@ -41,9 +45,6 @@ export const deleteShortLink = async (id) => {
   return res.data;
 }
 export const deleteManyShortLinks = async (ids) => {
-  console.log('ids to delete:', ids);
-  console.log('typeof first id:', typeof ids[0]);
-  console.log('data: ids:', { data: ids });
   const res = await axiosJWT.delete(`${process.env.REACT_APP_API_URL}/ShortUrl/deleteMany`, { data: ids });
   return res.data;
 };

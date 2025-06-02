@@ -232,6 +232,11 @@ const ListShortLink = () => {
       let urls;
       if (user === "ADMIN") {
         urls = await ShortUrlService.getAllLink();
+      
+        if (!urls) {
+          message.warning(urls.data?.errorMessage);
+          return;
+        }
         const userList = urls.$values || urls;
         const uniqueUsers = [
           ...new Set(
@@ -243,6 +248,11 @@ const ListShortLink = () => {
         setUsers(uniqueUsers);
       } else {
         urls = await ShortUrlService.getAllByUser(user);
+        if (!urls) {
+          console.log('urls', urls);
+          message.warning(urls.data?.errorMessage);
+          return;
+        }
       }
       console.log('Data từ API:', urls);
       const urlfetch = urls.$values || urls;
@@ -252,7 +262,7 @@ const ListShortLink = () => {
       setPagination((prev) => ({ ...prev, total: formattedData.length }));
     } catch (error) {
       console.error('Failed to fetch data:', error);
-      message.error(error.response?.data?.errorMessage || 'Lấy dữ liệu thất bại!');
+      message.error(error.response?.data?.errorMessage);
     } finally {
       setLoading(false);
     }

@@ -167,7 +167,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
     <Modal
       open={visible}
       onCancel={handleCancel}
-      // loading = {loading}
+      loading = {loading}
       footer={null}>
       <Content className="CSL_main-container">
         <h3>CÔNG CỤ TẠO SHORTLINK</h3>
@@ -181,18 +181,20 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
           onValuesChange={handleFormValuesChange}
           onPressEnter={onFinish}
         >
-          <Form.Item
-            name="originalUrl"
-            label={<span>URL gốc <span style={{ color: 'red' }}>*</span></span>}
-            rules={[{ required: true, message: 'Vui lòng nhập URL gốc!' },
-            { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' }
-            ]}
-          >
-            <div className="shortlink-form_Original">
+          <div className="shortlink-form_Original">
+            <Form.Item
+              name="originalUrl"
+              label={<span>URL gốc <span style={{ color: 'red' }}>*</span></span>}
+              rules={[
+                { required: true, message: 'Vui lòng nhập URL gốc!' },
+                { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' }
+              ]}
+              style={{ flex: 1 }}
+            >
               <Input placeholder="Nhập URL gốc" />
-              <Button onClick={resetForm}><SyncOutlined /></Button>
-            </div>
-          </Form.Item>
+            </Form.Item>
+            <Button onClick={resetForm} icon={<SyncOutlined />} />
+          </div>
 
           <Form.Item
             label="Tùy chỉnh liên kết của bạn:"
