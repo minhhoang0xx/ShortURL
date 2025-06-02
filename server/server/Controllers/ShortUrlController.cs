@@ -341,18 +341,21 @@ namespace server.Controllers
 					});
 				}
 
-				var temp = ids;
-				var lstTemp = _context.ShortUrls.Where(p => temp.Contains(p.ShortId)).ToList();
+				var temp = string.Join(",", ids);
+				var lstTemp = _context.ShortUrls.FromSqlRaw($"SELECT * FROM [ShortURL.Links] WHERE ShortId IN ({temp})");
 
 				var deletedIds = new List<int>();
+				_context.ShortUrls.RemoveRange(lstTemp);
+				await _context.SaveChangesAsync();
 
-				foreach (var item in ids)
-				{
-					var urls = _context.ShortUrls.First(p => p.ShortId == item);
-					_context.ShortUrls.Remove(urls);
-					await _context.SaveChangesAsync();
-					deletedIds.Add(item);
-				}
+
+				//foreach (var item in ids)
+				//{
+				//	var urls = _context.ShortUrls.First(p => p.ShortId == item);
+				//	_context.ShortUrls.Remove(urls);
+				//	await _context.SaveChangesAsync();
+				//	deletedIds.Add(item);
+				//}
 
 				return Ok(new
 				{
@@ -360,29 +363,10 @@ namespace server.Controllers
 					deletedIds
 				});
 
-
-				//if (!urls.Any())
-				//{
-				//	return NotFound(new ErrorResponse
-				//	{
-				//		ErrorCode = "URLS_NOT_FOUND",
-				//		ErrorMessage = "Không tìm thấy URL nào trong danh sách ID cung cấp."
-				//	});
-				//}
-
-				//var deletedIds = urls.Select(url => url.ShortId).ToList();
-				//_context.ShortUrls.RemoveRange(urls);
-				//await _context.SaveChangesAsync();
-
-				//return Ok(new
-				//{
-				//	message = "Các URL đã được xóa thành công.",
-				//	deletedIds
-				//});
 			}
 			catch (Exception ex)
 			{
-				return Ok(new
+				return BadRequest(new
 				{
 					message = string.Format("Lỗi: {0}", ex.Message)
 				});
