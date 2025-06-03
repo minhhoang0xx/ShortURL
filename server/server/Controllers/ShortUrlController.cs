@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.Models;
+using System.Diagnostics.Metrics;
 
 namespace server.Controllers
 {
@@ -20,7 +21,7 @@ namespace server.Controllers
 		[HttpGet("getAll")]
 		public async Task<IActionResult> getAllUrl()
 		{
-			var urls = await _context.ShortUrls.ToListAsync();
+			var urls = await _context.ShortUrls.OrderByDescending(x => x.CreateAt).ToListAsync();
 			if (!urls.Any())
 			{
 				return NotFound(new ErrorResponse
@@ -44,7 +45,8 @@ namespace server.Controllers
 				androidLink = url.AndroidLink,
 				CreatedByUser = url.CreatedByUser ?? "unknow",
 				expiry = url.Expiry,
-				status = url.Expiry.HasValue && url.Expiry < DateTime.Now ? false : (url.Status ?? true) 
+				status = url.Expiry.HasValue && url.Expiry < DateTime.Now ? false : (url.Status ?? true),
+				clickCount = url.ClickCount
 
 			});
 
@@ -64,7 +66,7 @@ namespace server.Controllers
 				});
 			}
 			var urls = await _context.ShortUrls
-				.Where(url => url.CreatedByUser == user)
+				.Where(url => url.CreatedByUser == user).OrderByDescending(x => x.CreateAt)
 				.ToListAsync();
 			if (!urls.Any())
 			{
@@ -214,7 +216,6 @@ namespace server.Controllers
 		public async Task<IActionResult> RedirectUrl(string code)
 		{
 			string domainFromHeader = Request.Headers["Domain"].ToString();
-			Console.WriteLine($"Base URL: {domainFromHeader}");
 			var urls = await _context.ShortUrls.Where(x => x.Alias == code).ToListAsync();
 			var url = urls.FirstOrDefault(x => x.Domain == domainFromHeader);
 			if (url == null)
@@ -244,6 +245,27 @@ namespace server.Controllers
 					ErrorMessage = "Shortlink không còn hoạt động!"
 				});
 			}
+
+			string userAgent = Request.Headers["User-Agent"].ToString();
+			string ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+			string referrer = Request.Headers["Referer"].ToString();
+
+			var (device, os, browser) = ParseUserAgent(userAgent);
+			var log = new ShortURL_Count
+			{
+				ShortId = url.ShortId,
+				IP = ip,
+				UserAgent = userAgent,
+				Device = device,
+				Browser = browser,
+				OS = os,
+				Referrer = referrer,
+				ClickedAt = DateTime.Now
+			};
+			_context.Add(log);
+			url.ClickCount += 1;
+			await _context.SaveChangesAsync();
+
 			if (url.CheckOS == true)
 			{
 				string UserAgent = Request.Headers["User-Agent"].ToString().ToUpper();
@@ -254,10 +276,45 @@ namespace server.Controllers
 				}
 				else if (UserAgent.Contains("ANDROID"))
 				{
-					return Ok(url.AndroidLink ?? url.OriginalUrl) ;
+					return Ok(url.AndroidLink ?? url.OriginalUrl);
 				}
 			}
 			return Ok(url.OriginalUrl);
+		}
+		[Authorize]
+		[HttpGet("{code}/logs")]
+		public async Task<IActionResult> getLogs (string code)
+		{
+			string domainFromHeader = Request.Headers["Domain"].ToString();
+
+			var urls = await _context.ShortUrls.Where(x => x.Alias == code).ToListAsync();
+			var shortLink = urls.FirstOrDefault(x => x.Domain == domainFromHeader);
+
+			if (shortLink == null)
+			{
+				return NotFound(new ErrorResponse
+				{
+					ErrorCode = "URL_NOT_EXISTED!",
+					ErrorMessage = "Shortlink không tồn tại!"
+				});
+			}
+
+			var logs = await _context.Counts
+				.Where(x => x.ShortId == shortLink.ShortId)
+				.OrderByDescending(x => x.ClickedAt)
+				.Select(x => new ShortURL_CountDTO
+				{
+					ClickedAt = x.ClickedAt,
+					IP = x.IP,
+					Device = x.Device,
+					Browser = x.Browser,
+					OS = x.OS,
+					Referrer = x.Referrer
+				})
+				.ToListAsync();
+
+			return Ok(logs);
+
 		}
 
 		[Authorize] 
@@ -407,7 +464,28 @@ namespace server.Controllers
 			return new string(Enumerable.Repeat(chars, length)
 										.Select(s => s[random.Next(s.Length)]).ToArray());
 		}
-	
+		private (string device, string os, string browser) ParseUserAgent(string userAgent)
+		{
+			string device = "Unknown", os = "Unknown", browser = "Unknown";
+
+			if (userAgent.Contains("Windows")) os = "Windows";
+			else if (userAgent.Contains("Mac")) os = "macOS";
+			else if (userAgent.Contains("Linux")) os = "Linux";
+			else if (userAgent.Contains("Android")) os = "Android";
+			else if (userAgent.Contains("iPhone")) os = "iOS";
+
+			if (userAgent.Contains("Mobile")) device = "Mobile";
+			else if (userAgent.Contains("Tablet")) device = "Tablet";
+			else device = "Desktop";
+
+			if (userAgent.Contains("Chrome")) browser = "Chrome";
+			else if (userAgent.Contains("Firefox")) browser = "Firefox";
+			else if (userAgent.Contains("Safari") && !userAgent.Contains("Chrome")) browser = "Safari";
+			else if (userAgent.Contains("Edge")) browser = "Edge";
+
+			return (device, os, browser);
+		}
+
 
 
 	}

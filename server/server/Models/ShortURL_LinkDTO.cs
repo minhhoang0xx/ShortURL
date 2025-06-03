@@ -14,5 +14,6 @@
 		public string? CreatedByUser { get; set; }
 		public DateTime? Expiry { get; set; }
 		public bool? Status { get; set; } = true;
+		public int? ClickCount { get; set; } = 0;
 	}
 }
