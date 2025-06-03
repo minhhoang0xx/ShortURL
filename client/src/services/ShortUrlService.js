@@ -36,6 +36,14 @@ export const getLinkByAlias = async (alias) => {
   });
   return res.data;
 }
+export const getLogs = async (alias) => {
+  const res = await axios.get(`${process.env.REACT_APP_API_URL}/ShortUrl/${alias}/logs`,{
+    headers: {
+      'Domain': window.location.origin + '/link'  
+    }
+  });
+  return res.data;
+}
 export const updateShortLink = async (id, data) => {
   const res = await axiosJWT.put(`${process.env.REACT_APP_API_URL}/ShortUrl/update/${id}`, data);
   return res.data;

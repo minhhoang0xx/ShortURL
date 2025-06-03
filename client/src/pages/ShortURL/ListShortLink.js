@@ -52,7 +52,7 @@ const ListShortLink = () => {
         />
       ),
       key: 'checkbox',
-      width: '3.76%',
+      width: '3%',
       className: 'checkbox-column',
       render: (_, record) => (
         <Checkbox
@@ -65,7 +65,7 @@ const ListShortLink = () => {
       title: 'STT',
       key: 'STT',
       className: 'STT-column',
-      width: '3.76%',
+      width: '3%',
       render: (_, __, index) => {
         const pageSize = pagination.pageSize;
         const currentPage = pagination.current;
@@ -76,16 +76,22 @@ const ListShortLink = () => {
       title: 'Dự án',
       dataIndex: 'projectName',
       key: 'projectName',
-      width: '6.9%',
+      width: '7%',
     },
     {
       title: 'Tên đường dẫn',
       dataIndex: 'alias',
       key: 'alias',
-      width: '11.3%',
+      width: '12%',
       sorter: (a, b) => a.alias.localeCompare(b.alias),
       sortDirections: ['ascend', 'descend'],
       showSorterTooltip: false,
+      onCell: (record) => {
+        if (record.status === true && record.checkOS) {
+          return { className: 'cell-highlight' };
+        }
+        return {};
+      },
     },
     {
       title: 'URL gốc',
@@ -97,7 +103,7 @@ const ListShortLink = () => {
           {HyperLink}
         </a>
       ),
-      width: '30.56%',
+      width: '20%',
     },
     {
       title: 'URL rút gọn',
@@ -105,7 +111,7 @@ const ListShortLink = () => {
       dataIndex: 'shortLink',
       key: 'shortLink',
       ellipsis: true,
-      width: '18.28%',
+      width: '20%',
       render: (HyperLink, record) => (
         <a href={HyperLink} target="_blank" rel="noreferrer"
           className={record.status === false ? 'shortlink-disabled' : ''}
@@ -131,10 +137,9 @@ const ListShortLink = () => {
           {date ? dayjs(date).format('HH:mm DD/MM/YYYY') : 'null'}
         </span>
       ),
-      width: '12%',
+      width: '11%',
       sorter: (a, b) => dayjs(a.createAt).unix() - dayjs(b.createAt).unix(),
       sortDirections: ['ascend', 'descend'],
-      defaultSortOrder: 'descend',
       onCell: (record) => {
         if (record.status === true && record.checkOS) {
           return { className: 'cell-highlight' };
@@ -149,7 +154,7 @@ const ListShortLink = () => {
       className: 'action-column',
       showSorterTooltip: false,
       render: (date) => (date ? dayjs(date).format(' DD/MM/YYYY') : 'Vô thời hạn'),
-      width: '12%',
+      width: '10%',
       sorter: (a, b) => {
         if (!a.expiry && !b.expiry) return 0;
         if (!a.expiry) return 1;
@@ -157,20 +162,56 @@ const ListShortLink = () => {
         return dayjs(a.expiry).unix() - dayjs(b.expiry).unix();
       },
       sortDirections: ['ascend', 'descend'],
+      onCell: (record) => {
+        if (record.status === true && record.checkOS) {
+          return { className: 'cell-highlight' };
+        }
+        return {};
+      },
     },
-    // {
-    //   title: 'Người chỉnh sửa',
-    //   dataIndex: 'createdByUser',
-    //   key: 'createdByUser',
-    //   width: '12%',
-    // },
+    ...(currentUser === 'ADMIN'
+      ? [
+          {
+            title: 'Người cập nhật',
+            dataIndex: 'createdByUser',
+            key: 'createdByUser',
+            width: '12%',
+            sorter: (a, b) => a.createdByUser.localeCompare(b.createdByUser),
+            sortDirections: ['ascend', 'descend'],
+            showSorterTooltip: false,
+            onCell: (record) => {
+              if (record.status === true && record.checkOS) {
+                return { className: 'cell-highlight' };
+              }
+              return {};
+            },
+          },
+        ]
+      : []),
+      {
+        title: 'Lượt truy cập',
+        dataIndex: 'clickCount',
+        className: 'action-column',
+        showSorterTooltip: false,
+        key: 'clickCount',
+        width: '10%',
+        render: (clickCount) => (clickCount || 0),
+        sorter: (a, b) => (a.clickCount === b.clickCount ? 0 : a.clickCount ? -1 : 1),
+        sortDirections: ['ascend', 'descend'],
+        onCell: (record) => {
+          if (record.status === true && record.checkOS) {
+            return { className: 'cell-highlight' };
+          }
+          return {};
+        },
+      },
     {
       title: 'Trạng Thái',
       dataIndex: 'status',
       className: 'action-column',
       showSorterTooltip: false,
       key: 'status',
-      width: '8%',
+      width: '8.5%',
       render: (status) => (
         <span className={status ? 'status-active' : 'status-expired'}>
           {status ? 'Hoạt động' : 'Quá Hạn'}
@@ -178,11 +219,18 @@ const ListShortLink = () => {
       ),
       sorter: (a, b) => (a.status === b.status ? 0 : a.status ? -1 : 1),
       sortDirections: ['ascend', 'descend'],
+      onCell: (record) => {
+        if (record.status === true && record.checkOS) {
+          return { className: 'cell-highlight' };
+        }
+        return {};
+      },
     },
+   
     {
       title: 'Chọn',
       key: 'action',
-      width: '8.2%',
+      width: '8%',
       className: 'action-column',
       render: (_, record) => (
         <Space size="middle">
@@ -231,7 +279,10 @@ const ListShortLink = () => {
       console.log('userName', user);
       let urls;
       if (user === "ADMIN") {
-        urls = await ShortUrlService.getAllLink();
+        urls = await ShortUrlService.getAllLink({
+          page: pagination.current,
+          pageSize: pagination.pageSize,
+        });
       
         if (!urls) {
           message.warning(urls.data?.errorMessage);
@@ -247,9 +298,11 @@ const ListShortLink = () => {
         ];
         setUsers(uniqueUsers);
       } else {
-        urls = await ShortUrlService.getAllByUser(user);
+        urls = await ShortUrlService.getAllByUser(user, {
+          page: pagination.current,
+          pageSize: pagination.pageSize,
+        });
         if (!urls) {
-          console.log('urls', urls);
           message.warning(urls.data?.errorMessage);
           return;
         }
@@ -262,7 +315,7 @@ const ListShortLink = () => {
       setPagination((prev) => ({ ...prev, total: formattedData.length }));
     } catch (error) {
       console.error('Failed to fetch data:', error);
-      message.error(error.response?.data?.errorMessage);
+      message.error(error.response?.data?.errorMessage || 'Lấy dữ liệu thất bại!');
     } finally {
       setLoading(false);
     }

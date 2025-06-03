@@ -16,7 +16,7 @@ const DeleteManyModal = ({ visible, onCancel, onConfirm, count, record, loading 
       okButtonProps={{ className: "confirm-button" }} 
       cancelButtonProps={{ className: "cancel-button" }} 
     >
-      <h3>Số shortLink mà chọn chọn để xóa:  </h3>
+      <h3>Số shortLink đã chọn để xóa:  </h3>
       <h1>{count}</h1>
     </Modal>
   );
