@@ -33,8 +33,8 @@ export const getLinkByAlias = async (alias,domain) => {
   const res = await axios.get(`${process.env.REACT_APP_API_URL}/ShortUrl/${alias}`,{params: { domain }});
   return res.data;
 }
-export const getLogs = async (alias) => {
-  const res = await axios.get(`${process.env.REACT_APP_API_URL}/ShortUrl/${alias}/logs`);
+export const getLogs = async (alias, domain) => {
+  const res = await axios.get(`${process.env.REACT_APP_API_URL}/ShortUrl/${alias}/logs`,{params: { domain }});
   return res.data;
 }
 export const updateShortLink = async (id, data) => {

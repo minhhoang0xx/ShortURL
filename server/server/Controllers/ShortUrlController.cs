@@ -92,7 +92,8 @@ namespace server.Controllers
 				androidLink = url.AndroidLink,
 				CreatedByUser = url.CreatedByUser ?? "unknow",
 				expiry = url.Expiry,
-				status = url.Expiry.HasValue && url.Expiry < DateTime.Now ? false : (url.Status ?? true)
+				status = url.Expiry.HasValue && url.Expiry < DateTime.Now ? false : (url.Status ?? true),
+				clickCount = url.ClickCount
 
 			});
 
@@ -215,17 +216,25 @@ namespace server.Controllers
 		[HttpGet("{code}")] // "code" trong domain
 		public async Task<IActionResult> RedirectUrl(string code, [FromQuery] string domain)
 		{
+			if (string.IsNullOrEmpty(domain))
+			{
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "DOMAIN_NOT_FOUND!",
+					ErrorMessage = "Domain không tìm thấy!"
+				});
+			}
 			var url = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == code && x.Domain == domain);
 			if (url == null)
 			{
-				return NotFound(new ErrorResponse 
-				{ 
+				return NotFound(new ErrorResponse
+				{
 					ErrorCode = "URL_NOT_EXISTED!",
 					ErrorMessage = "URL không tồn tại!"
 				});
 
 			}
-			 if (url.Expiry.HasValue && url.Expiry < DateTime.Now)
+			if (url.Expiry.HasValue && url.Expiry < DateTime.Now)
 			{
 				url.Status = false;
 				await _context.SaveChangesAsync();
@@ -267,7 +276,7 @@ namespace server.Controllers
 			if (url.CheckOS == true)
 			{
 				string UserAgent = Request.Headers["User-Agent"].ToString().ToUpper();
-				if (UserAgent.Contains("IPHONE") || UserAgent.Contains("IPAD") || UserAgent.Contains("MACINTOSH") 
+				if (UserAgent.Contains("IPHONE") || UserAgent.Contains("IPAD") || UserAgent.Contains("MACINTOSH")
 					|| UserAgent.Contains("WATCH"))
 				{
 					return Ok(url.IosLink ?? url.OriginalUrl);
@@ -281,12 +290,17 @@ namespace server.Controllers
 		}
 		[Authorize]
 		[HttpGet("{code}/logs")]
-		public async Task<IActionResult> getLogs (string code)
+		public async Task<IActionResult> getLogs(string code, [FromQuery] string domain)
 		{
-			string domainFromHeader = Request.Headers["Domain"].ToString();
-
-			var shortLink = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == code && x.Domain == domainFromHeader);
-
+			if (string.IsNullOrEmpty(domain))
+			{
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "DOMAIN_NOT_FOUND!",
+					ErrorMessage = "Domain không tìm thấy!"
+				});
+			}
+			var shortLink = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == code && x.Domain == domain);
 			if (shortLink == null)
 			{
 				return NotFound(new ErrorResponse
