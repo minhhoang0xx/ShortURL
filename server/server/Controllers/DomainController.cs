@@ -31,7 +31,7 @@ namespace server.Controllers
 		[HttpPost("addDomain")]
 		public async Task<IActionResult> addDomain([FromBody] ShortURL_DomainDTO domain)
 		{
-			var existedDomain = _context.Domains.FirstOrDefault(x => x.Link == domain.Link);
+			var existedDomain = await _context.Domains.FirstOrDefaultAsync(x => x.Link == domain.Link);
 			if(existedDomain != null)
 			{
 				return BadRequest(new { message = "Domain này đã tồn tại!" });
@@ -53,7 +53,7 @@ namespace server.Controllers
 	
 			if (data.Link != domain.Link)
 			{
-				var existedDomain = _context.Domains.FirstOrDefault(x => x.Link == domain.Link);
+				var existedDomain = await _context.Domains.FirstOrDefaultAsync(x => x.Link == domain.Link);
 				if (existedDomain != null)
 				{
 					return BadRequest(new { message = "Domain này đã tồn tại!" });

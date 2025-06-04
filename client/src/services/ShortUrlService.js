@@ -28,20 +28,13 @@ export const getLink = async (id) => {
   const res = await axiosJWT.get(`${process.env.REACT_APP_API_URL}/ShortUrl/getLink/${id}`);
   return res.data;
 }
-export const getLinkByAlias = async (alias) => {
-  const res = await axios.get(`${process.env.REACT_APP_API_URL}/ShortUrl/${alias}`,{
-    headers: {
-      'Domain': window.location.origin + '/link'  
-    }
-  });
+export const getLinkByAlias = async (alias,domain) => {
+  console.log ("fweeeeeeeeê",domain)
+  const res = await axios.get(`${process.env.REACT_APP_API_URL}/ShortUrl/${alias}`,{params: { domain }});
   return res.data;
 }
 export const getLogs = async (alias) => {
-  const res = await axios.get(`${process.env.REACT_APP_API_URL}/ShortUrl/${alias}/logs`,{
-    headers: {
-      'Domain': window.location.origin + '/link'  
-    }
-  });
+  const res = await axios.get(`${process.env.REACT_APP_API_URL}/ShortUrl/${alias}/logs`);
   return res.data;
 }
 export const updateShortLink = async (id, data) => {

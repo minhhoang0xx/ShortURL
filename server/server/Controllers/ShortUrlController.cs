@@ -177,7 +177,7 @@ namespace server.Controllers
 					return BadRequest(new ErrorResponse
 					{
 						ErrorCode = "ALIAS_EXISTED",
-						ErrorMessage = $"{shortCode} đã được {existingAlias.CreatedByUser} sử dụng trước đó cho {existingAlias.ProjectName} "
+						ErrorMessage = $"'{shortCode}' đã được [{existingAlias.CreatedByUser}] sử dụng trước đó cho {existingAlias.ProjectName} "
 					});
 				}
 			}
@@ -213,11 +213,9 @@ namespace server.Controllers
 
 		[AllowAnonymous]
 		[HttpGet("{code}")] // "code" trong domain
-		public async Task<IActionResult> RedirectUrl(string code)
+		public async Task<IActionResult> RedirectUrl(string code, [FromQuery] string domain)
 		{
-			string domainFromHeader = Request.Headers["Domain"].ToString();
-			var urls = await _context.ShortUrls.Where(x => x.Alias == code).ToListAsync();
-			var url = urls.FirstOrDefault(x => x.Domain == domainFromHeader);
+			var url = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == code && x.Domain == domain);
 			if (url == null)
 			{
 				return NotFound(new ErrorResponse 
@@ -227,7 +225,7 @@ namespace server.Controllers
 				});
 
 			}
-			if (url.Expiry.HasValue && url.Expiry < DateTime.Now)
+			 if (url.Expiry.HasValue && url.Expiry < DateTime.Now)
 			{
 				url.Status = false;
 				await _context.SaveChangesAsync();
@@ -287,8 +285,7 @@ namespace server.Controllers
 		{
 			string domainFromHeader = Request.Headers["Domain"].ToString();
 
-			var urls = await _context.ShortUrls.Where(x => x.Alias == code).ToListAsync();
-			var shortLink = urls.FirstOrDefault(x => x.Domain == domainFromHeader);
+			var shortLink = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == code && x.Domain == domainFromHeader);
 
 			if (shortLink == null)
 			{
@@ -376,7 +373,7 @@ namespace server.Controllers
 				return BadRequest(new ErrorResponse
 					{
 					ErrorCode = "ALIAS_EXISTED",
-					ErrorMessage = $"{shortCode} đã được {existingUrl.CreatedByUser} sử dụng trước đó cho {existingUrl.ProjectName} "
+					ErrorMessage = $"'{shortCode}' đã được [{existingUrl.CreatedByUser}] sử dụng trước đó cho {existingUrl.ProjectName} "
 				});
 			}
 			url.Alias = shortCode;
