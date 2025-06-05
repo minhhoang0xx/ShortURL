@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.Models;
 using System.Diagnostics.Metrics;
+using UAParser;
 
 namespace server.Controllers
 {
@@ -254,8 +255,14 @@ namespace server.Controllers
 			}
 
 			string userAgent = Request.Headers["User-Agent"].ToString();
-			string ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+			string ip = GetClientIp(HttpContext);
 			string referrer = Request.Headers["Referer"].ToString();
+			string source = "Unknown";
+			if (userAgent.Contains("Zalo")) source = "Zalo";
+			else if (userAgent.Contains("FBAN") || userAgent.Contains("FBAV")) source = "Facebook";
+			else if (userAgent.Contains("Instagram")) source = "Instagram";
+			else if (referrer.Contains("gmail")) source = "Gmail";
+			else if (!string.IsNullOrEmpty(referrer)) source = referrer;
 
 			var (device, os, browser) = ParseUserAgent(userAgent);
 			var log = new ShortURL_Count
@@ -267,6 +274,7 @@ namespace server.Controllers
 				Browser = browser,
 				OS = os,
 				Referrer = referrer,
+				Source = source,
 				ClickedAt = DateTime.Now
 			};
 			_context.Add(log);
@@ -315,12 +323,14 @@ namespace server.Controllers
 				.OrderByDescending(x => x.ClickedAt)
 				.Select(x => new ShortURL_CountDTO
 				{
+					Id = x.Id,
 					ClickedAt = x.ClickedAt,
 					IP = x.IP,
 					Device = x.Device,
 					Browser = x.Browser,
 					OS = x.OS,
-					Referrer = x.Referrer
+					Referrer = x.Referrer,
+					Source = x.Source,
 				})
 				.ToListAsync();
 
@@ -474,6 +484,16 @@ namespace server.Controllers
 			var random = new Random();
 			return new string(Enumerable.Repeat(chars, length)
 										.Select(s => s[random.Next(s.Length)]).ToArray());
+		}
+		private string GetClientIp(HttpContext context)
+		{
+			var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+			if (!string.IsNullOrEmpty(ip))
+			{
+				return ip.Split(',')[0]; // Nếu có chuỗi IP (proxy), lấy IP đầu tiên
+			}
+
+			return context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
 		}
 		private (string device, string os, string browser) ParseUserAgent(string userAgent)
 		{

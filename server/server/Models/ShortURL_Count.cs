@@ -13,7 +13,7 @@ namespace server.Models
 
 		[ForeignKey("ShortId")]
 		public ShortURL_Link ShortURL { get; set; }
-
+		public string? Source { get; set; }
 		public string? IP { get; set; }
 		public string? UserAgent { get; set; }
 		public string? Device { get; set; }
