@@ -58,4 +58,5 @@ export const routes =[
         isShowHeader: false,
         isShowFooter: false,
     }
+  
 ]   

@@ -45,3 +45,45 @@
   color: #0747A6 !important;
   border: 1px solid #0747A6 !important;
 }
+.linkLog {
+  display: inline-block;
+  max-width: 400px; 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+
+.log_header{
+  display: flex;
+  align-items: center;
+}
+.log_header-time{
+  width: 25%;
+  height: 50%;
+}
+.log_info-flex {
+  width: 100%;
+  margin-left: 40px;
+}
+
+.log_info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12%;
+}
+
+.log_info-pair {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.label {
+  font-weight: 600;
+}
+
+.Tag{
+  
+}

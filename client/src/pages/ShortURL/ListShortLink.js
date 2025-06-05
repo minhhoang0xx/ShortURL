@@ -7,11 +7,12 @@ import * as DownloadService from '../../services/DownloadService';
 import UpdateModal from '../../components/UpdateModal';
 import DeleteModal from '../../components/DeleteModal';
 import CreateModal from '../../components/CreateModal';
-import { CopyFilled, CopyOutlined, CopyTwoTone, DeleteTwoTone, EditFilled, EditTwoTone, PlusOutlined, PlusSquareFilled, PlusSquareOutlined } from '@ant-design/icons';
+import { CopyTwoTone, DeleteTwoTone, EditFilled, EditTwoTone, PlusOutlined, PlusSquareFilled, PlusSquareOutlined } from '@ant-design/icons';
 import '../../pages/ShortURL/style.css';
 import * as DomainService from '../../services/DomainService';
 import { jwtDecode } from 'jwt-decode';
 import DeleteManyModal from '../../components/DeleteManyModal';
+import LogModal from '../../components/LogModal';
 const { Content } = Layout;
 const { Option } = Select;
 const { RangePicker } = DatePicker
@@ -21,12 +22,14 @@ const ListShortLink = () => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [createModal, setCreateModal] = useState(false);
+  const [updateModal, setUpdateModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [showDeleteManyModal, setShowDeleteManyModal] = useState(false);
+  const [logModal, setLogModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [searchText, setSearchText] = useState('');
-  const [deleteModal, setDeleteModal] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState(null);
-  const [createModal, setCreateModal] = useState(false);
   const [domains, setDomains] = useState([]);
   const [dateRange, setDateRange] = useState([null, null]);
   const [selectedProject, setSelectedProject] = useState('all');
@@ -35,7 +38,7 @@ const ListShortLink = () => {
   const [users, setUsers] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
   const [currentUser, setCurrentUser] = useState('');
-  const [showDeleteManyModal, setShowDeleteManyModal] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -171,40 +174,39 @@ const ListShortLink = () => {
     },
     ...(currentUser === 'ADMIN'
       ? [
-          {
-            title: 'Người cập nhật',
-            dataIndex: 'createdByUser',
-            key: 'createdByUser',
-            width: '12%',
-            sorter: (a, b) => a.createdByUser.localeCompare(b.createdByUser),
-            sortDirections: ['ascend', 'descend'],
-            showSorterTooltip: false,
-            onCell: (record) => {
-              if (record.status === true && record.checkOS) {
-                return { className: 'cell-highlight' };
-              }
-              return {};
-            },
+        {
+          title: 'Người cập nhật',
+          dataIndex: 'createdByUser',
+          key: 'createdByUser',
+          width: '12%',
+          sorter: (a, b) => a.createdByUser.localeCompare(b.createdByUser),
+          sortDirections: ['ascend', 'descend'],
+          showSorterTooltip: false,
+          onCell: (record) => {
+            if (record.status === true && record.checkOS) {
+              return { className: 'cell-highlight' };
+            }
+            return {};
           },
-        ]
-      : []),
-      {
-        title: 'Lượt truy cập',
-        dataIndex: 'clickCount',
-        className: 'action-column',
-        showSorterTooltip: false,
-        key: 'clickCount',
-        width: '10%',
-        render: (clickCount) => (clickCount || 0),
-        sorter: (a, b) => (a.clickCount === b.clickCount ? 0 : a.clickCount ? -1 : 1),
-        sortDirections: ['ascend', 'descend'],
-        onCell: (record) => {
-          if (record.status === true && record.checkOS) {
-            return { className: 'cell-highlight' };
-          }
-          return {};
         },
-      },
+      ]
+      : []),
+    {
+      title: 'Lượt truy cập',
+      dataIndex: 'clickCount',
+      className: 'action-column',
+      showSorterTooltip: false,
+      key: 'clickCount',
+      width: '10%',
+      render: (clickCount) => (clickCount || 0),
+      sorter: (a, b) => (a.clickCount || 0) - (b.clickCount || 0),
+      sortDirections: ['ascend', 'descend'],
+      onCell: (record) => ({
+        onClick: () => showLogModal(record),
+        style: { cursor: 'pointer', fontStyle: 'underline', color: '#1890ff' },
+        className: record.status === true && record.checkOS ? 'cell-highlight' : '',
+      }),
+    },
     {
       title: 'Trạng Thái',
       dataIndex: 'status',
@@ -226,7 +228,7 @@ const ListShortLink = () => {
         return {};
       },
     },
-   
+
     {
       title: 'Chọn',
       key: 'action',
@@ -237,7 +239,7 @@ const ListShortLink = () => {
           <a onClick={() => copyToClipboard(record)}>
             <CopyTwoTone twoToneColor="#818582" />
           </a>
-          <a onClick={() => showModal(record)}>
+          <a onClick={() => showModalUpdate(record)}>
             <EditTwoTone twoToneColor="#2d6ed6" />
           </a>
           <a onClick={() => showDeleteConfirm(record)}>
@@ -283,7 +285,7 @@ const ListShortLink = () => {
           page: pagination.current,
           pageSize: pagination.pageSize,
         });
-      
+
         if (!urls) {
           message.warning(urls.data?.errorMessage);
           return;
@@ -390,12 +392,12 @@ const ListShortLink = () => {
   const handleSearch = () => {
     filterData(data);
   };
-  const showModal = (record) => {
+  const showModalUpdate = (record) => {
     setSelectedRecord(record);
-    setIsModalOpen(true);
+    setUpdateModal(true);
   };
   const handleCancelUpdate = () => {
-    setIsModalOpen(false);
+    setUpdateModal(false);
     setSelectedRecord(null);
   };
   const handleUpdate = () => {
@@ -441,7 +443,7 @@ const ListShortLink = () => {
     }
     setLoading(true);
     try {
-      console.log('id',selectedRows )
+      console.log('id', selectedRows)
       const response = await ShortUrlService.deleteManyShortLinks(selectedRows);
       setData((prevData) => prevData.filter((link) => !selectedRows.includes(link.key)));
       setFilteredData((prevData) => prevData.filter((link) => !selectedRows.includes(link.key)));
@@ -449,14 +451,13 @@ const ListShortLink = () => {
       setShowDeleteManyModal(false);
       message.success('Xóa các URL thành công!');
     } catch (error) {
-      console.log('err',error.response?.data?.errorMessage, error)
+      console.log('err', error.response?.data?.errorMessage, error)
       message.error('Xóa các URL thất bại!');
       await fetchData();
     } finally {
       setLoading(false);
     }
   };
-
 
   const showCreateModal = () => {
     setCreateModal(true);
@@ -466,6 +467,14 @@ const ListShortLink = () => {
   };
   const handleCancelCreate = () => {
     setCreateModal(false);
+  };
+  const showLogModal = (record) => {
+    setSelectedRecord(record);
+    setLogModal(true);
+  };
+  const handleCancelLog = () => {
+    setLogModal(false);
+    setSelectedRecord(null);
   };
   const copyToClipboard = (record) => {
     if (record.status === false) {
@@ -624,7 +633,7 @@ const ListShortLink = () => {
 
       <UpdateModal
         loading={loading}
-        visible={isModalOpen}
+        visible={updateModal}
         onCancel={handleCancelUpdate}
         onUpdate={handleUpdate}
         record={selectedRecord}
@@ -648,6 +657,12 @@ const ListShortLink = () => {
         onCancel={cancelShowDeleteMany}
         count={selectedRows.length}
         loading={loading}
+      />
+      <LogModal
+        loading={loading}
+        visible={logModal}
+        onCancel={handleCancelLog}
+        record={selectedRecord}
       />
     </Layout>
   );

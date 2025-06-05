@@ -15,7 +15,7 @@ const RedirectPage = () => {
                 console.log("response", response)
                 if (response) {
                     console.log("response", response)
-                    // window.location.href=response;
+                    window.location.href=response;
                 } else {
                     navigate('*');
                 }
