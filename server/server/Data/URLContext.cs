@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System;
 using Microsoft.EntityFrameworkCore;
+using Azure;
 
 
 namespace server.Data
@@ -14,5 +15,25 @@ namespace server.Data
 		public DbSet<Admin_Users> AdminUsers { get; set; }
 		public DbSet<FormRequest> FormRequests { get; set; }
 		public DbSet<ShortURL_Count> Counts { get; set; }
+		public DbSet<ShortURL_Tags> Tags { get; set; }
+		public DbSet<ShortURL_LinkTag> LinkTags { get; set; }
+
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			base.OnModelCreating(modelBuilder);
+
+			modelBuilder.Entity<ShortURL_LinkTag>()
+				.HasKey(lt => new { lt.ShortId, lt.TagId });
+
+			modelBuilder.Entity<ShortURL_LinkTag>()
+				.HasOne(lt => lt.Link)
+				.WithMany(l => l.LinkTags)
+				.HasForeignKey(lt => lt.ShortId);
+
+			modelBuilder.Entity<ShortURL_LinkTag>()
+				.HasOne(lt => lt.Tag)
+				.WithMany(t => t.LinkTags)
+				.HasForeignKey(lt => lt.TagId);
+		}
 	}
 }

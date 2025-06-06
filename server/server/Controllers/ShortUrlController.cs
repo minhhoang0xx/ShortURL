@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
@@ -22,7 +23,11 @@ namespace server.Controllers
 		[HttpGet("getAll")]
 		public async Task<IActionResult> getAllUrl()
 		{
-			var urls = await _context.ShortUrls.OrderByDescending(x => x.CreateAt).ToListAsync();
+			var urls = await _context.ShortUrls
+				.Include(x => x.LinkTags)
+				.ThenInclude(lt => lt.Tag)
+				.OrderByDescending(x => x.CreateAt)
+				.ToListAsync();
 			if (!urls.Any())
 			{
 				return NotFound(new ErrorResponse
@@ -47,8 +52,8 @@ namespace server.Controllers
 				CreatedByUser = url.CreatedByUser ?? "unknow",
 				expiry = url.Expiry,
 				status = url.Expiry.HasValue && url.Expiry < DateTime.Now ? false : (url.Status ?? true),
-				clickCount = url.ClickCount
-
+				clickCount = url.ClickCount,
+				tags = url.LinkTags.Select(lt => lt.Tag.Name).ToList()
 			});
 
 			return Ok(result);
@@ -67,7 +72,10 @@ namespace server.Controllers
 				});
 			}
 			var urls = await _context.ShortUrls
-				.Where(url => url.CreatedByUser == user).OrderByDescending(x => x.CreateAt)
+				.Where(url => url.CreatedByUser == user)
+				.Include(x => x.LinkTags)
+				.ThenInclude(lt => lt.Tag)
+				.OrderByDescending(x => x.CreateAt)
 				.ToListAsync();
 			if (!urls.Any())
 			{
@@ -94,8 +102,8 @@ namespace server.Controllers
 				CreatedByUser = url.CreatedByUser ?? "unknow",
 				expiry = url.Expiry,
 				status = url.Expiry.HasValue && url.Expiry < DateTime.Now ? false : (url.Status ?? true),
-				clickCount = url.ClickCount
-
+				clickCount = url.ClickCount,
+				tags = url.LinkTags.Select(lt => lt.Tag.Name).ToList()
 			});
 
 			return Ok(result);
@@ -106,7 +114,10 @@ namespace server.Controllers
 		[HttpGet("getLink/{id}")]
 		public async Task<IActionResult> GetUrlInfo(int id)
 		{
-			var url = await _context.ShortUrls.FindAsync(id);
+			var url = await _context.ShortUrls
+				.Include(x => x.LinkTags)
+				.ThenInclude(lt => lt.Tag)
+				.FirstOrDefaultAsync(x => x.ShortId == id);
 			if (url == null)
 			{
 				return NotFound(new ErrorResponse
@@ -138,7 +149,9 @@ namespace server.Controllers
 				androidLink = url.AndroidLink,
 				createdByUser = url.CreatedByUser,
 				expiry = url.Expiry,
-				status = url.Status ?? true
+				status = url.Status ?? true,
+				clickCount = url.ClickCount,
+				tags = url.LinkTags.Select(lt => lt.Tag.Name).ToList()
 			});
 		}
 
@@ -152,6 +165,22 @@ namespace server.Controllers
 				{
 					ErrorCode = "ORIGINALURL_NOT_FOUND",
 					ErrorMessage = "Link Không hợp lệ!"
+				});
+			}
+			if (string.IsNullOrEmpty(request.Domain))
+			{
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "DOMAIN_REQUIRED",
+					ErrorMessage = "Domain không được để trống!"
+				});
+			}
+			if (request.Tags == null || !request.Tags.Any())
+			{
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "TAG_REQUIRED",
+					ErrorMessage = "Tag không được để trống!"
 				});
 			}
 
@@ -204,8 +233,24 @@ namespace server.Controllers
 				AndroidLink = request.AndroidLink,
 				CreatedByUser = request.CreatedByUser,
 				Expiry = request.Expiry,
-				Status = true
+				Status = true,
+				LinkTags = new List<ShortURL_LinkTag>()
 			};
+			foreach (var tagName in request.Tags.Distinct())
+			{
+				var existingTag = await _context.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
+				if (existingTag == null)
+				{
+					existingTag = new ShortURL_Tags { Name = tagName };
+					_context.Tags.Add(existingTag);
+					await _context.SaveChangesAsync(); // lưu lại để lấy ID
+				}
+				shortUrl.LinkTags.Add(new ShortURL_LinkTag
+				{
+					TagId = existingTag.Id,
+					Link = shortUrl
+				});
+			}
 			_context.ShortUrls.Add(shortUrl);
 			await _context.SaveChangesAsync();
 
@@ -342,7 +387,9 @@ namespace server.Controllers
 		[HttpPut("update/{id}")]
 		public async Task<IActionResult> UpdateUrl(int id, [FromBody] ShortURL_LinkDTO request)
 		{
-			var url = await _context.ShortUrls.FindAsync(id);
+			var url = await _context.ShortUrls
+					.Include(x => x.LinkTags)
+					.FirstOrDefaultAsync(x => x.ShortId == id);
 			if (url == null)
 			{
 				return NotFound(new ErrorResponse
@@ -366,6 +413,14 @@ namespace server.Controllers
 				{
 					ErrorCode = "DOMAIN_REQUIRED",
 					ErrorMessage = "Domain không được để trống!"
+				});
+			}
+			if (request.Tags == null || !request.Tags.Any())
+			{
+				return BadRequest(new ErrorResponse 
+				{ 
+					ErrorCode = "TAG_REQUIRED", 
+					ErrorMessage = "Tag không được để trống!" 
 				});
 			}
 
@@ -412,11 +467,29 @@ namespace server.Controllers
 			url.IosLink = request.IosLink;
 			url.Expiry = request.Expiry;
 			url.Status = request.Expiry.HasValue && request.Expiry < DateTime.Now ? false : (request.Status ?? true);
+			var removedTagIds = url.LinkTags.Select(lt => lt.TagId).ToList();
+			_context.LinkTags.RemoveRange(url.LinkTags);
+			url.LinkTags = new List<ShortURL_LinkTag>();
 
+			foreach (var tagName in request.Tags.Distinct())
+			{
+				var existingTag = await _context.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
+				if (existingTag == null)
+				{
+					existingTag = new ShortURL_Tags { Name = tagName };
+					_context.Tags.Add(existingTag);
+					await _context.SaveChangesAsync(); // Lưu để lấy ID
+				}
+				url.LinkTags.Add(new ShortURL_LinkTag
+				{
+					TagId = existingTag.Id,
+					Link = url
+				});
+			}
 
 			_context.ShortUrls.Update(url);
 			await _context.SaveChangesAsync();
-
+			await RemoveOrphanedTagsAsync(removedTagIds);
 			var shortLink = $"{url.Domain}/{url.Alias}";
 			return Ok(new { id = url.ShortId, shortLink });
 		}
@@ -425,7 +498,9 @@ namespace server.Controllers
 		[HttpDelete("delete/{id}")]
 		public async Task<IActionResult> DeleteUrl(int id)
 		{
-			var url = await _context.ShortUrls.FindAsync(id);
+			var url = await _context.ShortUrls
+				.Include(x => x.LinkTags)
+				.FirstOrDefaultAsync(x => x.ShortId == id);
 			if (url == null)
 			{
 				return NotFound(new ErrorResponse
@@ -434,9 +509,11 @@ namespace server.Controllers
 					ErrorMessage = "URL không tồn tại!"
 				});
 			}
+			var removedTagIds = url.LinkTags.Select(lt => lt.TagId).ToList();
+			_context.LinkTags.RemoveRange(url.LinkTags);
 			_context.ShortUrls.Remove(url);
 			await _context.SaveChangesAsync();
-
+			await RemoveOrphanedTagsAsync(removedTagIds);
 			return Ok(new { message = "URL deleted successfully", id = id });
 		}
 
@@ -456,12 +533,25 @@ namespace server.Controllers
 				}
 
 				var temp = string.Join(",", ids);
-				var lstTemp = _context.ShortUrls.FromSqlRaw($"SELECT * FROM [ShortURL.Links] WHERE ShortId IN ({temp})");
+				var lstTemp = await _context.ShortUrls.FromSqlRaw($"SELECT * FROM [ShortURL.Links] WHERE ShortId IN ({temp})").ToListAsync();
+				if (!lstTemp.Any())
+				{
+					return NotFound(new ErrorResponse
+					{
+						ErrorCode = "URLS_NOT_FOUND",
+						ErrorMessage = "Không tìm thấy URL nào để xóa."
+					});
+				}
+				var deletedIds = lstTemp.Select(u => u.ShortId).ToList();
 
-				var deletedIds = new List<int>();
+				var linkTags = await _context.LinkTags
+					.FromSqlRaw($"SELECT * FROM [ShortURL.LinkTags] WHERE ShortId IN ({string.Join(",", deletedIds)})")
+					.ToListAsync();
+				var removedTagIds = linkTags.Select(lt => lt.TagId).ToList();
+				_context.LinkTags.RemoveRange(linkTags);
 				_context.ShortUrls.RemoveRange(lstTemp);
 				await _context.SaveChangesAsync();
-
+				await RemoveOrphanedTagsAsync(removedTagIds);
 				return Ok(new
 				{
 					message = "Các URL đã được xóa thành công.",
@@ -516,7 +606,20 @@ namespace server.Controllers
 
 			return (device, os, browser);
 		}
-
+		private async Task RemoveOrphanedTagsAsync(List<int> tagIds)
+		{
+			if (!tagIds.Any())
+				return;
+			var temp = string.Join(",", tagIds);
+			var tags = await _context.Tags
+				.FromSqlRaw($"SELECT t.* FROM [ShortURL.Tags] t LEFT JOIN [ShortURL.LinkTags] lt ON t.Id = lt.TagId WHERE t.Id IN ({temp}) AND lt.TagId IS NULL")
+				.ToListAsync();
+			if (tags.Any())
+			{
+				_context.Tags.RemoveRange(tags);
+				await _context.SaveChangesAsync();
+			}
+		}
 
 
 	}

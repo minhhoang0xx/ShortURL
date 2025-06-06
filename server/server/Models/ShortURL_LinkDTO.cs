@@ -15,5 +15,6 @@
 		public DateTime? Expiry { get; set; }
 		public bool? Status { get; set; } = true;
 		public int? ClickCount { get; set; } = 0;
+		public List<string> Tags { get; set; }
 	}
 }

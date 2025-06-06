@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Azure;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -23,6 +24,6 @@ namespace server.Models
 		public bool? Status { get; set; } = true;
 		public int? ClickCount { get; set; } = 0;
 
-
+		public ICollection<ShortURL_LinkTag> LinkTags { get; set; }
 	}
 }
