@@ -1,4 +1,4 @@
-import { Layout, Table, Input, Button, Select, Space, message, Spin, QRCode, DatePicker, Checkbox, Modal } from 'antd';
+import { Layout, Table, Input, Button, Select, Space, message, DatePicker, Checkbox } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -7,7 +7,7 @@ import * as DownloadService from '../../services/DownloadService';
 import UpdateModal from '../../components/UpdateModal';
 import DeleteModal from '../../components/DeleteModal';
 import CreateModal from '../../components/CreateModal';
-import { CopyTwoTone, DeleteTwoTone, EditFilled, EditTwoTone, PlusOutlined, PlusSquareFilled, PlusSquareOutlined } from '@ant-design/icons';
+import { CopyTwoTone, DeleteTwoTone, EditTwoTone} from '@ant-design/icons';
 import '../../pages/ShortURL/style.css';
 import * as DomainService from '../../services/DomainService';
 import { jwtDecode } from 'jwt-decode';
@@ -368,9 +368,9 @@ const ListShortLink = () => {
       );
     }
     if (searchText) {
-      result = result.filter(
+      result = result.filter( 
         (item) =>
-          item.alias && item.alias.toLowerCase().includes(searchText.toLowerCase())
+          item.tag && item.tag.toLowerCase().includes(searchText.toLowerCase())
       );
     }
     setFilteredData(result);
@@ -458,7 +458,6 @@ const ListShortLink = () => {
       setLoading(false);
     }
   };
-
   const showCreateModal = () => {
     setCreateModal(true);
   };
@@ -593,7 +592,7 @@ const ListShortLink = () => {
             )}
 
             <Input
-              placeholder="Tìm kiếm theo đường dẫn"
+              placeholder="Tìm kiếm theo Tag"
               value={searchText}
               size="middle"
               className='LSL_search-bar-input'

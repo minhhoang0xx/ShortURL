@@ -6,6 +6,7 @@ import { CopyOutlined, EditOutlined, LinkOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import * as ShortUrlService from '../services/ShortUrlService';
 import * as DomainService from '../services/DomainService';
+import * as TagService from '../services/TagService';
 import { jwtDecode } from 'jwt-decode';
 
 const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
@@ -17,6 +18,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const [loading, setLoading] = useState(false)
   const [isChecked, setIsChecked] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
+  const [tagOptions, setTagOptions] = useState([]);
   const dateFormat = 'DD/MM/YYYY';
 
   useEffect(() => {
@@ -28,9 +30,11 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
         expiry: record.expiry ? dayjs(record.expiry, 'YYYY-MM-DDTHH:mm:ss') : null,
       });
       fetchDomains();
+      fetchTags();
       setShortUrl(record.shortLink);
       setQrLink(record.qrCode);
       setIsChecked(record.checkOS);
+      setTagOptions(record.tag)
       setIsExpired(record.status === false || (record.expiry && new Date(record.expiry) < new Date()));
       console.log("Form values after setting:", record);
       console.log("record.expiry:", record.expiry);
@@ -40,6 +44,18 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     const response = await DomainService.getAll();
     setDomains(response);
     console.log("doamin", response)
+  };
+  const fetchTags = async () => {
+    try {
+      const response = await TagService.getAllTags();
+      const formatted = response.map(tag => ({
+        value: tag.name,
+        label: tag.name
+      }));
+      setTagOptions(formatted);
+    } catch (error) {
+      console.error("Lỗi khi tải tag:", error);
+    }
   };
 
   const handleFormValuesChange = (changedValues) => {
@@ -72,13 +88,12 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       const decodedToken = jwtDecode(token);
       const userName = decodedToken["name"];
       data.createdByUser = userName;
-      console.log("selectedDomain", selectedDomain)
       const linkShort = `${data.domain}/${data.alias}`;
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
       data.qrCode = qr;
       data.status = data.expiry && new Date(data.expiry) < new Date() ? false : true;
+      console.log("data_tag", data)
       const response = await ShortUrlService.updateShortLink(record.id, data)
-
       if (response && response.shortLink) {
         console.log("API Response:", response);
         message.success(`Cập nhật thành công!`);
@@ -234,6 +249,20 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
                 <Input disabled={isExpired} placeholder="Tên đường dẫn - Alias" />
               </Form.Item>
             </Space.Compact>
+          </Form.Item>
+          <Form.Item
+            name="tags"
+            label={<span>Tag: <span style={{ color: 'red' }}>*</span></span>}
+            className='CSL_form-tag'
+            rules={[
+              { required: true, message: 'Vui lòng nhập Tag' },
+            ]}>
+            <Select
+              mode="tags"
+              style={{ width: '100%' }}
+              placeholder="Nhập mới hoặc chọn tags"
+              options={tagOptions}
+            />
           </Form.Item>
           <Form.Item
             name="expiry"

@@ -284,6 +284,9 @@
     .CSL_custom-link-domain label{
         font-weight: 400;
     }
+    .CSL_form-tag{
+        margin-top: -10px;
+    }
 
     .ant-form-item{
         margin-bottom: 10px;

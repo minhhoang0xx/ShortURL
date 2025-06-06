@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Col, DatePicker, message, Modal, Row, Space, Table, Tag } from 'antd';
+import { DatePicker, message, Modal, Table, Tag } from 'antd';
 import * as ShortUrlService from '../services/ShortUrlService';
 import './style.css';
 import { Content } from 'antd/es/layout/layout';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 const { RangePicker } = DatePicker
 const dateFormat = 'DD/MM/YYYY';
 const LogModal = ({ visible, onCancel, record }) => {
-    console.log('record', record);
     const navigate = useNavigate();
     const [filteredData, setFilteredData] = useState([]);
     const [dateRange, setDateRange] = useState([null, null]);
@@ -86,7 +85,6 @@ const LogModal = ({ visible, onCancel, record }) => {
                 return;
             }
             const log = await ShortUrlService.getLogs(record.alias, record.domain);
-            console.log('DataLog từ API:', log);
             const formattedData = log.map((log) => ({ ...log, key: log.id }));
             setOriginalData(formattedData);
             let dataToDisplay = [...formattedData];
