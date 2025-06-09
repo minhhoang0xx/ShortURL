@@ -183,6 +183,13 @@ namespace server.Controllers
 					ErrorMessage = "Tag không được để trống!"
 				});
 			}
+			if (request.Alias.Count() >= 50) {
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "ALIAS_TO_LONG",
+					ErrorMessage = "Alias chỉ được phép dưới 50 ký tự!"
+				});
+			}
 
 			var existingOG = await _context.ShortUrls
 				.Where(url => url.CreatedByUser == request.CreatedByUser && url.OriginalUrl == request.OriginalUrl )
@@ -323,7 +330,7 @@ namespace server.Controllers
 				ClickedAt = DateTime.Now
 			};
 			_context.Add(log);
-			url.ClickCount += 1;
+			url.ClickCount = (url.ClickCount ?? 0) + 1;
 			await _context.SaveChangesAsync();
 
 			if (url.CheckOS == true)

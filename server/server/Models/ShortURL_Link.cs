@@ -22,7 +22,7 @@ namespace server.Models
 		public string? CreatedByUser { get; set; }
 		public DateTime? Expiry {  get; set; }
 		public bool? Status { get; set; } = true;
-		public int? ClickCount { get; set; } = 0;
+		public int? ClickCount { get; set; }
 
 		public ICollection<ShortURL_LinkTag> LinkTags { get; set; }
 	}

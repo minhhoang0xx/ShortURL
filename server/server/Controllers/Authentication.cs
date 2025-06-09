@@ -6,6 +6,7 @@ using server.Data;
 using server.Models;
 using System.Security.Cryptography;
 namespace server.Controllers;
+using Microsoft.AspNetCore.Authorization;
 using server.Services;
 using System.Collections.Concurrent;
 using System.Text;
@@ -152,5 +153,13 @@ public class Authentication : ControllerBase
 			var token = _jwtService.GenerateToken(checkLogin.UserName.ToString());
             return Ok(new { message = "Đăng nhập thành công", token, attempts = Failed(clientIp) });
 		}
+	[Authorize]
+	[HttpPost("logout")]
+	public async Task<IActionResult> Logout()
+	{
+		return Ok(new { message = "Đăng xuất thành công" });
+	}
+	
+
 
 }

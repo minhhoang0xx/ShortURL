@@ -40,7 +40,7 @@ namespace server.Controllers
 					var worksheet = package.Workbook.Worksheets.Add("ShortUrls");
 					// Tiêu đề Form
 					worksheet.Cells[1, 1].Value = "SHORT URLs";
-					worksheet.Cells[1, 1, 1, 14].Merge = true; 
+					worksheet.Cells[1, 1, 1, 15].Merge = true; 
 					worksheet.Cells[1, 1].Style.Font.Name = "Times New Roman";
 					worksheet.Cells[1, 1].Style.Font.Size = 16;
 					worksheet.Cells[1, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
@@ -52,20 +52,21 @@ namespace server.Controllers
 					worksheet.Cells[2, 1].Value = "STT";
 					worksheet.Cells[2, 2].Value = "Dự án";
 					worksheet.Cells[2, 3].Value = "Tên đường dẫn";
-					worksheet.Cells[2, 4].Value = "URL gốc";
-					worksheet.Cells[2, 5].Value = "URL rút gọn";
-					worksheet.Cells[2, 6].Value = "QrCode";
-					worksheet.Cells[2, 7].Value = "Ngày cập nhật";
-					worksheet.Cells[2, 8].Value = "Ngày hết hạn";
-					worksheet.Cells[2, 9].Value = "Người cập nhật";
-					worksheet.Cells[2, 10].Value = "Lượt truy cập";
-					worksheet.Cells[2, 11].Value = "Trạng thái";
-					worksheet.Cells[2, 12].Value = "Kiểm tra OS"; 
-					worksheet.Cells[2, 13].Value = "iOS Link"; 
-					worksheet.Cells[2, 14].Value = "Android Link";
+					worksheet.Cells[2, 4].Value = "Tag";
+					worksheet.Cells[2, 5].Value = "URL gốc";
+					worksheet.Cells[2, 6].Value = "URL rút gọn";
+					worksheet.Cells[2, 7].Value = "QrCode";
+					worksheet.Cells[2, 8].Value = "Ngày cập nhật";
+					worksheet.Cells[2, 9].Value = "Ngày hết hạn";
+					worksheet.Cells[2, 10].Value = "Người cập nhật";
+					worksheet.Cells[2, 11].Value = "Lượt truy cập";
+					worksheet.Cells[2, 12].Value = "Trạng thái";
+					worksheet.Cells[2, 13].Value = "Kiểm tra OS"; 
+					worksheet.Cells[2, 14].Value = "IOS Link"; 
+					worksheet.Cells[2, 15].Value = "Android Link";
 
 
-					var headerRange = worksheet.Cells[2, 1, 2, 14];
+					var headerRange = worksheet.Cells[2, 1, 2, 15];
 					headerRange.Style.Font.Name = "Times New Roman";
 					headerRange.Style.Font.Size = 12;
 					headerRange.Style.Font.Bold = true;
@@ -77,13 +78,13 @@ namespace server.Controllers
 					headerRange.Style.Border.Right.Style = ExcelBorderStyle.Thin;
 					headerRange.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
 
-					worksheet.Column(4).Width = 50;
 					worksheet.Column(5).Width = 50;
-					worksheet.Column(6).Width = 20;
+					worksheet.Column(6).Width = 50;
 					worksheet.Column(7).Width = 20;
 					worksheet.Column(8).Width = 20;
-					worksheet.Column(12).Width = 20; 
-					worksheet.Column(13).Width = 20;
+					worksheet.Column(9).Width = 20;
+					worksheet.Column(14).Width = 20; 
+					worksheet.Column(15).Width = 20;
 
 					int row = 3;
 					int index = 1;
@@ -92,33 +93,35 @@ namespace server.Controllers
 						worksheet.Cells[row, 1].Value = index; index++;
 						worksheet.Cells[row, 2].Value = url.ProjectName;
 						worksheet.Cells[row, 3].Value = url.Alias;
-						worksheet.Cells[row, 4].Value = url.OriginalUrl;
-						worksheet.Cells[row, 5].Value = $"{url.Domain}/{url.Alias}";
-						worksheet.Cells[row, 6].Value = url.QrCode;
-						worksheet.Cells[row, 7].Value = url.CreateAt.ToString("HH:mm dd/MM/yyyy");
-						worksheet.Cells[row, 8].Value = url.Expiry?.ToString("00:00 dd/MM/yyyy") ?? "Vô thời hạn";
-						worksheet.Cells[row, 9].Value = url.CreatedByUser;
-						worksheet.Cells[row, 10].Value = url.ClickCount;
-						worksheet.Cells[row, 11].Value = url.Status.HasValue ? (url.Status.Value ? "Hoạt động" : "Quá Hạn") : "Không xác định";
-						worksheet.Cells[row, 12].Value = url.CheckOS.HasValue ? (url.CheckOS.Value ? "Có" : "Không") : "Không xác định"; 
-						worksheet.Cells[row, 13].Value = url.IosLink ?? "Không có"; 
-						worksheet.Cells[row, 14].Value = url.AndroidLink ?? "Không có"; 
-
+						worksheet.Cells[row, 4].Value = url.Tags;
+						worksheet.Cells[row, 5].Value = url.OriginalUrl;
+						worksheet.Cells[row, 6].Value = $"{url.Domain}/{url.Alias}";
+						worksheet.Cells[row, 7].Value = url.QrCode;
+						worksheet.Cells[row, 8].Value = url.CreateAt.ToString("HH:mm dd/MM/yyyy");
+						worksheet.Cells[row, 9].Value = url.Expiry?.ToString("00:00 dd/MM/yyyy") ?? "Vô thời hạn";
+						worksheet.Cells[row, 10].Value = url.CreatedByUser;
+						worksheet.Cells[row, 11].Value = url.ClickCount;
+						worksheet.Cells[row, 12].Value = url.Status.HasValue ? (url.Status.Value ? "Hoạt động" : "Quá Hạn") : "Không xác định";
+						worksheet.Cells[row, 13].Value = url.CheckOS.HasValue ? (url.CheckOS.Value ? "Có" : "Không") : "Không xác định"; 
+						worksheet.Cells[row, 14].Value = url.IosLink ?? "Không có"; 
+						worksheet.Cells[row, 15].Value = url.AndroidLink ?? "Không có";
 
 						// căn chỉnh thông tin
+						worksheet.Cells[row, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 						worksheet.Cells[row, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 						worksheet.Cells[row, 3].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 						worksheet.Cells[row, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 						worksheet.Cells[row, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 						worksheet.Cells[row, 6].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-						worksheet.Cells[row, 7].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+						worksheet.Cells[row, 7].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 						worksheet.Cells[row, 8].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-						worksheet.Cells[row, 9].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-						worksheet.Cells[row, 10].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+						worksheet.Cells[row, 9].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+						worksheet.Cells[row, 10].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 						worksheet.Cells[row, 11].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 						worksheet.Cells[row, 12].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-						worksheet.Cells[row, 13].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+						worksheet.Cells[row, 13].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 						worksheet.Cells[row, 14].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+						worksheet.Cells[row, 15].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 
 						if (url.Status.HasValue && !url.Status.Value)
 						{
@@ -126,22 +129,22 @@ namespace server.Controllers
 						}
 
 						// Đặt font cho dữ liệu
-						worksheet.Cells[row, 1, row, 14].Style.Font.Name = "Times New Roman";
-						worksheet.Cells[row, 1, row, 14].Style.Font.Size = 10;
-						worksheet.Cells[row, 1, row, 14].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-						worksheet.Cells[row, 1, row, 14].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-						worksheet.Cells[row, 1, row, 14].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+						worksheet.Cells[row, 1, row, 15].Style.Font.Name = "Times New Roman";
+						worksheet.Cells[row, 1, row, 15].Style.Font.Size = 10;
+						worksheet.Cells[row, 1, row, 15].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+						worksheet.Cells[row, 1, row, 15].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+						worksheet.Cells[row, 1, row, 15].Style.Border.Right.Style = ExcelBorderStyle.Thin;
 
 						row++;
 					}
 
 				
-					for (int col = 1; col <= 14; col++)
+					for (int col = 1; col <= 15; col++)
 					{
-						if (col != 4 && col != 6 && col != 5 && col != 12 && col != 13 && col != 8 && col != 7) 
+						if (col != 5 && col != 7 && col != 6 && col != 14 && col != 15 && col != 9 && col != 8) 
 							worksheet.Column(col).AutoFit();
 					}
-					var dataRange = worksheet.Cells[2, 1, row - 1, 14];
+					var dataRange = worksheet.Cells[2, 1, row - 1, 15];
 					dataRange.Style.Border.Top.Style = ExcelBorderStyle.Thin;
 					dataRange.Style.Border.Left.Style = ExcelBorderStyle.Thin;
 					dataRange.Style.Border.Right.Style = ExcelBorderStyle.Thin;
