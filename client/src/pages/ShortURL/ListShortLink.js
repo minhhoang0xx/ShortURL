@@ -1,4 +1,4 @@
-import { Layout, Table, Input, Button, Select, Space, message, DatePicker, Checkbox } from 'antd';
+import { Layout, Table, Input, Button, Select, Space, message, DatePicker, Checkbox, Tag } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -13,6 +13,7 @@ import * as DomainService from '../../services/DomainService';
 import { jwtDecode } from 'jwt-decode';
 import DeleteManyModal from '../../components/DeleteManyModal';
 import LogModal from '../../components/LogModal';
+import ScrollContainer from 'react-indiana-drag-scroll';
 const { Content } = Layout;
 const { Option } = Select;
 const { RangePicker } = DatePicker
@@ -45,6 +46,7 @@ const ListShortLink = () => {
     pageSize: 20,
     total: 0,
   });
+ 
 
   const columns = [
     {
@@ -90,11 +92,42 @@ const ListShortLink = () => {
       sortDirections: ['ascend', 'descend'],
       showSorterTooltip: false,
       onCell: (record) => {
-        if (record.status === true && record.checkOS) {
+        if ( record.checkOS) {
           return { className: 'cell-highlight' };
         }
-        return {};
+        return {};  
       },
+    },
+    // {
+    //   title: 'Tag',
+    //   dataIndex: 'tags',
+    //   key: 'tags',
+    //   width: '10%',
+    //   render: function (tags) {
+    //     return (
+    //       <div className="tag-scroll-container">
+    //         {tags.map(tag => (
+    //           <Tag key={tag}>{tag}</Tag>
+    //         ))}
+    //       </div>
+    //     );
+    //   }
+    // },  
+    {
+      title: 'Tag',
+      dataIndex: 'tags',
+      key: 'tags',
+      width: 150,
+      render: tags => (
+        <ScrollContainer
+          className="scroll-container"
+          horizontal
+          vertical={false}
+          style={{ maxWidth: 140, whiteSpace: 'nowrap' }}
+        >
+          {tags.map(tag => <Tag key={tag}>{tag}</Tag>)}
+        </ScrollContainer>
+      )
     },
     {
       title: 'URL gốc',
@@ -140,24 +173,24 @@ const ListShortLink = () => {
           {date ? dayjs(date).format('HH:mm DD/MM/YYYY') : 'null'}
         </span>
       ),
-      width: '11%',
+      width: '10%',
       sorter: (a, b) => dayjs(a.createAt).unix() - dayjs(b.createAt).unix(),
       sortDirections: ['ascend', 'descend'],
       onCell: (record) => {
-        if (record.status === true && record.checkOS) {
+        if ( record.checkOS) {
           return { className: 'cell-highlight' };
         }
         return {};
       },
     },
     {
-      title: 'Ngày hết hạn',
+      title: 'Thời Hạn',
       dataIndex: 'expiry',
       key: 'expiry',
       className: 'action-column',
       showSorterTooltip: false,
       render: (date) => (date ? dayjs(date).format(' DD/MM/YYYY') : 'Vô thời hạn'),
-      width: '10%',
+      width: '8%',
       sorter: (a, b) => {
         if (!a.expiry && !b.expiry) return 0;
         if (!a.expiry) return 1;
@@ -166,7 +199,7 @@ const ListShortLink = () => {
       },
       sortDirections: ['ascend', 'descend'],
       onCell: (record) => {
-        if (record.status === true && record.checkOS) {
+        if ( record.checkOS) {
           return { className: 'cell-highlight' };
         }
         return {};
@@ -183,7 +216,7 @@ const ListShortLink = () => {
           sortDirections: ['ascend', 'descend'],
           showSorterTooltip: false,
           onCell: (record) => {
-            if (record.status === true && record.checkOS) {
+            if ( record.checkOS) {
               return { className: 'cell-highlight' };
             }
             return {};
@@ -192,19 +225,19 @@ const ListShortLink = () => {
       ]
       : []),
     {
-      title: 'Lượt truy cập',
+      title: 'Truy cập',
       dataIndex: 'clickCount',
       className: 'action-column',
       showSorterTooltip: false,
       key: 'clickCount',
-      width: '10%',
+      width: '7%',
       render: (clickCount) => (clickCount || 0),
       sorter: (a, b) => (a.clickCount || 0) - (b.clickCount || 0),
       sortDirections: ['ascend', 'descend'],
       onCell: (record) => ({
         onClick: () => showLogModal(record),
         style: { cursor: 'pointer', fontStyle: 'underline', color: '#1890ff' },
-        className: record.status === true && record.checkOS ? 'cell-highlight' : '',
+        className:  record.checkOS ? 'cell-highlight' : '',
       }),
     },
     {
@@ -213,7 +246,7 @@ const ListShortLink = () => {
       className: 'action-column',
       showSorterTooltip: false,
       key: 'status',
-      width: '8.5%',
+      width: '8%',
       render: (status) => (
         <span className={status ? 'status-active' : 'status-expired'}>
           {status ? 'Hoạt động' : 'Quá Hạn'}
@@ -222,7 +255,7 @@ const ListShortLink = () => {
       sorter: (a, b) => (a.status === b.status ? 0 : a.status ? -1 : 1),
       sortDirections: ['ascend', 'descend'],
       onCell: (record) => {
-        if (record.status === true && record.checkOS) {
+        if ( record.checkOS) {
           return { className: 'cell-highlight' };
         }
         return {};
@@ -232,7 +265,7 @@ const ListShortLink = () => {
     {
       title: 'Chọn',
       key: 'action',
-      width: '8%',
+      width: '7%',
       className: 'action-column',
       render: (_, record) => (
         <Space size="middle">
@@ -250,6 +283,7 @@ const ListShortLink = () => {
       ),
     },
   ];
+  
   const handleCheckAll = (checked) => {
     if (checked) {
       setSelectedRows(filteredData.map((record) => record.key));
@@ -367,10 +401,17 @@ const ListShortLink = () => {
           dayjs(item.createAt).isBefore(end)
       );
     }
-    if (searchText) {
-      result = result.filter( 
+    if (searchText && searchText.trim()) {
+      const searchTerms = searchText.toLowerCase().split(/\s+/).filter(term => term);
+      result = result.filter(
         (item) =>
-          item.tag && item.tag.toLowerCase().includes(searchText.toLowerCase())
+          Array.isArray(item.tags) &&
+          searchTerms.every(term =>
+            item.tags.some(tag => 
+              tag && 
+              tag.toLowerCase().includes(term)
+            )
+          )
       );
     }
     setFilteredData(result);
@@ -618,7 +659,8 @@ const ListShortLink = () => {
           dataSource={filteredData}
           bordered
           rowClassName={(record) =>
-            record.status === false ? 'row-disabled' : record.checkOS === true ? 'row-highlight' : ''
+            // record.status === false ? 'row-disabled' : record.checkOS === true ? 'row-highlight' : ''
+            record.checkOS === true ? 'row-highlight' : ''
           }
           pagination={{
             ...pagination,

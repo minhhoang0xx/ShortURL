@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { DatePicker, message, Modal, Table, Tag } from 'antd';
+import { Button, DatePicker, message, Modal, Table, Tag } from 'antd';
 import * as ShortUrlService from '../services/ShortUrlService';
 import './style.css';
 import { Content } from 'antd/es/layout/layout';
@@ -126,6 +126,10 @@ const LogModal = ({ visible, onCancel, record }) => {
             onCancel={onCancel}
             className="log_modal"
             width="90vw"
+            footer={[
+                <Button key="close" onClick={onCancel} className="log-modal-cancle">
+                    Đóng
+                </Button>]}
         >
             <Content className="log_main-container">
                 <div className="log_main-container">
@@ -141,12 +145,12 @@ const LogModal = ({ visible, onCancel, record }) => {
                             <div className="log_info-flex">
                                 <div className="log_info-row">
                                     <div className="log_info-pair">
-                                        <span className="label">Ngày hết hạn:</span>
-                                        <span>{record.expiry ? dayjs(record.expiry).format('DD/MM/YYYY') : 'Vô thời hạn'}</span>
-                                    </div>
-                                    <div className="log_info-pair">
                                         <span className="label">Dự án:</span>
                                         <span>{record.projectName}</span>
+                                    </div>
+                                    <div className="log_info-pair">
+                                        <span className="label">Ngày hết hạn:</span>
+                                        <span>{record.expiry ? dayjs(record.expiry).format('DD/MM/YYYY') : 'Vô thời hạn'}</span>
                                     </div>
                                     <div className="log_info-pair">
                                         <span className="label">Người cập nhật:</span>

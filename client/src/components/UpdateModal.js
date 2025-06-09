@@ -243,6 +243,10 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
                   {
                     pattern: /^[a-zA-Z0-9]+$/,
                     message: 'Alias phải chứa chữ cái (a-z, A-Z) và số (0-9)!'
+                  },
+                  {
+                    max: 50,
+                    message: 'Alias không được vượt quá 50 ký tự!'
                   }
                 ]}
               >
@@ -283,7 +287,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
               name="iosLink"
               label={<span>Link tới App Store <span style={{ color: 'red' }}>*</span></span>}
               rules={[{ required: true, message: "Vui lòng nhập URL App Store!" },
-              { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+              { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' }
               ]}
             >
               <Input disabled={isExpired} placeholder="Nhập URL App Store" />
@@ -294,7 +298,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
               name="androidLink"
               label={<span>Link tới Google Play <span style={{ color: 'red' }}>*</span></span>}
               rules={[{ required: true, message: "Vui lòng nhập URL Google Play!" },
-              { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+              { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' }
               ]}
             >
               <Input disabled={isExpired} placeholder="Nhập URL Google Play" />

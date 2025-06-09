@@ -79,11 +79,11 @@
   gap: 6px;
   align-items: center;
 }
+.log_modal .ant-modal-footer{
+text-align: center;
+}
 
 .label {
   font-weight: 600;
 }
 
-.Tag{
-  
-}

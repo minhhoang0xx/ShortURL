@@ -20,6 +20,8 @@
     .header-content {
         align-items: center;
         margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
     }
 
     .header-content span {
@@ -35,7 +37,17 @@
     .ant-layout-header{
         height: 50px;
         line-height: 50px;
+        padding: 0 15px 0 50px;
     }
+    .logout{
+        height: 50px;
+    }
+    .logout a{
+        color: white;
+        font-size: 30px;
+        
+    }
+ 
     /* ----------------------------------------end header----------------------------------- */
 
     /* ---------------------------------------start body------------------------------------- */
@@ -157,6 +169,18 @@
         background-color: #FAFAFA !important; 
         
       }
+      /* .tag-scroll-container {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 4px;
+      } */
+      .scroll-container::-webkit-scrollbar {
+        display: none;
+      }
+      
+
+   
+ 
   
     /* end List Link */
 

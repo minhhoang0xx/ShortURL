@@ -243,6 +243,10 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
                   {
                     pattern: /^[a-zA-Z0-9]+$/,
                     message: 'Alias phải chứa chữ cái (a-z, A-Z) và số (0-9).'
+                  },
+                  {
+                    max: 50,
+                    message: 'Alias không được vượt quá 50 ký tự!'
                   }
                 ]}
               >
@@ -250,16 +254,6 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
               </Form.Item>
             </Space.Compact>
           </Form.Item>
-          {/* <Form.Item
-            name="tag"
-            label={<span>Tag: <span style={{ color: 'red' }}>*</span></span>}
-            className='CSL_form-tag'
-            rules={[
-              { required: true, message: 'Vui lòng nhập Tag' },
-            ]}
-          >
-            <Input placeholder="Nhập một hoặc nhiều Tag" />
-          </Form.Item> */}
           <Form.Item
             name="tags"
             label={<span>Tag: <span style={{ color: 'red' }}>*</span></span>}
@@ -294,7 +288,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
               name="iosLink"
               label={<span>Link tới App Store <span style={{ color: 'red' }}>*</span></span>}
               rules={[{ required: true, message: "Vui lòng nhập URL App Store!" },
-              { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+              { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' }
               ]}
             >
               <Input placeholder="Nhập URL App Store" />
@@ -305,7 +299,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
               name="androidLink"
               label={<span>Link tới Google Play <span style={{ color: 'red' }}>*</span></span>}
               rules={[{ required: true, message: "Vui lòng nhập URL Google Play!" },
-              { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' }
+              { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' }
               ]}
             >
               <Input placeholder="Nhập URL Google Play" />

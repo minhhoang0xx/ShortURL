@@ -1,11 +1,11 @@
 import React from "react";
-import Header from "../HeaderFooterComponents/header";
+import HeaderBar from "../HeaderFooterComponents/header";
 import Footer from "../HeaderFooterComponents/footer";
 
     const DefaultComponent = ({children}) =>{
     return (
         <div> 
-            <Header/>
+            <HeaderBar/>
             {children}
             {/* <Footer/> */}
         </div>
