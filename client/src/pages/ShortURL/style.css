@@ -4,7 +4,7 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         position: relative;
     }
-    :where(.css-dev-only-do-not-override-1v613y0).ant-layout{
+    .ant-layout{
         background: white;
     }    
 
@@ -24,7 +24,7 @@
         justify-content: space-between;
     }
 
-    .header-content span {
+    .header-content-left span {
         font-weight: bold;
     }
 
@@ -44,10 +44,16 @@
     }
     .logout a{
         color: white;
-        font-size: 30px;
+        font-size: 16px;
+    }
+    .dropd-logout{
+        font-size: 20px;
+        font-weight: 800;
+    }
+    .ant-modal{
+        top: 60px;
         
     }
- 
     /* ----------------------------------------end header----------------------------------- */
 
     /* ---------------------------------------start body------------------------------------- */
@@ -160,10 +166,10 @@
         justify-items: center;
     }
     .row-highlight {
-        background-color: #d5f0fd !important; 
+        background-color: #ecf3f6bd !important; 
       }
       .cell-highlight {
-        background-color: #d5f0fd !important;
+        background-color: #ecf3f6bd !important;
       }
       .ant-table-row:hover > .cell-highlight {
         background-color: #FAFAFA !important; 
@@ -310,6 +316,7 @@
     }
     .CSL_form-tag{
         margin-top: -10px;
+        text-align: left;
     }
 
     .ant-form-item{

@@ -98,21 +98,6 @@ const ListShortLink = () => {
         return {};  
       },
     },
-    // {
-    //   title: 'Tag',
-    //   dataIndex: 'tags',
-    //   key: 'tags',
-    //   width: '10%',
-    //   render: function (tags) {
-    //     return (
-    //       <div className="tag-scroll-container">
-    //         {tags.map(tag => (
-    //           <Tag key={tag}>{tag}</Tag>
-    //         ))}
-    //       </div>
-    //     );
-    //   }
-    // },  
     {
       title: 'Tag',
       dataIndex: 'tags',

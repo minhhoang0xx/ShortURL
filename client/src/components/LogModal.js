@@ -5,6 +5,7 @@ import * as ShortUrlService from '../services/ShortUrlService';
 import './style.css';
 import { Content } from 'antd/es/layout/layout';
 import { useNavigate } from 'react-router-dom';
+import { TagOutlined } from '@ant-design/icons';
 const { RangePicker } = DatePicker
 const dateFormat = 'DD/MM/YYYY';
 const LogModal = ({ visible, onCancel, record }) => {
@@ -56,17 +57,17 @@ const LogModal = ({ visible, onCancel, record }) => {
             width: '5%',
             className: 'action-column',
         },
-        {
-            title: 'Nguồn truy cập',
-            dataIndex: 'source',
-            key: 'source',
-            width: '15%',
-        },
+        // {
+        //     title: 'Nguồn truy cập',
+        //     dataIndex: 'source',
+        //     key: 'source',
+        //     width: '15%',
+        // },
         {
             title: 'IP',
             dataIndex: 'ip',
             key: 'ip',
-            width: '8%',
+            width: '5%',    
         },
     ]
     useEffect(() => {
@@ -88,6 +89,7 @@ const LogModal = ({ visible, onCancel, record }) => {
             const formattedData = log.map((log) => ({ ...log, key: log.id }));
             setOriginalData(formattedData);
             let dataToDisplay = [...formattedData];
+            console.log('data of log', log)
             // Kiểm tra dateRange có phải là mảng có giá trị 
             if (Array.isArray(dateRange) && dateRange[0] && dateRange[1]) {
                 const startDate = dayjs(dateRange[0]).startOf('day');
@@ -96,10 +98,10 @@ const LogModal = ({ visible, onCancel, record }) => {
                     // Kiểm tra clickedAt
                     const clickedAt = item.clickedAt ? dayjs(item.clickedAt) : null;
                     if (!clickedAt || !clickedAt.isValid()) {
-                        return false; 
+                        return false;
                     }
                     return (clickedAt.isAfter(startDate) || clickedAt.isSame(startDate)) &&
-                           (clickedAt.isBefore(endDate) || clickedAt.isSame(endDate));
+                        (clickedAt.isBefore(endDate) || clickedAt.isSame(endDate));
                 });
             }
             setFilteredData(dataToDisplay);
@@ -121,7 +123,10 @@ const LogModal = ({ visible, onCancel, record }) => {
 
     return (
         <Modal
-            title="thống kê truy cập"
+            title={<div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                {record?.tags?.map((tag, index) => (
+                    <Tag key={index} style={{ backgroundColor: '#DFDFDF', color: 'black' }}><TagOutlined/> {tag}</Tag>
+                ))} </div>}
             open={visible}
             onCancel={onCancel}
             className="log_modal"

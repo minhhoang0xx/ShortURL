@@ -182,6 +182,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       open={visible}
       onCancel={handleCancel}
       loading={loading}
+       width="38vw"
       footer={null}>
       <Content className="CSL_main-container">
         <h3>CÔNG CỤ TẠO SHORTLINK</h3>

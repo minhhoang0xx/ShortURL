@@ -306,14 +306,20 @@ namespace server.Controllers
 				});
 			}
 
+
 			string userAgent = Request.Headers["User-Agent"].ToString();
 			string ip = GetClientIp(HttpContext);
 			string referrer = Request.Headers["Referer"].ToString();
 			string source = "Unknown";
-			if (userAgent.Contains("Zalo")) source = "Zalo";
-			else if (userAgent.Contains("FBAN") || userAgent.Contains("FBAV")) source = "Facebook";
-			else if (userAgent.Contains("Instagram")) source = "Instagram";
-			else if (referrer.Contains("gmail")) source = "Gmail";
+			string uaLower = userAgent.ToLower();
+			string refLower = referrer?.ToLower() ?? "";
+
+			if (uaLower.Contains("zalo")) source = "Zalo";
+			else if (uaLower.Contains("fban") || uaLower.Contains("fbav") || uaLower.Contains("facebook") || uaLower.Contains("facebookexternalhit")) source = "Facebook";
+			else if (uaLower.Contains("instagram")) source = "Instagram";
+			else if (refLower.Contains("mail.google.com") || refLower.Contains("gmail")) source = "Gmail";
+			else if (refLower.Contains("t.me")) source = "Telegram";
+			else if (refLower.Contains("l.facebook.com")) source = "Facebook";
 			else if (!string.IsNullOrEmpty(referrer)) source = referrer;
 
 			var (device, os, browser) = ParseUserAgent(userAgent);
@@ -595,24 +601,29 @@ namespace server.Controllers
 		private (string device, string os, string browser) ParseUserAgent(string userAgent)
 		{
 			string device = "Unknown", os = "Unknown", browser = "Unknown";
+			userAgent = userAgent.ToLower();
 
-			if (userAgent.Contains("Windows")) os = "Windows";
-			else if (userAgent.Contains("Mac")) os = "macOS";
-			else if (userAgent.Contains("Linux")) os = "Linux";
-			else if (userAgent.Contains("Android")) os = "Android";
-			else if (userAgent.Contains("iPhone")) os = "iOS";
+			if (userAgent.Contains("windows")) os = "Windows";
+			else if (userAgent.Contains("android")) os = "Android";
+			else if (userAgent.Contains("iphone") || userAgent.Contains("ipad")) os = "IOS";
+			else if (userAgent.Contains("mac os") || userAgent.Contains("macintosh")) os = "MacOS";
+			else if (userAgent.Contains("linux")) os = "Linux";
 
-			if (userAgent.Contains("Mobile")) device = "Mobile";
-			else if (userAgent.Contains("Tablet")) device = "Tablet";
+			if (userAgent.Contains("mobile")) device = "Mobile";
+			else if (userAgent.Contains("tablet") || userAgent.Contains("ipad")) device = "Tablet";
 			else device = "Desktop";
 
-			if (userAgent.Contains("Chrome")) browser = "Chrome";
-			else if (userAgent.Contains("Firefox")) browser = "Firefox";
-			else if (userAgent.Contains("Safari") && !userAgent.Contains("Chrome")) browser = "Safari";
-			else if (userAgent.Contains("Edge")) browser = "Edge";
+			if (userAgent.Contains("edg/")) browser = "Edge";
+			else if (userAgent.Contains("opr/") || userAgent.Contains("opera")) browser = "Opera";
+			else if (userAgent.Contains("chrome") && !userAgent.Contains("edg/") && !userAgent.Contains("opr/")) browser = "Chrome";
+			else if (userAgent.Contains("firefox")) browser = "Firefox";
+			else if (userAgent.Contains("safari") && !userAgent.Contains("chrome") && !userAgent.Contains("opr/") && !userAgent.Contains("edg/")) browser = "Safari";
 
 			return (device, os, browser);
 		}
+
+
+
 		private async Task RemoveOrphanedTagsAsync(List<int> tagIds)
 		{
 			if (!tagIds.Any())

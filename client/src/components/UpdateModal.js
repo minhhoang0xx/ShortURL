@@ -186,7 +186,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   }
 
   return (
-    <Modal open={visible} onCancel={onCancel} loading={loading} footer={null}>
+    <Modal open={visible} onCancel={onCancel} loading={loading} width="38vw" footer={null}>
       <Content className="CSL_main-container">
         <h3>CẬP NHẬT SHORTLINK</h3>
         <Form
