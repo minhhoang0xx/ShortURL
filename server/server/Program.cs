@@ -7,12 +7,11 @@ using server.Controllers;
 using server.Data;
 using System;
 using server.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 
 
 
 var builder = WebApplication.CreateBuilder(args);
-
-
 builder.Services.AddDbContext<URLContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 //builder.Services.AddControllers().AddJsonOptions(options =>
@@ -55,17 +54,17 @@ builder.Services.AddCors(options =>
                   .AllowCredentials();
 		});
 });
-
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+	options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+	options.KnownNetworks.Clear(); 
+	options.KnownProxies.Clear();
+});
 
 var app = builder.Build();
-
-//if (app.Environment.IsDevelopment())
-//{
+app.UseForwardedHeaders();
 app.UseSwagger();
-    app.UseSwaggerUI();
-//}
-
-
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors(MyAllowSpecificOrigins);

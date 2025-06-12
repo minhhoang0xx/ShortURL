@@ -588,14 +588,18 @@ namespace server.Controllers
 			return new string(Enumerable.Repeat(chars, length)
 										.Select(s => s[random.Next(s.Length)]).ToArray());
 		}
+		//private string GetClientIp(HttpContext context)
+		//{
+		//	var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+		//	if (!string.IsNullOrEmpty(ip))
+		//	{
+		//		return ip.Split(',')[0];
+		//	}
+
+		//	return context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+		//}
 		private string GetClientIp(HttpContext context)
 		{
-			var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-			if (!string.IsNullOrEmpty(ip))
-			{
-				return ip.Split(',')[0]; // Nếu có chuỗi IP (proxy), lấy IP đầu tiên
-			}
-
 			return context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
 		}
 		private (string device, string os, string browser) ParseUserAgent(string userAgent)

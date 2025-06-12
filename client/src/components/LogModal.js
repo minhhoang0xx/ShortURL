@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { TagOutlined } from '@ant-design/icons';
 const { RangePicker } = DatePicker
 const dateFormat = 'DD/MM/YYYY';
-const LogModal = ({ visible, onCancel, record }) => {
+const LogModal = ({ visible, onCancel, record, onTagClick }) => {
     const navigate = useNavigate();
     const [filteredData, setFilteredData] = useState([]);
     const [dateRange, setDateRange] = useState([null, null]);
@@ -120,12 +120,19 @@ const LogModal = ({ visible, onCancel, record }) => {
             pageSize: newPagination.pageSize,
         });
     };
+    const handleTagClick = (tag) => {
+        onTagClick(tag);
+        onCancel(); 
+      };
+
 
     return (
         <Modal
             title={<div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                 {record?.tags?.map((tag, index) => (
-                    <Tag key={index} style={{ backgroundColor: '#DFDFDF', color: 'black' }}><TagOutlined/> {tag}</Tag>
+                    <Tag key={index} 
+                    onClick={() => handleTagClick(tag)}
+                    style={{ backgroundColor: '#DFDFDF', color: 'black' }}><TagOutlined/> {tag}</Tag>
                 ))} </div>}
             open={visible}
             onCancel={onCancel}

@@ -80,7 +80,7 @@ const LoginPage = () => {
             let err = "Đăng nhập thất bại!";
             setAttempts(error.response?.data?.attempts);
             console.log('submit', attempts);
-            const expiryTime = Date.now() + 60 * 60 * 1000;
+            const expiryTime = Date.now() + 24 * 60 * 60 * 1000;
             localStorage.setItem("login_attempts", JSON.stringify({ value: error.response?.data?.attempts, expiry: expiryTime }));
             if (error.response?.data?.errorMessage) {
                 err = error.response?.data?.errorMessage;

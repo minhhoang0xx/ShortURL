@@ -27,7 +27,7 @@ namespace server.Services
             var token = new JwtSecurityToken(
                
                 claims: claims,
-				expires: DateTime.Now.AddHours(1),
+				expires: DateTime.Now.AddDays(1),
 				signingCredentials: credentials
             );
 

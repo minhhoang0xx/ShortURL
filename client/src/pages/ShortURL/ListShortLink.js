@@ -39,14 +39,18 @@ const ListShortLink = () => {
   const [users, setUsers] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
   const [currentUser, setCurrentUser] = useState('');
-
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 20,
     total: 0,
   });
- 
+  const handleTagClick = (tag) => {
+    setSearchText(tag);
+    filterData(data, tag); 
+    setLogModal(false); 
+    setSelectedRecord(null); 
+  };
 
   const columns = [
     {
@@ -268,7 +272,6 @@ const ListShortLink = () => {
       ),
     },
   ];
-  
   const handleCheckAll = (checked) => {
     if (checked) {
       setSelectedRows(filteredData.map((record) => record.key));
@@ -283,8 +286,6 @@ const ListShortLink = () => {
       setSelectedRows((prev) => prev.filter((id) => id !== key));
     }
   };
-
-
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -352,8 +353,7 @@ const ListShortLink = () => {
       setLoading(false);
     }
   };
-
-  const filterData = (sourceData) => {
+  const filterData = (sourceData, tagOverride = null) => {
     let result = [...sourceData];
     if (selectedProject && selectedProject !== 'all') {
       result = result.filter(
@@ -386,8 +386,9 @@ const ListShortLink = () => {
           dayjs(item.createAt).isBefore(end)
       );
     }
-    if (searchText && searchText.trim()) {
-      const searchTerms = searchText.toLowerCase().split(/\s+/).filter(term => term);
+    const searchValue = tagOverride || searchText;
+    if (searchValue && searchValue.trim()) {
+      const searchTerms = searchValue.toLowerCase().split(/\s+/).filter((term) => term);
       result = result.filter(
         (item) =>
           Array.isArray(item.tags) &&
@@ -433,7 +434,6 @@ const ListShortLink = () => {
     setRecordToDelete(record);
     setDeleteModal(true);
   };
-
   const handleConfirmDelete = async () => {
     setLoading(true);
     try {
@@ -689,6 +689,7 @@ const ListShortLink = () => {
         visible={logModal}
         onCancel={handleCancelLog}
         record={selectedRecord}
+        onTagClick={handleTagClick}
       />
     </Layout>
   );
