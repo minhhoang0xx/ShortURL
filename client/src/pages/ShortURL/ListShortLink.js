@@ -298,7 +298,6 @@ const ListShortLink = () => {
       const decodedToken = jwtDecode(token);
       const user = decodedToken["name"];
       setCurrentUser(user)
-      console.log('userName', user);
       let urls;
       if (user === "ADMIN") {
         urls = await ShortUrlService.getAllLink({
@@ -329,7 +328,6 @@ const ListShortLink = () => {
           return;
         }
       }
-      console.log('Data từ API:', urls);
       const urlfetch = urls.$values || urls;
       const formattedData = urlfetch.map((url) => ({ ...url, key: url.id }));
       setData(formattedData);
@@ -469,7 +467,6 @@ const ListShortLink = () => {
     }
     setLoading(true);
     try {
-      console.log('id', selectedRows)
       const response = await ShortUrlService.deleteManyShortLinks(selectedRows);
       setData((prevData) => prevData.filter((link) => !selectedRows.includes(link.key)));
       setFilteredData((prevData) => prevData.filter((link) => !selectedRows.includes(link.key)));
@@ -477,7 +474,6 @@ const ListShortLink = () => {
       setShowDeleteManyModal(false);
       message.success('Xóa các URL thành công!');
     } catch (error) {
-      console.log('err', error.response?.data?.errorMessage, error)
       message.error('Xóa các URL thất bại!');
       await fetchData();
     } finally {
@@ -524,7 +520,6 @@ const ListShortLink = () => {
         setLoading(false);
         return;
       }
-      console.log('dowload', filteredData);
       const response = await DownloadService.download(filteredData);
 
       const blob = response.data;

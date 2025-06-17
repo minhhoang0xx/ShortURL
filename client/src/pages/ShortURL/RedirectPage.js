@@ -12,9 +12,7 @@ const RedirectPage = () => {
             try {
                 const domain = window.location.origin + '/link';
                 const response = await ShortUrlService.getLinkByAlias(alias,domain);
-                console.log("response", response)
                 if (response) {
-                    console.log("response", response)
                     window.location.href=response;
                 } else {
                     navigate('*');

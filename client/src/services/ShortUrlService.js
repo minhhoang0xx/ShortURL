@@ -16,7 +16,6 @@ export const getAllLink = async () => {
   return res.data;
 }
 export const getAllByUser = async (user) => {
-  console.log('User:', user);
   const res = await axiosJWT.get(`${process.env.REACT_APP_API_URL}/ShortUrl/getAllByUser?user=${encodeURIComponent(user)}`);
   return res.data;
 };
@@ -29,7 +28,6 @@ export const getLink = async (id) => {
   return res.data;
 }
 export const getLinkByAlias = async (alias,domain) => {
-  console.log ("fweeeeeeeeê",domain)
   const res = await axios.get(`${process.env.REACT_APP_API_URL}/ShortUrl/${alias}`,{params: { domain }});
   return res.data;
 }

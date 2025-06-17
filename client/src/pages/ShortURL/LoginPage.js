@@ -56,10 +56,8 @@ const LoginPage = () => {
             RecaptchaToken: captchaToken,
         };
         try {
-            console.log("dataLogin", loginData);
             const response = await AuthenticationService.Login(loginData);
             setAttempts(response.attempts);
-            console.log('submit timessssss', attempts);
             if (response) {
                 message.success(response.message);
                 localStorage.setItem('token', response.token);
@@ -79,7 +77,7 @@ const LoginPage = () => {
         } catch (error) {
             let err = "Đăng nhập thất bại!";
             setAttempts(error.response?.data?.attempts);
-            console.log('submit', attempts);
+
             const expiryTime = Date.now() + 24 * 60 * 60 * 1000;
             localStorage.setItem("login_attempts", JSON.stringify({ value: error.response?.data?.attempts, expiry: expiryTime }));
             if (error.response?.data?.errorMessage) {
@@ -92,7 +90,6 @@ const LoginPage = () => {
                     }
                 }
             }
-            console.log('ERR', error);
             message.error(err);
         } finally {
             setLoading(false);

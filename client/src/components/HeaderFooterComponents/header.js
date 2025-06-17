@@ -8,7 +8,6 @@ const HeaderBar = () => {
 
   const navigate = useNavigate()
   const handleLogout = () => {
-    console.log('header');
     localStorage.removeItem(`${process.env.REACT_APP_TOKEN_KEY}`);
     message.success('Đăng xuất thành công.')
     navigate('/login')

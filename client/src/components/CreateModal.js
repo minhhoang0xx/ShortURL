@@ -33,7 +33,6 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
   const fetchDomains = async () => {
     const response = await DomainService.getAll();
     setDomains(response);
-    console.log("doamin", response)
   };
   const fetchTags = async () => {
     try {
@@ -66,7 +65,6 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
   };
 
   const onFinish = async (data) => {
-    console.log('Received values:', data);
     setLoading(true)
     try {
       const selectedDomain = domains.find(domain => domain.link === data.domain);
@@ -82,14 +80,12 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       data.qrCode = qr;
       data.status = true;
       data.status = data.expiry && new Date(data.expiry) < new Date() ? false : true;
-      console.log("data", data)
       const response = await ShortUrlService.createShortLink(data)
       if (response && response.shortLink) {
         message.success(`Tạo thành công!`);
         setShortUrl(linkShort);
         setQrLink(qr);
         setIsExpired(data.expiry && new Date(data.expiry) < new Date());
-        console.log("QR Link:", qrLink);
         onCreate()
       }
     } catch (error) {

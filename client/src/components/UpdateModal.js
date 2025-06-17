@@ -24,7 +24,6 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   useEffect(() => {
     if (visible && record) {
       resetForm();
-      console.log("record.expiry:", record.expiry);
       form.setFieldsValue({
         ...record,
         expiry: record.expiry ? dayjs(record.expiry, 'YYYY-MM-DDTHH:mm:ss') : null,
@@ -36,14 +35,11 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       setIsChecked(record.checkOS);
       setTagOptions(record.tag)
       setIsExpired(record.status === false || (record.expiry && new Date(record.expiry) < new Date()));
-      console.log("Form values after setting:", record);
-      console.log("record.expiry:", record.expiry);
     }
   }, [visible, record, form]);
   const fetchDomains = async () => {
     const response = await DomainService.getAll();
     setDomains(response);
-    console.log("doamin", response)
   };
   const fetchTags = async () => {
     try {
@@ -76,7 +72,6 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     }
   };
   const onFinish = async (data) => {
-    console.log('Received values:', data);
     setLoading(true)
     try {
 
@@ -92,10 +87,8 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
       data.qrCode = qr;
       data.status = data.expiry && new Date(data.expiry) < new Date() ? false : true;
-      console.log("data_tag", data)
       const response = await ShortUrlService.updateShortLink(record.id, data)
       if (response && response.shortLink) {
-        console.log("API Response:", response);
         message.success(`Cập nhật thành công!`);
         setShortUrl(response.shortLink);
         setQrLink(qr)

@@ -59,9 +59,7 @@ const LandingPageStaxi = () => {
         };
         setLoading(true);
         try {
-            console.log("data", dataToSubmit);
             const response = await FormRequestService.saveRequestStaxi(dataToSubmit);
-            console.log("Response:", response);
             if (response && response.message) {
                 message.success(response.message);
                 setFormData({

@@ -89,7 +89,7 @@ const LogModal = ({ visible, onCancel, record, onTagClick }) => {
             const formattedData = log.map((log) => ({ ...log, key: log.id }));
             setOriginalData(formattedData);
             let dataToDisplay = [...formattedData];
-            console.log('data of log', log)
+
             // Kiểm tra dateRange có phải là mảng có giá trị 
             if (Array.isArray(dateRange) && dateRange[0] && dateRange[1]) {
                 const startDate = dayjs(dateRange[0]).startOf('day');

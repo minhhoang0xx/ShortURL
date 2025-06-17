@@ -56,7 +56,6 @@ const LandingPageBAExpress = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (loading) return;
-        console.log('submit', captchaToken)
         const dataToSubmit = {
             ...formData,
             projectName: "BAExpress",
@@ -64,9 +63,7 @@ const LandingPageBAExpress = () => {
         };
         setLoading(true);
         try {
-            console.log("data", dataToSubmit);
             const response = await FormRequestService.saveRequestBAE(dataToSubmit);
-            console.log("Response:", response);
             if (response && response.message) {
                 message.success(response.message);
                 setFormData({
@@ -79,7 +76,6 @@ const LandingPageBAExpress = () => {
                 const expiryTime = Date.now() + 60 * 60 * 1000;
                 localStorage.setItem("attempts", JSON.stringify({ value: response.attempts, expiry: expiryTime }));
                 setAttempts(response.attempts);
-                console.log('sumbit times', attempts)
                 // setShowCaptcha(false);
                 setCaptchaToken(null);
                 if (recaptchaRef.current) {
@@ -88,7 +84,6 @@ const LandingPageBAExpress = () => {
             }
         } catch (error) {
             let err = "Gửi form thất bại.";
-            console.log('submit timesssss', attempts)
             if (error.response?.data?.errorMessage) {
                 err = error.response.data.errorMessage;
             }
