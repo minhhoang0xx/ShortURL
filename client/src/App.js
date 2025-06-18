@@ -5,27 +5,49 @@ import { Fragment } from 'react';
 import 'antd/dist/reset.css';
 import DefaultComponent from "./components/DefaultComponent/DefaultComponent";
 import PrivateRoute from "./routes/PrivateRoute";
+import * as SSOService from './services/SSOService'
+import { message } from "antd";
 function TokenHandler() {
   const location = useLocation();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+
   useEffect(() => {
-    // let token = location.search.substring(1);
-    const params = new URLSearchParams(location.search);
-    const token = params.get("token");
-    if (token) {
-      localStorage.setItem("token", token);
-      navigate("/ShortUrl", { replace: true });
-    }
+    const handleToken = async () => {
+      try {
+        const params = new URLSearchParams(location.search);
+        console.log('params',params)
+        const token = params.get("token");
+        if(token){
+          const response = await SSOService.checkLogin(token);
+          console.log('token123',response)
+          if (response && response.tokenVerify) {
+            localStorage.setItem("token", response.tokenVerify);
+            const cleanUrl = window.location.origin + location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+            navigate("/shortUrl", { replace: true });
+          } else if (response && response.redirectUrl) {
+            message.error(response.error);
+            window.location.href = response.redirectUrl;
+          }
+        }
+      } catch (error) {
+        message.error(error.response?.data?.error);
+        const redirectUrl = error.response?.data?.redirectUrl ;
+        window.location.href = redirectUrl;
+        console.log('err',error)
+      }
+    };
+    handleToken();
   }, [location, navigate]);
 
-  return null; 
+  return null;
 }
 
-function App() {  
- 
+function App() {
+
   return (
     <Router>
-       <TokenHandler />
+      <TokenHandler />
       <Routes>
         {routes.map((route) => {
           const Page = route.page

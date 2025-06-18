@@ -73,7 +73,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       data.expiry = data.expiry ? dayjs(data.expiry).format('YYYY-MM-DD') : null;
       const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
       const decodedToken = jwtDecode(token);
-      const userName = decodedToken["name"];
+      const userName = decodedToken["unique_name"];
       data.createdByUser = userName;
       const linkShort = `${data.domain}/${data.alias}`;
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
