@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -17,65 +18,56 @@ namespace server.Controllers
 		private readonly IConfiguration _configuration;
 		private readonly URLContext _context;
 
-		public SSOController(IConfiguration configuration)
+		public SSOController(IConfiguration configuration, URLContext context)
 		{
 			_configuration = configuration;
+			_context = context;
 		}
-		[HttpPost("{token}")]
+		[HttpGet("{token}")]
 		public async Task<IActionResult> CheckLogin(string token)
 		{
-			if (string.IsNullOrEmpty(token))
+			var tokenVerify = token;
+			const string callBack = "https://admin.staxi.vn/login?returnUrl=https://staxi.vn/ShortUrl";
+
+			if (string.IsNullOrEmpty(tokenVerify))
 			{
-				return Redirect("https://admin.staxi.vn/login?returnUrl=https://staxi.vn/SSO");
+				return Ok(new { redirectUrl = callBack, error = "Token không được cung cấp!" });
 			}
 			try
-			{		
-				var handler = new JwtSecurityTokenHandler();
-				var jwtToken = handler.ReadJwtToken(token);
-				var username = jwtToken.Claims.FirstOrDefault(x => x.Type == "name")?.Value;
-				var password = jwtToken.Claims.FirstOrDefault(x => x.Type == "password")?.Value;
-				if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+			{
+				var config = _context.CompanyConfigs.FirstOrDefault();
+				if (config == null || string.IsNullOrEmpty(config.JWTSecretKey))
 				{
-					return Redirect("https://admin.staxi.vn/login?returnUrl=https://staxi.vn/SSO");
+					throw new InvalidOperationException("JWTSecretKey không tồn tại hoặc rỗng trong bảng Company.Config.");
 				}
-				return Redirect($"https://staxi.vn/ShortUrl?token={token}");
+				var key = Encoding.UTF8.GetBytes(config.JWTSecretKey);
+				var secretKey = new SymmetricSecurityKey(key);
+				var handler = new JwtSecurityTokenHandler();
+				var validationParameters = new TokenValidationParameters
+				{
+					ValidateIssuer = false,
+					ValidateAudience = false,
+					ValidateLifetime = true,
+					ValidateIssuerSigningKey = true,
+					IssuerSigningKey = secretKey,
+				};
+				var jwtToken = handler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+				var username = jwtToken.Claims.FirstOrDefault(x => x.Type == "unique_name")?.Value;
+				var checkLogin = await _context.AdminUsers.FirstOrDefaultAsync(x => x.UserName == username);
+				if (username == null)
+				{
+					return Ok(new { redirectUrl = callBack, error = "Token không chứa thông tin hợp lệ!" });
+				}
+				if (checkLogin == null)
+				{
+					return Ok(new { redirectUrl = callBack, error = "Người dùng không tồn tại!" });
+				}
+				return Ok(new { message = "Đăng nhập thành công", tokenVerify });
 			}
 			catch (Exception ex)
 			{
-				return Redirect("https://admin.staxi.vn/login?returnUrl=https://staxi.vn/SSO");
+				return Ok(new { redirectUrl = callBack});
 			}
-
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ----------có sử dụng key để bảo mật----------
-//var secretKey = _configuration["Jwt:Key"];
-//var key = Encoding.UTF8.GetBytes(secretKey);
-//var tokenHandler = new JwtSecurityTokenHandler();
-//var validationParameters = new TokenValidationParameters
-//{
-//	ValidateIssuer = false,
-//	ValidateAudience = false,
-//	ValidateLifetime = false, 
-//	ValidateIssuerSigningKey = true,
-//	IssuerSigningKey = new SymmetricSecurityKey(key)
-//};
-//var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);	
-//var username = principal.FindFirst("username")?.Value;
-//var password = principal.FindFirst("password")?.Value;

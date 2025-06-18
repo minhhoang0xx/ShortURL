@@ -14,30 +14,40 @@ using Microsoft.AspNetCore.HttpOverrides;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<URLContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-//builder.Services.AddControllers().AddJsonOptions(options =>
-//{
-//	options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-//});
 builder.Services.AddControllers();
 builder.Services.AddHttpClient("RecaptchaClient");
 builder.Services.AddScoped<RecaptchaService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<JwtService>();
+
+
+string jwtSecretKey = null;
+using (var scope = builder.Services.BuildServiceProvider().CreateScope())
+{
+	var context = scope.ServiceProvider.GetRequiredService<URLContext>();
+	jwtSecretKey = context.CompanyConfigs.FirstOrDefault()?.JWTSecretKey;
+}
+if (string.IsNullOrEmpty(jwtSecretKey))
+{
+	throw new InvalidOperationException("JWTSecretKey không tồn tại hoặc rỗng trong bảng Company.Config.");
+}
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-    options.TokenValidationParameters = new TokenValidationParameters
+	options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = false,
         ValidateAudience = false,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            Encoding.UTF8.GetBytes(jwtSecretKey))
+
     };
 });
 

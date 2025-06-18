@@ -17,6 +17,7 @@ namespace server.Data
 		public DbSet<ShortURL_Count> Counts { get; set; }
 		public DbSet<ShortURL_Tags> Tags { get; set; }
 		public DbSet<ShortURL_LinkTag> LinkTags { get; set; }
+		public DbSet<Company_Config> CompanyConfigs { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
