@@ -15,7 +15,7 @@ const HeaderBar = () => {
 
   const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
   const decodedToken = jwtDecode(token);
-  const userName = decodedToken["unique_name"];
+  const userName = decodedToken["name"];
   return (
     <Header className="header">
       <div className="header-content">

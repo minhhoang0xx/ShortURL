@@ -28,7 +28,8 @@ namespace server.Services
 
 			var claims = new[]
 			{
-			   new Claim("name", UserName)
+			   new Claim("name", UserName),
+			   new Claim("LoginSource", "AdminStaxi"),
 			};
 
 			var token = new JwtSecurityToken(

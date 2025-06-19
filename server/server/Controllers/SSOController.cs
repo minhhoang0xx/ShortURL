@@ -27,7 +27,7 @@ namespace server.Controllers
 		public async Task<IActionResult> CheckLogin(string token)
 		{
 			var tokenVerify = token;
-			const string callBack = "https://admin.staxi.vn/login?returnUrl=https://staxi.vn/ShortUrl";
+			const string callBack = "https://admin.staxi.vn/home/Login?returnUrl=https://staxi.vn/ShortUrl";
 
 			if (string.IsNullOrEmpty(tokenVerify))
 			{
@@ -35,7 +35,7 @@ namespace server.Controllers
 			}
 			try
 			{
-				var config = _context.CompanyConfigs.FirstOrDefault();
+				var config = await _context.CompanyConfigs.FirstOrDefaultAsync();
 				if (config == null || string.IsNullOrEmpty(config.JWTSecretKey))
 				{
 					throw new InvalidOperationException("JWTSecretKey không tồn tại hoặc rỗng trong bảng Company.Config.");
@@ -51,13 +51,14 @@ namespace server.Controllers
 					ValidateIssuerSigningKey = true,
 					IssuerSigningKey = secretKey,
 				};
-				var jwtToken = handler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
-				var username = jwtToken.Claims.FirstOrDefault(x => x.Type == "unique_name")?.Value;
-				var checkLogin = await _context.AdminUsers.FirstOrDefaultAsync(x => x.UserName == username);
+
+				var principal = handler.ValidateToken(tokenVerify, validationParameters, out SecurityToken validatedToken);
+				var username = principal.Claims.FirstOrDefault(c => c.Type == "name" || c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")?.Value;
 				if (username == null)
 				{
 					return Ok(new { redirectUrl = callBack, error = "Token không chứa thông tin hợp lệ!" });
 				}
+				var checkLogin = await _context.AdminUsers.FirstOrDefaultAsync(x => x.UserName == username);
 				if (checkLogin == null)
 				{
 					return Ok(new { redirectUrl = callBack, error = "Người dùng không tồn tại!" });

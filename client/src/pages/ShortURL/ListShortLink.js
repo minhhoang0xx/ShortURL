@@ -296,7 +296,7 @@ const ListShortLink = () => {
         return;
       }
       const decodedToken = jwtDecode(token);
-      const user = decodedToken["unique_name"];
+      const user = decodedToken["name"];
       setCurrentUser(user)
       let urls;
       if (user === "ADMIN") {
