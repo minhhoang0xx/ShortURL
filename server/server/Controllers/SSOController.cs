@@ -28,7 +28,7 @@ namespace server.Controllers
 		[HttpPost("CheckLogin")]
 		public async Task<IActionResult> CheckLogin([FromBody] string tokenVerify)
 		{
-			const string callBack = "https://admin.staxi.vn/home/Login?returnUrl=https://staxi.vn/ShortUrl";
+			const string callBack = "https://admin.staxi.vn/home/SSOLogin?returnUrl=https://staxi.vn/ShortUrl";
 
 			if (string.IsNullOrEmpty(tokenVerify))
 			{
