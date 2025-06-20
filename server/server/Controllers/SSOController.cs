@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using server.Data;
 using server.Models;
 using server.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace server.Controllers
 {
@@ -23,15 +25,18 @@ namespace server.Controllers
 			_configuration = configuration;
 			_context = context;
 		}
-		[HttpGet("{token}")]
-		public async Task<IActionResult> CheckLogin(string token)
+		[HttpPost("CheckLogin")]
+		public async Task<IActionResult> CheckLogin([FromBody] string tokenVerify)
 		{
-			var tokenVerify = token;
 			const string callBack = "https://admin.staxi.vn/home/Login?returnUrl=https://staxi.vn/ShortUrl";
 
 			if (string.IsNullOrEmpty(tokenVerify))
 			{
 				return Ok(new { redirectUrl = callBack, error = "Token không được cung cấp!" });
+			}
+			if (!Regex.IsMatch(tokenVerify, @"^[A-Za-z0-9._-]+$"))
+			{
+				return Ok(new { redirectUrl = callBack, error = "Token chứa ký tự không hợp lệ!" });
 			}
 			try
 			{
@@ -53,7 +58,7 @@ namespace server.Controllers
 				};
 
 				var principal = handler.ValidateToken(tokenVerify, validationParameters, out SecurityToken validatedToken);
-				var username = principal.Claims.FirstOrDefault(c => c.Type == "name" || c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")?.Value;
+				var username = principal.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
 				if (username == null)
 				{
 					return Ok(new { redirectUrl = callBack, error = "Token không chứa thông tin hợp lệ!" });
@@ -67,7 +72,7 @@ namespace server.Controllers
 			}
 			catch (Exception ex)
 			{
-				return Ok(new { redirectUrl = callBack});
+				return Ok(new { redirectUrl = callBack, error ="Có lỗi xảy ra"});
 			}
 		}
 	}

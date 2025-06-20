@@ -18,7 +18,6 @@ function TokenHandler() {
         const token = params.get("token");
         if(token){
           const response = await SSOService.checkLogin(token);
-          console.log('ok', response);
           if (response && response.tokenVerify) {
             localStorage.setItem("token", response.tokenVerify);
             const cleanUrl = window.location.origin + location.pathname;
@@ -26,13 +25,13 @@ function TokenHandler() {
             navigate("/shortUrl", { replace: true });
           } else if (response && response.redirectUrl) {
             message.error(response.error);
-            // window.location.href = response.redirectUrl;
+            window.location.href = response.redirectUrl;
           }
         }
       } catch (error) {
         message.error(error.response?.data?.error);
         const redirectUrl = error.response?.data?.redirectUrl ;
-        // window.location.href = redirectUrl;
+        window.location.href = redirectUrl;
       }
     };
     handleToken();
