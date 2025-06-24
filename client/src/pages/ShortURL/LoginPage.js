@@ -2,15 +2,13 @@
 
 import { Button, Checkbox, Form, Input, message } from "antd";
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import * as AuthenticationService from "../../services/AuthenticationService";
 import "../ShortURL/style.css";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import Password from "antd/es/input/Password";
 
 const LoginPage = () => {
-    const location = useLocation();
     const navigate = useNavigate();
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);

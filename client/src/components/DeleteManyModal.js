@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal } from 'antd';
 import './style.css';
 
-const DeleteManyModal = ({ visible, onCancel, onConfirm, count, record, loading }) => {
+const DeleteManyModal = ({ visible, onCancel, onConfirm, count, loading }) => {
   return (
     <Modal
       title="Xác nhận xóa ShortLink"

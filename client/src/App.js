@@ -25,6 +25,7 @@ function TokenHandler() {
             const cleanUrl = window.location.origin + location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
             navigate("/shortUrl", { replace: true });
+            message.success(response.message)
           } else if (response && response.redirectUrl) {
             message.error(response.error);
             window.location.href = response.redirectUrl;

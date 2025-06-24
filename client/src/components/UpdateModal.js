@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Button, Space, Select, message, Radio, Switch, Checkbox, DatePicker, QRCode } from 'antd';
+import { Modal, Form, Input, Button, Space, Select, message, Checkbox, DatePicker } from 'antd';
 import { Content } from 'antd/es/layout/layout';
 import dayjs from 'dayjs';
 import { CopyOutlined, EditOutlined, LinkOutlined } from '@ant-design/icons';

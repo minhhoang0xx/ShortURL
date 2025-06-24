@@ -63,11 +63,11 @@ namespace server.Controllers
 				{
 					return Ok(new { redirectUrl = callBack, error = "Token không chứa thông tin hợp lệ!" });
 				}
-				var checkLogin = await _context.AdminUsers.FirstOrDefaultAsync(x => x.UserName == username);
-				if (checkLogin == null)
-				{
-					return Ok(new { redirectUrl = callBack, error = "Người dùng không tồn tại!" });
-				}
+				//var checkLogin = await _context.AdminUsers.(username);
+				//if (checkLogin == null)
+				//{
+				//	return Ok(new { redirectUrl = callBack, error = "Người dùng không tồn tại!" });
+				//}
 				return Ok(new { message = "Đăng nhập thành công", tokenVerify });
 			}
 			catch (Exception ex)

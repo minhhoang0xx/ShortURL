@@ -3,7 +3,6 @@ import { CopyOutlined, LinkOutlined, PlusOutlined, SyncOutlined } from '@ant-des
 import { Content } from "antd/es/layout/layout";
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from "react-router-dom";
 import * as ShortUrlService from '../services/ShortUrlService';
 import * as DomainService from '../services/DomainService';
 import * as TagService from '../services/TagService';
@@ -14,7 +13,6 @@ import { jwtDecode } from "jwt-decode";
 const CreateModal = ({ visible, onCancel, onCreate }) => {
   const [qrLink, setQrLink] = useState("");
   const [shortUrl, setShortUrl] = useState("");
-  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(false)

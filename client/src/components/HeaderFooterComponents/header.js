@@ -1,7 +1,7 @@
 import { Header } from "antd/es/layout/layout";
 import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { Dropdown, message, Space } from "antd";
+import { message } from "antd";
 import { jwtDecode } from "jwt-decode";
 
 const HeaderBar = () => {
