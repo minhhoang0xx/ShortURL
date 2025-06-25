@@ -67,7 +67,7 @@ const LogModal = ({ visible, onCancel, record, onTagClick }) => {
             title: 'IP',
             dataIndex: 'ip',
             key: 'ip',
-            width: '5%',    
+            width: '5%',
         },
     ]
     useEffect(() => {
@@ -122,17 +122,18 @@ const LogModal = ({ visible, onCancel, record, onTagClick }) => {
     };
     const handleTagClick = (tag) => {
         onTagClick(tag);
-        onCancel(); 
-      };
+        onCancel();
+    };
 
 
     return (
         <Modal
             title={<div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                 {record?.tags?.map((tag, index) => (
-                    <Tag key={index} 
-                    onClick={() => handleTagClick(tag)}
-                    style={{ backgroundColor: '#DFDFDF', color: 'black' }}><TagOutlined/> {tag}</Tag>
+                    <Tag key={index}
+                        className='tag-cate'
+                        onClick={() => handleTagClick(tag)}
+                        style={{ backgroundColor: '#DFDFDF', color: 'black' }}><TagOutlined /> {tag}</Tag>
                 ))} </div>}
             open={visible}
             onCancel={onCancel}
@@ -187,7 +188,7 @@ const LogModal = ({ visible, onCancel, record, onTagClick }) => {
                             </div>
                         )}
                         {record && (
-                            <Tag color={record.status ? '#1ebd7b' : '#F03939'}>
+                            <Tag color={record.status ? 'rgb(17 141 52)' : '#F03939'}>
                                 {record.status ? 'Hoạt động' : 'Quá hạn'}
                             </Tag>)}
                     </div>

@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import * as ShortUrlService from '../../services/ShortUrlService';
 import * as DownloadService from '../../services/DownloadService';
+import * as TagService from '../../services/TagService';
 import UpdateModal from '../../components/UpdateModal';
 import DeleteModal from '../../components/DeleteModal';
 import CreateModal from '../../components/CreateModal';
-import { CopyTwoTone, DeleteTwoTone, EditTwoTone} from '@ant-design/icons';
+import { CopyTwoTone, DeleteTwoTone, EditTwoTone } from '@ant-design/icons';
 import '../../pages/ShortURL/style.css';
 import * as DomainService from '../../services/DomainService';
 import { jwtDecode } from 'jwt-decode';
@@ -40,6 +41,8 @@ const ListShortLink = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [currentUser, setCurrentUser] = useState('');
   const [loading, setLoading] = useState(false);
+  const [tagOptions, setTagOptions] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 20,
@@ -47,9 +50,9 @@ const ListShortLink = () => {
   });
   const handleTagClick = (tag) => {
     setSearchText(tag);
-    filterData(data, tag); 
-    setLogModal(false); 
-    setSelectedRecord(null); 
+    filterData(data, tag);
+    setLogModal(false);
+    setSelectedRecord(null);
   };
 
   const columns = [
@@ -96,10 +99,10 @@ const ListShortLink = () => {
       sortDirections: ['ascend', 'descend'],
       showSorterTooltip: false,
       onCell: (record) => {
-        if ( record.checkOS) {
+        if (record.checkOS) {
           return { className: 'cell-highlight' };
         }
-        return {};  
+        return {};
       },
     },
     {
@@ -166,7 +169,7 @@ const ListShortLink = () => {
       sorter: (a, b) => dayjs(a.createAt).unix() - dayjs(b.createAt).unix(),
       sortDirections: ['ascend', 'descend'],
       onCell: (record) => {
-        if ( record.checkOS) {
+        if (record.checkOS) {
           return { className: 'cell-highlight' };
         }
         return {};
@@ -188,7 +191,7 @@ const ListShortLink = () => {
       },
       sortDirections: ['ascend', 'descend'],
       onCell: (record) => {
-        if ( record.checkOS) {
+        if (record.checkOS) {
           return { className: 'cell-highlight' };
         }
         return {};
@@ -205,7 +208,7 @@ const ListShortLink = () => {
           sortDirections: ['ascend', 'descend'],
           showSorterTooltip: false,
           onCell: (record) => {
-            if ( record.checkOS) {
+            if (record.checkOS) {
               return { className: 'cell-highlight' };
             }
             return {};
@@ -226,7 +229,7 @@ const ListShortLink = () => {
       onCell: (record) => ({
         onClick: () => showLogModal(record),
         style: { cursor: 'pointer', fontStyle: 'underline', color: '#1890ff' },
-        className:  record.checkOS ? 'cell-highlight' : '',
+        className: record.checkOS ? 'cell-highlight' : '',
       }),
     },
     {
@@ -244,7 +247,7 @@ const ListShortLink = () => {
       sorter: (a, b) => (a.status === b.status ? 0 : a.status ? -1 : 1),
       sortDirections: ['ascend', 'descend'],
       onCell: (record) => {
-        if ( record.checkOS) {
+        if (record.checkOS) {
           return { className: 'cell-highlight' };
         }
         return {};
@@ -284,6 +287,18 @@ const ListShortLink = () => {
       setSelectedRows((prev) => [...prev, key]);
     } else {
       setSelectedRows((prev) => prev.filter((id) => id !== key));
+    }
+  };
+  const fetchTags = async () => {
+    try {
+      const response = await TagService.getAllTags();
+      const formatted = response.map(tag => ({
+        value: tag.name,
+        label: tag.name
+      }));
+      setTagOptions(formatted);
+    } catch (error) {
+      console.error("Lỗi khi tải tag:", error);
     }
   };
   const fetchData = async () => {
@@ -384,6 +399,19 @@ const ListShortLink = () => {
           dayjs(item.createAt).isBefore(end)
       );
     }
+    //có thể search theo mảng tags
+    if (Array.isArray(selectedTags) && selectedTags.length > 0) {
+      result = result.filter(
+        (item) =>
+          Array.isArray(item.tags) &&
+          selectedTags.every(tag =>
+            item.tags.some(itemTag =>
+              itemTag && itemTag.toLowerCase().includes(tag.toLowerCase())
+            )
+          )
+      );
+    }
+    // cái này dành cho trường hợp người dùng click và tag ở phía log modal để filter
     const searchValue = tagOverride || searchText;
     if (searchValue && searchValue.trim()) {
       const searchTerms = searchValue.toLowerCase().split(/\s+/).filter((term) => term);
@@ -391,8 +419,8 @@ const ListShortLink = () => {
         (item) =>
           Array.isArray(item.tags) &&
           searchTerms.every(term =>
-            item.tags.some(tag => 
-              tag && 
+            item.tags.some(tag =>
+              tag &&
               tag.toLowerCase().includes(term)
             )
           )
@@ -407,6 +435,7 @@ const ListShortLink = () => {
   useEffect(() => {
     fetchData();
     fetchDomains();
+    fetchTags();
   }, []);
   useEffect(() => {
     const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
@@ -557,6 +586,7 @@ const ListShortLink = () => {
     setDateRange([null, null]);
     setSelectedRows([]);
     setSearchText('');
+    setTagOptions('');
     setFilteredData(data);
     setPagination((prev) => ({ ...prev, current: 1, total: data.length }));
   };
@@ -611,15 +641,24 @@ const ListShortLink = () => {
                 ))}
               </Select>
             )}
-
-            <Input
+            <Select
+              mode="tags"
+                 placeholder="Tìm kiếm theo Tag"
+              value={selectedTags}
+              onChange={(value) => setSelectedTags(value)}
+              options={tagOptions}
+              className='LSL_search-bar-input'
+              onPressEnter={handleSearch}
+              
+            />
+            {/* <Input
               placeholder="Tìm kiếm theo Tag"
               value={searchText}
               size="middle"
               className='LSL_search-bar-input'
               onPressEnter={handleSearch}
               onChange={(e) => setSearchText(e.target.value)}
-            />
+            /> */}
             <Button type="primary" className="LSL_search-bar-Search" onClick={handleSearch} >
               <a >Tìm kiếm</a>
             </Button>
