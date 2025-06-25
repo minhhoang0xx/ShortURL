@@ -1,7 +1,141 @@
 USE [LandingPageManagement]
 GO
 
-/****** Object:  Table [dbo].[ShortURL.Links]    Script Date: 4/15/2025 3:59:34 PM ******/
+/****** Object:  Table [dbo].[Admin.Users]    Script Date: 6/25/2025 11:49:25 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Admin.Users](
+	[AdminId] [uniqueidentifier] NOT NULL,
+	[UserName] [nvarchar](50) NULL,
+	[Password] [nvarchar](250) NULL,
+	[Fullname] [nvarchar](50) NULL,
+	[PhoneNumber] [varchar](50) NULL,
+	[Email] [varchar](50) NULL,
+	[IsLock] [bit] NULL,
+	[IsDeleted] [bit] NULL,
+	[CreatedByUser] [uniqueidentifier] NULL,
+	[CreatedDate] [smalldatetime] NULL,
+	[UpdatedByUser] [uniqueidentifier] NULL,
+	[UpdatedDate] [smalldatetime] NULL,
+	[IPAddress] [nvarchar](250) NULL,
+	[IsReadOnly] [bit] NULL,
+ CONSTRAINT [PK_Admin.Users] PRIMARY KEY CLUSTERED 
+(
+	[AdminId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [uc_Admin.Users_UserName] UNIQUE NONCLUSTERED 
+(
+	[UserName] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Admin.Users] ADD  CONSTRAINT [DF_Admin.Users_IsLock]  DEFAULT ((0)) FOR [IsLock]
+GO
+
+ALTER TABLE [dbo].[Admin.Users] ADD  CONSTRAINT [DF_Admin.Users_IsDeleted]  DEFAULT ((0)) FOR [IsDeleted]
+GO
+
+ALTER TABLE [dbo].[Admin.Users] ADD  CONSTRAINT [DF_Admin.Users_CreatedDate]  DEFAULT (getdate()) FOR [CreatedDate]
+GO
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+USE [LandingPageManagement]
+GO
+
+/****** Object:  Table [dbo].[Company.Config]    Script Date: 6/25/2025 11:49:18 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Company.Config](
+	[PK_ConfigId] [int] IDENTITY(1,1) NOT NULL,
+	[ConfigCode] [nvarchar](20) NULL,
+	[UpdatedDate] [datetime] NULL,
+	[JWTSecretKey] [nvarchar](50) NULL
+) ON [PRIMARY]
+GO
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+USE [LandingPageManagement]
+GO
+
+/****** Object:  Table [dbo].[ShortURL.Tags]    Script Date: 6/25/2025 11:48:52 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[ShortURL.Tags](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [nvarchar](100) NOT NULL,
+	[CreatedAt] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+UNIQUE NONCLUSTERED 
+(
+	[Name] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[ShortURL.Tags] ADD  DEFAULT (getdate()) FOR [CreatedAt]
+GO
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+USE [LandingPageManagement]
+GO
+
+/****** Object:  Table [dbo].[ShortURL.LinkTags]    Script Date: 6/25/2025 11:48:46 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[ShortURL.LinkTags](
+	[ShortId] [int] NOT NULL,
+	[TagId] [int] NOT NULL,
+ CONSTRAINT [PK_ShortURL.LinkTags] PRIMARY KEY CLUSTERED 
+(
+	[ShortId] ASC,
+	[TagId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[ShortURL.LinkTags]  WITH CHECK ADD  CONSTRAINT [FK_LinkTags_Links] FOREIGN KEY([ShortId])
+REFERENCES [dbo].[ShortURL.Links] ([ShortId])
+ON DELETE CASCADE
+GO
+
+ALTER TABLE [dbo].[ShortURL.LinkTags] CHECK CONSTRAINT [FK_LinkTags_Links]
+GO
+
+ALTER TABLE [dbo].[ShortURL.LinkTags]  WITH CHECK ADD  CONSTRAINT [FK_LinkTags_Tags] FOREIGN KEY([TagId])
+REFERENCES [dbo].[ShortURL.Tags] ([Id])
+ON DELETE CASCADE
+GO
+
+ALTER TABLE [dbo].[ShortURL.LinkTags] CHECK CONSTRAINT [FK_LinkTags_Tags]
+GO
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+USE [LandingPageManagement]
+GO
+
+/****** Object:  Table [dbo].[ShortURL.Links]    Script Date: 6/25/2025 11:48:38 AM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -20,16 +154,18 @@ CREATE TABLE [dbo].[ShortURL.Links](
 	[AndroidLink] [nvarchar](max) NULL,
 	[IosLink] [nvarchar](max) NULL,
 	[CreatedByUser] [nvarchar](50) NULL,
+	[Expiry] [datetime] NULL,
+	[Status] [bit] NOT NULL,
+	[ClickCount] [int] NULL,
+	[Tag] [nvarchar](max) NULL,
  CONSTRAINT [PK_ShortURL.Links] PRIMARY KEY CLUSTERED 
 (
 	[ShortId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-
-
-
 --------------------------------------------------------------------------------------------------------
+
 USE [LandingPageManagement]
 GO
 
@@ -78,6 +214,42 @@ CREATE TABLE [dbo].[ShortURL.Domain](
 	[ShortDomainID] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+USE [LandingPageManagement]
+GO
+
+/****** Object:  Table [dbo].[ShortURL.Counts]    Script Date: 6/25/2025 11:48:22 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[ShortURL.Counts](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[ShortId] [int] NOT NULL,
+	[IP] [nvarchar](100) NULL,
+	[UserAgent] [nvarchar](max) NULL,
+	[Device] [nvarchar](100) NULL,
+	[OS] [nvarchar](100) NULL,
+	[Browser] [nvarchar](100) NULL,
+	[Referrer] [nvarchar](500) NULL,
+	[ClickedAt] [datetime] NOT NULL,
+	[Source] [nvarchar](max) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[ShortURL.Counts]  WITH CHECK ADD  CONSTRAINT [FK_ShortURL_Counts_Links] FOREIGN KEY([ShortId])
+REFERENCES [dbo].[ShortURL.Links] ([ShortId])
+ON DELETE CASCADE
+GO
+
+ALTER TABLE [dbo].[ShortURL.Counts] CHECK CONSTRAINT [FK_ShortURL_Counts_Links]
 GO
 
 

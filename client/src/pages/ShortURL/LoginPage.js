@@ -107,7 +107,7 @@ const LoginPage = () => {
                 <h2 className="login-title">Đăng nhập hệ thống</h2>
                 <Form
                     name="SignIn"
-                    initialValues={{ remember: true }}
+                    initialValues={{ remember: false  }}
                     onFinish={onFinish}
                     onFinishFailed={onFinishFailed}
                     form={form}
@@ -141,7 +141,7 @@ const LoginPage = () => {
                         </Form.Item>
                     )}
 
-                    <Form.Item name="remember" valuePropName="unchecked">
+                    <Form.Item name="remember" valuePropName="checked">
                         <Checkbox>Ghi nhớ tôi</Checkbox>
                     </Form.Item>
 
