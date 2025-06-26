@@ -102,7 +102,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
     if (shortUrl && !isExpired) {
       navigator.clipboard.writeText(shortUrl)
         .then(() => {
-          message.success('Link đã được sao chép!');
+          message.success('Shortlink đã được sao chép!');
         })
         .catch(() => {
           message.error('Không thể sao chép link!');

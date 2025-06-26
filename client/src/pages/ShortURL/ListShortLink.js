@@ -49,7 +49,7 @@ const ListShortLink = () => {
     total: 0,
   });
   const handleTagClick = (tag) => {
-    setSearchText(tag);
+    setSelectedTags([tag])
     filterData(data, tag);
     setLogModal(false);
     setSelectedRecord(null);
@@ -399,29 +399,16 @@ const ListShortLink = () => {
           dayjs(item.createAt).isBefore(end)
       );
     }
-    //có thể search theo mảng tags
-    if (Array.isArray(selectedTags) && selectedTags.length > 0) {
+    const tagFilters = tagOverride
+    ? [tagOverride.toLowerCase()]
+    : selectedTags.map((t) => t.toLowerCase());
+    if (Array.isArray(tagFilters) && tagFilters.length > 0) {
       result = result.filter(
         (item) =>
           Array.isArray(item.tags) &&
-          selectedTags.every(tag =>
+        tagFilters.every(tag =>
             item.tags.some(itemTag =>
-              itemTag && itemTag.toLowerCase().includes(tag.toLowerCase())
-            )
-          )
-      );
-    }
-    // cái này dành cho trường hợp người dùng click và tag ở phía log modal để filter
-    const searchValue = tagOverride || searchText;
-    if (searchValue && searchValue.trim()) {
-      const searchTerms = searchValue.toLowerCase().split(/\s+/).filter((term) => term);
-      result = result.filter(
-        (item) =>
-          Array.isArray(item.tags) &&
-          searchTerms.every(term =>
-            item.tags.some(tag =>
-              tag &&
-              tag.toLowerCase().includes(term)
+              itemTag && itemTag.toLowerCase().includes(tag)
             )
           )
       );
@@ -534,7 +521,7 @@ const ListShortLink = () => {
     if (record) {
       navigator.clipboard.writeText(record.shortLink)
         .then(() => {
-          message.success('Link đã được sao chép!');
+          message.success('Shortlink đã được sao chép!');
         })
         .catch(() => {
           message.error('Không thể sao chép link!');
@@ -585,7 +572,6 @@ const ListShortLink = () => {
     setSelectedUser('all');
     setDateRange([null, null]);
     setSelectedRows([]);
-    setSearchText('');
     setTagOptions('');
     setFilteredData(data);
     setPagination((prev) => ({ ...prev, current: 1, total: data.length }));
@@ -611,7 +597,7 @@ const ListShortLink = () => {
               onChange={setSelectedProject}
               className='LSL_search-bar-domain'
             >
-              <Option value="all">Dự án</Option>
+              <Option value="all">Tất cả dự án</Option>
               {domains.map((domain) => (
                 <Option key={domain} value={domain}>
                   {domain}

@@ -24,7 +24,7 @@ const HeaderBar = () => {
           <span>CÔNG TY TNHH PHÁT TRIỂN CÔNG NGHỆ ĐIỆN TỬ BÌNH ANH</span>
         </div>
         <div className="logout">
-         <a onClick={handleLogout}><UserOutlined /><span>{userName}</span>  <LogoutOutlined/></a>
+         <a onClick={handleLogout}><UserOutlined /> <span> </span> <span> {userName} </span>  <span> </span> <LogoutOutlined/></a>
         </div>
       </div>
     </Header>

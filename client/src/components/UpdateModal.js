@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Button, Space, Select, message, Checkbox, DatePicker } from 'antd';
 import { Content } from 'antd/es/layout/layout';
@@ -19,15 +20,20 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const [isChecked, setIsChecked] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
   const [tagOptions, setTagOptions] = useState([]);
+  const [initialValues, setInitialValues] = useState({});
+  const [hasChanges, setHasChanges] = useState(false);
   const dateFormat = 'DD/MM/YYYY';
 
   useEffect(() => {
     if (visible && record) {
       resetForm();
-      form.setFieldsValue({
+      const initialFormValues = {
         ...record,
         expiry: record.expiry ? dayjs(record.expiry, 'YYYY-MM-DDTHH:mm:ss') : null,
-      });
+        tags: record.tags,
+      };
+      form.setFieldsValue(initialFormValues);
+      setInitialValues(initialFormValues);
       fetchDomains();
       fetchTags();
       setShortUrl(record.shortLink);
@@ -35,6 +41,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       setIsChecked(record.checkOS);
       setTagOptions(record.tag)
       setIsExpired(record.status === false || (record.expiry && new Date(record.expiry) < new Date()));
+      setHasChanges(false);
     }
   }, [visible, record, form]);
   const fetchDomains = async () => {
@@ -54,7 +61,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     }
   };
 
-  const handleFormValuesChange = (changedValues) => {
+  const handleFormValuesChange = (changedValues, allValues) => {
     if ('domain' in changedValues || 'alias' in changedValues) {
       const domain = form.getFieldValue('domain');
       const alias = form.getFieldValue('alias') || '';
@@ -63,15 +70,31 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
         setShortUrl(combinedUrl);
       }
     }
+    // Kiểm tra xem có thay đổi so với giá trị ban đầu không
+    const isChanged = Object.keys(allValues).some(key => {
+      const currentValue = allValues[key];
+      const initialValue = initialValues[key];
+      if (key === 'expiry') {
+        return currentValue?.format('YYYY-MM-DD') !== initialValue?.format('YYYY-MM-DD');
+      }
+      if (Array.isArray(currentValue) && Array.isArray(initialValue)) {
+        return JSON.stringify(currentValue.sort()) !== JSON.stringify(initialValue.sort());
+      }
+      return JSON.stringify(currentValue) !== JSON.stringify(initialValue);
+    });
+    setHasChanges(isChanged);
   };
+  
   const handleCheckOSChange = (e) => {
     const check = !isChecked;
     setIsChecked(check);
     if (!check) {
       form.setFieldsValue({ iosLink: "", androidLink: "" });
     }
+    handleFormValuesChange({}, form.getFieldsValue());
   };
   const onFinish = async (data) => {
+    
     setLoading(true)
     try {
 
@@ -111,7 +134,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     if (shortUrl) {
       navigator.clipboard.writeText(shortUrl)
         .then(() => {
-          message.success('Link đã được sao chép!');
+          message.success('Shortlink đã được sao chép!');
         })
         .catch(() => {
           message.error('Không thể sao chép link!');
@@ -176,6 +199,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     setIsChecked(false)
     setIsExpired(false);
     form.resetFields();
+    setHasChanges(false);
   }
 
   return (
@@ -298,7 +322,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
             </Form.Item>
           )}
           <Form.Item >
-            <Button type="primary" htmlType="submit" disabled={loading} className="CSL_button-create">
+            <Button type="primary" htmlType="submit" disabled={loading || !hasChanges} className="CSL_button-create">
               <EditOutlined /> Cập nhật
             </Button>
           </Form.Item>
