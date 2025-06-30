@@ -280,7 +280,7 @@ namespace server.Controllers
 			var url = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == code && x.Domain == domain);
 			if (url == null)
 			{
-				return NotFound(new ErrorResponse
+					return NotFound(new ErrorResponse
 				{
 					ErrorCode = "URL_NOT_EXISTED!",
 					ErrorMessage = "URL không tồn tại!"
@@ -600,6 +600,10 @@ namespace server.Controllers
 		//}
 		private string GetClientIp(HttpContext context)
 		{
+			var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+			if (!string.IsNullOrEmpty(ip))
+				return ip.Split(',').First().Trim();
+
 			return context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
 		}
 		private (string device, string os, string browser) ParseUserAgent(string userAgent)

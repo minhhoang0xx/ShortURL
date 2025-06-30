@@ -10,22 +10,25 @@ using Microsoft.AspNetCore.Authorization;
 using server.Services;
 using System.Collections.Concurrent;
 using System.Text;
+using Novell.Directory.Ldap;
 
 [Route("api/[controller]")]
 [ApiController]
 public class Authentication : ControllerBase
-	{
+{
 		private readonly JwtService _jwtService;
 		private readonly URLContext _context;
 		private readonly RecaptchaService _recaptchaService;
+		private readonly IConfiguration _configuration;
 		private static ConcurrentDictionary<string, (int Count, DateTime FirstAttempt)> submitAttempts = new();
 		private static readonly TimeSpan AttemptLifetime = TimeSpan.FromHours(1);
-		public	Authentication(URLContext context, RecaptchaService recaptchaService, JwtService jwtService)
+		public	Authentication(URLContext context, RecaptchaService recaptchaService, JwtService jwtService, IConfiguration configuration)
 		{
 			_context = context;
 			_recaptchaService = recaptchaService;
 			_jwtService = jwtService;
-		}
+			_configuration = configuration;
+	}
 		private string HashToMD5(string input)
 		{
 			using (MD5 md5 = MD5.Create())
@@ -78,7 +81,7 @@ public class Authentication : ControllerBase
 
 
 
-	[HttpPost("Login")]
+		[HttpPost("Login")]
 		public async Task<IActionResult> Login([FromBody] Admin_UserDTO account)
 		{
 			
@@ -124,6 +127,29 @@ public class Authentication : ControllerBase
 					});
 			}
 			}
+
+		if (account.UserName.EndsWith("@bagroup.vn", StringComparison.OrdinalIgnoreCase) ||
+			account.UserName.EndsWith("@bagps.vn", StringComparison.OrdinalIgnoreCase))
+		{
+			var usernameOnly = account.UserName.Split('@')[0];
+			var domain = account.UserName.Split('@')[1];
+			var ldapOk = await AuthenticateLdapUser(usernameOnly, account.Password, domain);
+			if (!ldapOk)
+			{
+				Increase(clientIp);
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "LDAP_FAIL",
+					ErrorMessage = "Tài khoản LDAP không hợp lệ!",
+					attempts = Failed(clientIp),
+					RequiresCaptcha = Failed(clientIp) >= 3
+				});
+			}
+
+			Reset(clientIp);
+			var tokenLdap = _jwtService.GenerateToken(account.UserName); 
+			return Ok(new { message = "Đăng nhập LDAP thành công", tokenLdap });
+		}
 		var checkLogin = await _context.AdminUsers.FirstOrDefaultAsync(x => x.UserName == account.UserName);
 		if (checkLogin == null)
 		{
@@ -159,7 +185,29 @@ public class Authentication : ControllerBase
 	{
 		return Ok(new { message = "Đăng xuất thành công" });
 	}
-	
 
+	private async Task<bool> AuthenticateLdapUser(string username, string password, string domain)
+	{
+		var ldapConfig = _configuration.GetSection($"LDAP:Domains:{domain}");
+		var host = ldapConfig["Host"];
+		var port = int.Parse(ldapConfig["Port"]);
+		var userDnFormat = ldapConfig["UserDnFormat"];
+		string userDn = string.Format(userDnFormat, username);
+		try
+		{
+			using (var connection = new LdapConnection())
+			{
+				await connection.ConnectAsync(host, port);
+				await connection.BindAsync(userDn, password);      
+
+				return connection.Bound;
+			}
+		}
+		catch (LdapException ex)
+		{
+			return false;
+		}
+	}
 
 }
+
