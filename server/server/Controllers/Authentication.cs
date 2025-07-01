@@ -11,6 +11,8 @@ using server.Services;
 using System.Collections.Concurrent;
 using System.Text;
 using Novell.Directory.Ldap;
+using System.Net.Http;
+using System.Text.Json.Nodes;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -20,14 +22,16 @@ public class Authentication : ControllerBase
 		private readonly URLContext _context;
 		private readonly RecaptchaService _recaptchaService;
 		private readonly IConfiguration _configuration;
+	private readonly IHttpClientFactory _httpClientFactory;
 		private static ConcurrentDictionary<string, (int Count, DateTime FirstAttempt)> submitAttempts = new();
 		private static readonly TimeSpan AttemptLifetime = TimeSpan.FromHours(1);
-		public	Authentication(URLContext context, RecaptchaService recaptchaService, JwtService jwtService, IConfiguration configuration)
+	public	Authentication(URLContext context, RecaptchaService recaptchaService, JwtService jwtService, IConfiguration configuration,IHttpClientFactory httpClientFactory)
 		{
 			_context = context;
 			_recaptchaService = recaptchaService;
 			_jwtService = jwtService;
 			_configuration = configuration;
+			_httpClientFactory = httpClientFactory;
 	}
 		private string HashToMD5(string input)
 		{
@@ -188,26 +192,33 @@ public class Authentication : ControllerBase
 
 	private async Task<bool> AuthenticateLdapUser(string username, string password, string domain)
 	{
+		var httpClient = _httpClientFactory.CreateClient();
 		var ldapConfig = _configuration.GetSection($"LDAP:Domains:{domain}");
-		var host = ldapConfig["Host"];
-		var port = int.Parse(ldapConfig["Port"]);
-		var userDnFormat = ldapConfig["UserDnFormat"];
-		string userDn = string.Format(userDnFormat, username);
+		var apiUrl = ldapConfig["Url"];
+		var clientId = ldapConfig["ClientID"];
+		var basicAuth = ldapConfig["BasicAuth"];
+		var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
+		request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", basicAuth);
+		var body = new
+		{
+			email = username,
+			password = password,
+			clientID = clientId
+		};
+
+		request.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+
 		try
 		{
-			using (var connection = new LdapConnection())
-			{
-				await connection.ConnectAsync(host, port);
-				await connection.BindAsync(userDn, password);      
-
-				return connection.Bound;
-			}
+			var response = await httpClient.SendAsync(request);
+			return response.IsSuccessStatusCode;
 		}
-		catch (LdapException ex)
+		catch (Exception ex)
 		{
 			return false;
 		}
 	}
+
 
 }
 
