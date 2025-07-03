@@ -6,7 +6,7 @@ import {jwtDecode} from "jwt-decode";
 export const Login = async (data) => {
     const res = await axios.post(`${process.env.REACT_APP_API_URL}/Authentication/Login`,data);
     if(res.data.message === "Login successfully!") {
-        const token = res.data.token;
+        const token = res.data.token || "";
         localStorage.setItem(`${process.env.REACT_APP_TOKEN_KEY}`, token.toString());
     }
     return res.data; 
