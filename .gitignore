@@ -21,3 +21,14 @@ node_modules
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.bin
+*.db
+*.db-shm
+*.vsidx
+*.v2
+/server/.vs
+/server/server/bin
+/server/server/obj
+/server/server/Properties
+/server/ShortUrl.Tests/bin
+/server/ShortUrl.Tests/obj
