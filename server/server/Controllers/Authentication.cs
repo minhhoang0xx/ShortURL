@@ -14,6 +14,7 @@ using Novell.Directory.Ldap;
 using System.Net.Http;
 using System.Text.Json.Nodes;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Hosting;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -94,17 +95,6 @@ public class Authentication : ControllerBase
 		?? "local";
 
 		int attempts = Failed(clientIp);
-		if (attempts >= 3 && account.RecaptchaToken == null)
-		{
-			return BadRequest(new ErrorResponse
-			{
-				ErrorCode = "CAPTCHA_INVALID",
-				ErrorMessage = "CAPTCHA chưa được xác thực!",
-				attempts = Failed(clientIp),
-				RequiresCaptcha = Failed(clientIp) >= 3
-			});
-
-		}
 		if (attempts >= 3)
 		{
 			if (string.IsNullOrEmpty(account.RecaptchaToken))
@@ -150,41 +140,42 @@ public class Authentication : ControllerBase
 				attempts = Failed(clientIp),
 				RequiresCaptcha = Failed(clientIp) >= 3
 			});
-
 		}
-		var checkPassword = HashToMD5(account.Password).ToUpper();
-		if (checkLogin.Password != checkPassword)
-		{
-			Increase(clientIp);
-			return BadRequest(new ErrorResponse
-			{
-				ErrorCode = "PASSWORD_INCORRECT",
-				ErrorMessage = "Tài khoản hoặc mật khẩu không đúng!",
-				attempts = Failed(clientIp),
-				RequiresCaptcha = Failed(clientIp) >= 3
-			});
-		}
-
 		if (domain.Equals("bagroup.vn", StringComparison.OrdinalIgnoreCase) ||
-			domain.Equals("bagroup.vn", StringComparison.OrdinalIgnoreCase))
+			domain.Equals("bagps.vn", StringComparison.OrdinalIgnoreCase))
 		{
 
-			var ldapOk = await AuthenticateLdapUser(usernameOnly, account.Password, domain);
+			var ldapOk = await AuthenLDAP(usernameOnly, account.Password, domain);
 			if (!ldapOk)
 			{
 				Increase(clientIp);
 				return BadRequest(new ErrorResponse
 				{
 					ErrorCode = "LDAP_FAIL",
-					ErrorMessage = "Xác thực qua LDAP thất bại!",
+					ErrorMessage = "Đăng nhập bằng tài khoản @bagroup.vn thất bại!",
 					attempts = Failed(clientIp),
 					RequiresCaptcha = Failed(clientIp) >= 3
 				});
 			}
 		}
+		else
+		{
+			var checkPassword = HashToMD5(account.Password).ToUpper();
+			if (checkLogin.Password != checkPassword)
+			{
+				Increase(clientIp);
+				return BadRequest(new ErrorResponse
+				{
+					ErrorCode = "PASSWORD_INCORRECT",
+					ErrorMessage = "Tài khoản hoặc mật khẩu không đúng!",
+					attempts = Failed(clientIp),
+					RequiresCaptcha = Failed(clientIp) >= 3
+				});
+			}
+		 }
 		
 		Reset(clientIp);
-		var token = _jwtService.GenerateToken(usernameOnly.ToString());
+		var token = _jwtService.GenerateToken(account.UserName.ToString());
 		return Ok(new { message = "Đăng nhập thành công", token, attempts = Failed(clientIp) });
 		
 	}
@@ -195,47 +186,35 @@ public class Authentication : ControllerBase
 		return Ok(new { message = "Đăng xuất thành công" });
 	}
 
-	private async Task<bool> AuthenticateLdapUser(string username, string password, string domain)
-	{
-		var httpClient = _httpClientFactory.CreateClient();
-		var ldapConfig = _configuration.GetSection($"LDAP:Domains:{domain}");
-		var apiUrl = ldapConfig["Url"];
-		var clientId = ldapConfig["ClientID"];
-		var basicAuth = ldapConfig["BasicAuth"];
-		var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
-		request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", basicAuth);
-		var body = new
-		{
-			email = username,
-			password = password,
-			clientID = clientId
-		};
 
-		request.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+	private async Task<bool> AuthenLDAP(string username , string password , string domain)
+	{
+		var Config = _configuration.GetSection($"LDAP:Domains:{domain}");
+		var host = Config["Host"];
+		var port = int.Parse(Config["Port"]);
+		var userDN = Config["UserDn"];
+		var serviceUsername = Config["ServiceUser"];
+		var servicePassword = Config["ServicePassword"];
+
+		string userLoginName = string.Format(userDN, username);
 
 		try
 		{
-			reponseApi? result = null;
-			var response = await httpClient.SendAsync(request);
-			if (response.IsSuccessStatusCode)
+			using (var connection = new LdapConnection() )
 			{
-				var jsonString = await response.Content.ReadAsStringAsync();
-				result = JsonConvert.DeserializeObject<reponseApi>(jsonString);
-
+				connection.SecureSocketLayer = false;
+				await connection.ConnectAsync(host, port);
+				await connection.BindAsync(serviceUsername, servicePassword); // bind với tài khoản xác thực LDAP
+				await connection.BindAsync(userLoginName, password); // bind với tài khoản từ client
+				return connection.Bound;
 			}
-			return result != null ? result.data : false;
 		}
-		catch (Exception ex)
+		catch (LdapException)
 		{
 			return false;
 		}
-	}
-	public class reponseApi
-	{
-		public bool data { get; set; }
-		public string message { get; set; }
-		public bool success { get; set; }
 
 	}
+
 }
 
