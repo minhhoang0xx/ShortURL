@@ -2,13 +2,13 @@ import React from "react";
 import HeaderBar from "../HeaderFooterComponents/header";
 import Footer from "../HeaderFooterComponents/footer";
 
-    const DefaultComponent = ({children}) =>{
+const DefaultComponent = ({ children, isShowHeader = true, isShowFooter = true }) => {
     return (
-        <div> 
-            <HeaderBar/>
+        <div>
+            {isShowHeader && <HeaderBar />}
             {children}
-            {/* <Footer/> */}
+            {isShowFooter && <Footer />}
         </div>
-        )
+    )
 }
- export default DefaultComponent
+export default DefaultComponent
