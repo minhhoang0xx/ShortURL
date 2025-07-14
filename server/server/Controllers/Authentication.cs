@@ -172,13 +172,14 @@ public class Authentication : ControllerBase
 					RequiresCaptcha = Failed(clientIp) >= 3
 				});
 			}
-		 }
-		
+
+		}
 		Reset(clientIp);
 		var token = _jwtService.GenerateToken(account.UserName.ToString());
 		return Ok(new { message = "Đăng nhập thành công", token, attempts = Failed(clientIp) });
 		
-	}
+	    }
+
 	[Authorize]
 	[HttpPost("logout")]
 	public async Task<IActionResult> Logout()

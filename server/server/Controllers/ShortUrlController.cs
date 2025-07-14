@@ -175,14 +175,6 @@ namespace server.Controllers
 					ErrorMessage = "Domain không được để trống!"
 				});
 			}
-			if (request.Tags == null || !request.Tags.Any())
-			{
-				return BadRequest(new ErrorResponse
-				{
-					ErrorCode = "TAG_REQUIRED",
-					ErrorMessage = "Tag không được để trống!"
-				});
-			}
 			if (request.Alias.Count() >= 50) {
 				return BadRequest(new ErrorResponse
 				{
@@ -243,20 +235,23 @@ namespace server.Controllers
 				Status = true,
 				LinkTags = new List<ShortURL_LinkTag>()
 			};
-			foreach (var tagName in request.Tags.Distinct())
+			if (request.Tags != null && request.Tags.Any())
 			{
-				var existingTag = await _context.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
-				if (existingTag == null)
+				foreach (var tagName in request.Tags.Distinct())
 				{
-					existingTag = new ShortURL_Tags { Name = tagName };
-					_context.Tags.Add(existingTag);
-					await _context.SaveChangesAsync(); // lưu lại để lấy ID
+					var existingTag = await _context.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
+					if (existingTag == null)
+					{
+						existingTag = new ShortURL_Tags { Name = tagName };
+						_context.Tags.Add(existingTag);
+						await _context.SaveChangesAsync(); // lưu lại để lấy ID
+					}
+					shortUrl.LinkTags.Add(new ShortURL_LinkTag
+					{
+						TagId = existingTag.Id,
+						Link = shortUrl
+					});
 				}
-				shortUrl.LinkTags.Add(new ShortURL_LinkTag
-				{
-					TagId = existingTag.Id,
-					Link = shortUrl
-				});
 			}
 			_context.ShortUrls.Add(shortUrl);
 			await _context.SaveChangesAsync();
@@ -428,14 +423,6 @@ namespace server.Controllers
 					ErrorMessage = "Domain không được để trống!"
 				});
 			}
-			if (request.Tags == null || !request.Tags.Any())
-			{
-				return BadRequest(new ErrorResponse 
-				{ 
-					ErrorCode = "TAG_REQUIRED", 
-					ErrorMessage = "Tag không được để trống!" 
-				});
-			}
 
 
 			if (url.OriginalUrl != request.OriginalUrl) // neu original thay doi thi moi can ktra 
@@ -483,21 +470,23 @@ namespace server.Controllers
 			var removedTagIds = url.LinkTags.Select(lt => lt.TagId).ToList();
 			_context.LinkTags.RemoveRange(url.LinkTags);
 			url.LinkTags = new List<ShortURL_LinkTag>();
-
-			foreach (var tagName in request.Tags.Distinct())
+			if (request.Tags != null && request.Tags.Any())
 			{
-				var existingTag = await _context.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
-				if (existingTag == null)
+				foreach (var tagName in request.Tags.Distinct())
 				{
-					existingTag = new ShortURL_Tags { Name = tagName };
-					_context.Tags.Add(existingTag);
-					await _context.SaveChangesAsync(); // Lưu để lấy ID
+					var existingTag = await _context.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
+					if (existingTag == null)
+					{
+						existingTag = new ShortURL_Tags { Name = tagName };
+						_context.Tags.Add(existingTag);
+						await _context.SaveChangesAsync(); // Lưu để lấy ID
+					}
+					url.LinkTags.Add(new ShortURL_LinkTag
+					{
+						TagId = existingTag.Id,
+						Link = url
+					});
 				}
-				url.LinkTags.Add(new ShortURL_LinkTag
-				{
-					TagId = existingTag.Id,
-					Link = url
-				});
 			}
 
 			_context.ShortUrls.Update(url);
