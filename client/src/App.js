@@ -17,6 +17,11 @@ function TokenHandler() {
       try {
         const params = new URLSearchParams(location.search);
         const token = params.get("token");
+        if (token === "") {
+          const response = await SSOService.checkLogin(token);
+          message.error(response.error);
+          window.location.href = response.redirectUrl;
+        }
         if (token) {
           setLoading(true);
           const response = await SSOService.checkLogin(token);
@@ -25,7 +30,6 @@ function TokenHandler() {
             const cleanUrl = window.location.origin + location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
             navigate("/shortUrl", { replace: true });
-            message.success(response.message)
           } else if (response && response.redirectUrl) {
             message.error(response.error);
             window.location.href = response.redirectUrl;
@@ -59,7 +63,18 @@ function App() {
       <Routes>
         {routes.map((route) => {
           const Page = route.page
-          const Layout = route.isShowHeader ? DefaultComponent : Fragment
+          const hasLayout = route.isShowHeader || route.isShowFooter;
+          const WrappedLayout = ({ children }) =>
+            hasLayout ? (
+              <DefaultComponent
+                isShowHeader={route.isShowHeader}
+                isShowFooter={route.isShowFooter}
+              >
+                {children}
+              </DefaultComponent>
+            ) : (
+              <>{children}</>
+            );
           return (
             <Route
               key={route.path}
@@ -67,14 +82,14 @@ function App() {
               element={
                 route.requireAuth ? (
                   <PrivateRoute>
-                    <Layout>
+                    <WrappedLayout>
                       <Page />
-                    </Layout>
+                    </WrappedLayout>
                   </PrivateRoute>
                 ) : (
-                  <Layout>
+                  <WrappedLayout>
                     <Page />
-                  </Layout>
+                  </WrappedLayout>
                 )
               } />
           )

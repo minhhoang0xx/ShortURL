@@ -7,15 +7,23 @@ import { jwtDecode } from "jwt-decode";
 const HeaderBar = () => {
 
   const navigate = useNavigate()
+  const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
+  let userName = null;
+  try {
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      userName = decodedToken["name"];
+    }
+  } catch (err) {
+    localStorage.removeItem(`${process.env.REACT_APP_TOKEN_KEY}`); 
+  }
+
   const handleLogout = () => {
     localStorage.removeItem(`${process.env.REACT_APP_TOKEN_KEY}`);
     message.success('Đăng xuất thành công.')
     navigate('/login')
   }
 
-  const token = localStorage.getItem(`${process.env.REACT_APP_TOKEN_KEY}`);
-  const decodedToken = jwtDecode(token);
-  const userName = decodedToken["name"];
   return (
     <Header className="header">
       <div className="header-content">
@@ -23,9 +31,13 @@ const HeaderBar = () => {
           <img src="/logo.png" alt="Logo BA GPS" className="logo" />
           <span>CÔNG TY TNHH PHÁT TRIỂN CÔNG NGHỆ ĐIỆN TỬ BÌNH ANH</span>
         </div>
-        <div className="logout">
-         <a onClick={handleLogout}><UserOutlined /> <span> </span> <span> {userName} </span>  <span> </span> <LogoutOutlined/></a>
-        </div>
+        {userName && (
+          <div className="logout">
+            <a onClick={handleLogout}>
+              <UserOutlined /> <span>{userName}</span> <LogoutOutlined />
+            </a>
+          </div>
+        )}
       </div>
     </Header>
   )
