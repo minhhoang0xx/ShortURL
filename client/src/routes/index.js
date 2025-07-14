@@ -13,14 +13,14 @@ export const routes =[
         path: '/ShortUrl',
         page: ListShortLink,
         isShowHeader: true,
-        isShowFooter: true,
+        isShowFooter: false,
         requireAuth: true
     },
     {
         path: 'link/:alias',
         page: RedirectPage,
         isShowHeader: false,
-        isShowFooter: false,
+        isShowFooter: true,
         requireAuth: false
     },
     {
@@ -49,7 +49,7 @@ export const routes =[
         page: LoginPage,
         requireAuth: false,
         isShowHeader: false,
-        isShowFooter: false,
+        isShowFooter: true,
     },
     {
         path: 'Staxi',
