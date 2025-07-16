@@ -33,6 +33,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
         expiry: record.expiry ? dayjs(record.expiry, 'YYYY-MM-DDTHH:mm:ss') : null,
         tags: record.tags,
       };
+      console.log('initialFormValues', initialFormValues);
       form.setFieldsValue(initialFormValues);
       setInitialValues(initialFormValues);
       fetchDomains();
@@ -64,7 +65,10 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
 
   const handleFormValuesChange = (changedValues, allValues) => {
     if ('domain' in changedValues || 'alias' in changedValues) {
-      const domain = form.getFieldValue('domain');
+      let domain = form.getFieldValue('domain');
+      if (domain === "https://link.bagps.vn") {
+        domain = "https://u.bagps.vn"
+      }
       const alias = form.getFieldValue('alias') || '';
       if (domain) {
         const combinedUrl = alias ? `${domain}/${alias}` : domain;
@@ -107,6 +111,9 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       const decodedToken = jwtDecode(token);
       const userName = decodedToken["name"];
       data.createdByUser = userName;
+      if (data.domain === "https://link.bagps.vn") {
+        data.domain = "https://u.bagps.vn"
+      }
       const linkShort = `${data.domain}/${data.alias}`;
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
       data.qrCode = qr;
@@ -205,7 +212,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   }
 
   return (
-    <Modal open={visible} onCancel={onCancel} loading={loading} width="38vw" footer={null}>
+    <Modal open={visible} onCancel={onCancel} loading={loading} width="560px" footer={null}>
       <Content className="CSL_main-container">
         <h3>CẬP NHẬT SHORTLINK</h3>
         <Form
@@ -275,6 +282,15 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
           </Form.Item>
           <Space.Compact style={{ width: '100%', gap: "2%" }}>
             <Form.Item
+              name="expiry"
+              className="CSL_custom-time"
+            // label="Hạn sử dụng liên kết:"
+            >
+              <DatePicker placeholder="Ngày hết hạn" className="datePicker" format={dateFormat}
+                disabledDate={(current) => current && current < dayjs().startOf('day')}
+              />
+            </Form.Item>
+            <Form.Item
               name="tags"
               className='CSL_form-tag'>
               <Select
@@ -283,17 +299,6 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
                 options={tagOptions}
                 allowClear
                 style={{ maxWidth: '100%' }}
-
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="expiry"
-              className="CSL_custom-time"
-            // label="Hạn sử dụng liên kết:"
-            >
-              <DatePicker placeholder="Ngày hết hạn" className="datePicker" format={dateFormat}
-                disabledDate={(current) => current && current < dayjs().startOf('day')}
               />
             </Form.Item>
           </Space.Compact>
@@ -304,29 +309,38 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
             {/* <Switch checked={isChecked} onClick={handleCheckOSChange} checkedChildren="CheckOS" unCheckedChildren="UnCheck"/> */}
           </Form.Item>
           {isChecked && (
+            <Space.Compact style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <div style={{ width: 80,marginBottom: '10px' }}>
+              <span>App Store<span style={{ color: 'red' }}>*</span></span>
+            </div>
             <Form.Item
               name="iosLink"
-              rules={[{ required: true, message: "Vui lòng nhập URL App Store!" },
-              { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' }
-              ]}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <div style={{ width: 80 }}>App Store<span style={{ color: 'red' }}>*</span></div>
-                <Input placeholder="Nhập URL App Store" style={{ flex: 1 }} />
-              </div>
+              rules={[
+                { required: true, message: "Vui lòng nhập URL App Store!" },
+                { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' },
+              ]}
+              style={{ flex: 1, alignItems:'center' }}
+            >
+              <Input placeholder="Nhập URL App Store" />
             </Form.Item>
+          </Space.Compact>
           )}
           {isChecked && (
-            <Form.Item
-              name="androidLink"
-              rules={[{ required: true, message: "Vui lòng nhập URL Google Play!" },
-              { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' }
-              ]}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <div style={{ width: 80 }}>Google Play<span style={{ color: 'red' }}>*</span></div>
-                <Input placeholder="Nhập URL Google Play" style={{ flex: 1 }} />
-              </div>
-            </Form.Item>
+               <Space.Compact style={{ display: 'flex', alignItems: 'center', gap: '5px',marginBottom:'10px' }}>
+               <div style={{ width: 80,marginBottom: '10px' }}>
+                 <span>Google Play<span style={{ color: 'red' }}>*</span></span>
+               </div>
+               <Form.Item
+                 name="androidLink"
+                 rules={[
+                   { required: true, message: "Vui lòng nhập URL Google Play!" },
+                   { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' },
+                 ]}
+                 style={{ flex: 1, alignItems:'center' }}
+               >
+                 <Input placeholder="Nhập URL App Store" />
+               </Form.Item>
+             </Space.Compact>
           )}
           <Form.Item >
             <Button type="primary" htmlType="submit" disabled={loading || !hasChanges} className="CSL_button-create">
