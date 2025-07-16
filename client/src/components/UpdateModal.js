@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Button, Space, Select, message, Checkbox, DatePicker } from 'antd';
+import { Modal, Form, Input, Button, Space, Select, message, Checkbox, DatePicker, Tag } from 'antd';
 import { Content } from 'antd/es/layout/layout';
 import dayjs from 'dayjs';
 import { CopyOutlined, EditOutlined, LinkOutlined } from '@ant-design/icons';
@@ -9,11 +9,12 @@ import * as ShortUrlService from '../services/ShortUrlService';
 import * as DomainService from '../services/DomainService';
 import * as TagService from '../services/TagService';
 import { jwtDecode } from 'jwt-decode';
+import ScrollContainer from 'react-indiana-drag-scroll';
 
 const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const [form] = Form.useForm();
   const [shortUrl, setShortUrl] = useState("");
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [qrLink, setQrLink] = useState("");
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(false)
@@ -63,7 +64,10 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
 
   const handleFormValuesChange = (changedValues, allValues) => {
     if ('domain' in changedValues || 'alias' in changedValues) {
-      const domain = form.getFieldValue('domain');
+      let domain = form.getFieldValue('domain');
+      if(domain==="https://link.bagps.vn"){
+        domain = "https://u.bagps.vn"
+      }
       const alias = form.getFieldValue('alias') || '';
       if (domain) {
         const combinedUrl = alias ? `${domain}/${alias}` : domain;
@@ -84,7 +88,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     });
     setHasChanges(isChanged);
   };
-  
+
   const handleCheckOSChange = (e) => {
     const check = !isChecked;
     setIsChecked(check);
@@ -94,7 +98,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     handleFormValuesChange({}, form.getFieldsValue());
   };
   const onFinish = async (data) => {
-    
+
     setLoading(true)
     try {
 
@@ -106,10 +110,14 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       const decodedToken = jwtDecode(token);
       const userName = decodedToken["name"];
       data.createdByUser = userName;
+      if(data.domain==="https://link.bagps.vn"){
+        data.domain = "https://u.bagps.vn"
+      }
       const linkShort = `${data.domain}/${data.alias}`;
       const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
       data.qrCode = qr;
       data.status = data.expiry && new Date(data.expiry) < new Date() ? false : true;
+      data.tags = data.tags || [];
       const response = await ShortUrlService.updateShortLink(record.id, data)
       if (response && response.shortLink) {
         message.success(`Cập nhật thành công!`);
@@ -144,16 +152,16 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
 
   const doDownload = (url, fileName) => {
     setLoading(true)
-    try{
+    try {
       const a = document.createElement('a');
       a.download = fileName;
       a.href = url;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-    } catch{
+    } catch {
       message.error("Tải QR Code thất bại.")
-    }finally{
+    } finally {
       setLoading(false)
     }
 
@@ -168,26 +176,26 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     const image = new Image();
     image.crossOrigin = 'anonymous';
     image.src = img.src;
-  
+
     image.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = image.width;
       canvas.height = image.height;
-  
+
       const ctx = canvas.getContext('2d');
       ctx.drawImage(image, 0, 0);
-  
+
       const url = canvas.toDataURL('image/png');
-      const fileName =  `${shortUrl}.png`;
+      const fileName = `${shortUrl}.png`;
       doDownload(url, fileName);
     };
-  
+
     image.onerror = () => {
       console.error('Không tải được ảnh QR từ nguồn.');
       setLoading(false);
     };
   };
-  
+
   const openLink = () => {
     if (shortUrl) {
       window.open(shortUrl, '_blank');
@@ -203,7 +211,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   }
 
   return (
-    <Modal open={visible} onCancel={onCancel} loading={loading} width="38vw" footer={null}>
+    <Modal open={visible} onCancel={onCancel} loading={loading} width="560px" footer={null}>
       <Content className="CSL_main-container">
         <h3>CẬP NHẬT SHORTLINK</h3>
         <Form
@@ -271,29 +279,29 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
               </Form.Item>
             </Space.Compact>
           </Form.Item>
+          <Space.Compact style={{ width: '100%', gap: "2%" }}>
           <Form.Item
-            name="tags"
-            label={<span>Tag: <span style={{ color: 'red' }}>*</span></span>}
-            className='CSL_form-tag'
-            rules={[
-              { required: true, message: 'Vui lòng nhập Tag' },
-            ]}>
-            <Select
-              mode="tags"
-              style={{ width: '100%' }}
-              placeholder="Nhập mới hoặc chọn tags"
-              options={tagOptions}
-            />
-          </Form.Item>
-          <Form.Item
-            name="expiry"
-            className="CSL_custom-time"
-            label="Hạn sử dụng liên kết:"
-          >
-            <DatePicker placeholder="DD-MM-YYYY" className="datePicker" format={dateFormat}
-            // disabledDate={(current) => current && current < dayjs().startOf('day')}
-            />
-          </Form.Item>
+              name="expiry"
+              className="CSL_custom-time"
+            // label="Hạn sử dụng liên kết:"
+            >
+              <DatePicker placeholder="Ngày hết hạn" className="datePicker" format={dateFormat}
+                disabledDate={(current) => current && current < dayjs().startOf('day')}
+              />
+            </Form.Item>
+            <Form.Item
+              name="tags"
+              className='CSL_form-tag'>
+              <Select
+                mode="tags"
+                placeholder="Nhập mới hoặc chọn tags"
+                options={tagOptions}
+                allowClear
+                style={{ maxWidth: '100%' }}
+              />
+            </Form.Item>
+          </Space.Compact>
+
           <Form.Item name="checkOS" className="checkOs">
             <Checkbox disabled={isExpired} checked={isChecked} onClick={handleCheckOSChange} />
             <label> Tạo link tải APP</label>
@@ -302,23 +310,26 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
           {isChecked && (
             <Form.Item
               name="iosLink"
-              label={<span>Link tới App Store <span style={{ color: 'red' }}>*</span></span>}
               rules={[{ required: true, message: "Vui lòng nhập URL App Store!" },
               { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' }
-              ]}
-            >
-              <Input disabled={isExpired} placeholder="Nhập URL App Store" />
+              ]}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div style={{ width: 80 }}>App Store<span style={{ color: 'red' }}>*</span></div>
+                <Input placeholder="Nhập URL App Store" style={{ flex: 1 }} />
+              </div>
             </Form.Item>
           )}
           {isChecked && (
             <Form.Item
               name="androidLink"
-              label={<span>Link tới Google Play <span style={{ color: 'red' }}>*</span></span>}
               rules={[{ required: true, message: "Vui lòng nhập URL Google Play!" },
               { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' }
               ]}
             >
-              <Input disabled={isExpired} placeholder="Nhập URL Google Play" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div style={{ width: 80 }}>Google Play<span style={{ color: 'red' }}>*</span></div>
+                <Input placeholder="Nhập URL Google Play" style={{ flex: 1 }} />
+              </div>
             </Form.Item>
           )}
           <Form.Item >
@@ -327,11 +338,18 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
             </Button>
           </Form.Item>
 
-          <Form.Item label="Kết quả:" className="CSL_form-result">
-            <div className="CSL_result">
-              <div className="CSL_short-url">
-                {shortUrl} {isExpired && <span style={{ color: 'red' }}>(Quá Hạn)</span>}
+          <Form.Item
+            label={
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span>Kết quả:</span>
+                <div className="CSL_short-url">
+                  {shortUrl} {isExpired && <span style={{ color: 'red', marginLeft: 4, fontWeight: 'bold' }}>(Quá Hạn)</span>}
+                </div>
               </div>
+            }
+            className="CSL_form-result">
+            <div className="CSL_result">
+
               <div className="CSL_qr-code">
                 {qrLink && (
                   <>
