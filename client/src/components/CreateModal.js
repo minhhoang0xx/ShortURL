@@ -1,5 +1,5 @@
 import { Button, Checkbox, DatePicker, Form, Input, Modal, Select, Space, message } from "antd";
-import { CopyOutlined, LinkOutlined, PlusOutlined, SyncOutlined } from '@ant-design/icons';
+import { CopyOutlined, EditOutlined, LinkOutlined, PlusOutlined, SyncOutlined } from '@ant-design/icons';
 import { Content } from "antd/es/layout/layout";
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
@@ -19,6 +19,8 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
   const [isChecked, setIsChecked] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
   const [tagOptions, setTagOptions] = useState([]);
+  const [isFinish, setIsFinish] = useState(false);
+  const [isCustom, setIsCustom] = useState(false);
   const dateFormat = 'DD/MM/YYYY';
 
 
@@ -50,9 +52,6 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
     if ('domain' in changedValues || 'alias' in changedValues) {
      
       let domain = form.getFieldValue('domain');
-      if(domain==="https://link.bagps.vn"){
-        domain = "https://u.bagps.vn"
-      }
       const alias = form.getFieldValue('alias') || '';
       if (domain) {
         const combinedUrl = alias ? `${domain}/${alias}` : domain;
@@ -67,6 +66,13 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       form.setFieldsValue({ iosLink: "", androidLink: "" });
     }
   };
+  const handleCheckCustom = (e) => {
+    const check = !isCustom;
+    setIsCustom(check);
+    if (!check) {
+      form.setFieldsValue({ alias: ""});
+    }
+  };
 
   const onFinish = async (data) => {
     setLoading(true)
@@ -79,22 +85,22 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       const decodedToken = jwtDecode(token);
       const userName = decodedToken["name"];
       data.createdByUser = userName;
-      if(data.domain==="https://link.bagps.vn"){
-        data.domain = "https://u.bagps.vn"
-      }
       const linkShort = `${data.domain}/${data.alias}`;
-      const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
-      data.qrCode = qr;
       data.status = true;
       data.status = data.expiry && new Date(data.expiry) < new Date() ? false : true;
       data.tags = data.tags || [];
+      data.qrCode = 'null';
       const response = await ShortUrlService.createShortLink(data)
       if (response && response.shortLink) {
         message.success(`Tạo thành công!`);
-        setShortUrl(linkShort);
-        setQrLink(qr);
+        setShortUrl(response.shortLink);
+        setQrLink(response.qrCode);
         setIsExpired(data.expiry && new Date(data.expiry) < new Date());
         onCreate()
+        setIsFinish(true)
+        setIsCustom(true)
+        form.setFieldsValue({ alias: response.shortCode });
+        console.log('res', response)
       }
     } catch (error) {
       console.error("API Error:", error);
@@ -176,6 +182,8 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
     setQrLink("");
     setIsChecked(false);
     setIsChecked(false);
+    setIsFinish(false);
+    setIsCustom(false);
   }
   const handleCancel = () => {
     resetForm();
@@ -238,15 +246,20 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
               <Form.Item label=" ">
                 <span style={{ color: '#000', margin: '0 10px', fontSize: '20px' }}>/</span>
               </Form.Item>
+
               <Form.Item
                 name="alias"
-                label={<span>Tên đường dẫn-Alias<span style={{ color: 'red' }}>*</span></span>}
+                label={
+                  <>
+                    <Checkbox checked={isCustom} onClick={handleCheckCustom} />
+                    <span style={{ marginLeft: 5 }}>Custom</span>
+                  </>
+                }
                 className="CSL_custom-link-alias"
                 rules={[
-                  { required: true, message: 'Vui lòng nhập Alias!' },
                   { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' },
                   {
-                    pattern: /^[a-zA-Z0-9]+$/,
+                    pattern: /^[a-zA-Z0-9_]+$/,
                     message: 'Alias phải chứa chữ cái (a-z, A-Z) và số (0-9).'
                   },
                   {
@@ -255,8 +268,9 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
                   }
                 ]}
               >
-                <Input placeholder="Tên đường dẫn - Alias" />
+                 <Input disabled={!isCustom} placeholder="Tên đường dẫn - Alias" /> 
               </Form.Item>
+             
             </Space.Compact>
           </Form.Item>
           <Space.Compact style={{ width: '100%', gap: "2%" }}>
@@ -323,8 +337,8 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
              </Space.Compact>
           )}
           <Form.Item>
-            <Button type="primary" htmlType="submit" disabled={loading} className="CSL_button-create">
-              <PlusOutlined />  Tạo mới
+            <Button type="primary" htmlType="submit" disabled={loading || isFinish} className="CSL_button-create">
+             {isFinish ?   (<><EditOutlined /> Cập nhật</>):(<> <PlusOutlined />  Tạo mới</>) }
             </Button>
           </Form.Item>
           <Form.Item 

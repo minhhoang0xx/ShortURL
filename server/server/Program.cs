@@ -8,7 +8,13 @@ using server.Data;
 using System;
 using server.Services;
 using Microsoft.AspNetCore.HttpOverrides;
+using Serilog;
+using Serilog.Events;
 
+Log.Logger = new LoggerConfiguration()
+	.MinimumLevel.Information()
+	.WriteTo.File("LogsShortLink/log-.txt", rollingInterval: RollingInterval.Day)
+	.CreateLogger();
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +27,7 @@ builder.Services.AddScoped<RecaptchaService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<JwtService>();
+builder.Host.UseSerilog();
 
 
 string jwtSecretKey = null;
@@ -82,4 +89,5 @@ app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
 app.Run();

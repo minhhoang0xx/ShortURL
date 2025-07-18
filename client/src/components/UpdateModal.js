@@ -23,6 +23,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const [tagOptions, setTagOptions] = useState([]);
   const [initialValues, setInitialValues] = useState({});
   const [hasChanges, setHasChanges] = useState(false);
+  const [isCustom, setIsCustom] = useState(true);
   const dateFormat = 'DD/MM/YYYY';
 
   useEffect(() => {
@@ -66,9 +67,6 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const handleFormValuesChange = (changedValues, allValues) => {
     if ('domain' in changedValues || 'alias' in changedValues) {
       let domain = form.getFieldValue('domain');
-      if (domain === "https://link.bagps.vn") {
-        domain = "https://u.bagps.vn"
-      }
       const alias = form.getFieldValue('alias') || '';
       if (domain) {
         const combinedUrl = alias ? `${domain}/${alias}` : domain;
@@ -98,11 +96,16 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     }
     handleFormValuesChange({}, form.getFieldsValue());
   };
+  const handleCheckCustom = (e) => {
+    const check = !isCustom;
+    setIsCustom(check);
+    if (!check) {
+      form.setFieldsValue({ alias: ""});
+    }
+  };
   const onFinish = async (data) => {
-
     setLoading(true)
     try {
-
       const selectedDomain = domains.find(domain => domain.link === data.domain);
       data.projectName = selectedDomain.name
       data.checkOS = isChecked ? true : false;
@@ -111,20 +114,18 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
       const decodedToken = jwtDecode(token);
       const userName = decodedToken["name"];
       data.createdByUser = userName;
-      if (data.domain === "https://link.bagps.vn") {
-        data.domain = "https://u.bagps.vn"
-      }
       const linkShort = `${data.domain}/${data.alias}`;
-      const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkShort)}`;
-      data.qrCode = qr;
+      data.qrCode = 'null'
       data.status = data.expiry && new Date(data.expiry) < new Date() ? false : true;
       data.tags = data.tags || [];
       const response = await ShortUrlService.updateShortLink(record.id, data)
       if (response && response.shortLink) {
         message.success(`Cập nhật thành công!`);
         setShortUrl(response.shortLink);
-        setQrLink(qr)
+        setQrLink(response.qrCode);
+        setIsCustom(true)
         setIsExpired(data.expiry && new Date(data.expiry) < new Date());
+        form.setFieldsValue({ alias: response.shortCode });
         onUpdate();
       }
     } catch (error) {
@@ -209,6 +210,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     setIsExpired(false);
     form.resetFields();
     setHasChanges(false);
+    setIsCustom(true);
   }
 
   return (
@@ -258,17 +260,19 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
                 <span style={{ color: '#000', margin: '0 10px', fontSize: '20px' }}>/</span>
               </Form.Item>
               <Form.Item
-
                 name="alias"
-                label={<span>Tên đường dẫn-Alias <span style={{ color: 'red' }}>*</span></span>}
+                label={
+                  <>
+                    <Checkbox checked={isCustom} onClick={handleCheckCustom} />
+                    <span style={{ marginLeft: 5 }}>Custom</span>
+                  </>
+                }
                 className="CSL_custom-link-alias"
-
                 rules={[
-                  { required: true, message: 'Vui lòng nhập Alias!' },
                   { pattern: /^[^\s]+$/, message: 'Alias không được chứa khoảng trắng!' },
                   {
-                    pattern: /^[a-zA-Z0-9]+$/,
-                    message: 'Alias phải chứa chữ cái (a-z, A-Z) và số (0-9)!'
+                    pattern: /^[a-zA-Z0-9_]+$/,
+                    message: 'Alias phải chứa chữ cái (a-z, A-Z) và số (0-9).'
                   },
                   {
                     max: 50,
@@ -276,7 +280,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
                   }
                 ]}
               >
-                <Input disabled={isExpired} placeholder="Tên đường dẫn - Alias" />
+                 <Input disabled={isExpired || !isCustom} placeholder="Tên đường dẫn - Alias" /> 
               </Form.Item>
             </Space.Compact>
           </Form.Item>

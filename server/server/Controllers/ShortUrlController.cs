@@ -14,10 +14,12 @@ namespace server.Controllers
 	public class ShortUrlController : ControllerBase
 	{
 		private readonly URLContext _context;
+		private readonly ILogger<ShortUrlController> _logger;
 
-		public ShortUrlController(URLContext context)
+		public ShortUrlController(URLContext context, ILogger<ShortUrlController> logger)
 		{
 			_context = context;
+			_logger = logger;
 		}
 		[Authorize]
 		[HttpGet("getAll")]
@@ -219,6 +221,8 @@ namespace server.Controllers
 					ErrorMessage = "Ngày hết hạn không được nhỏ hơn ngày hiện tại!"
 				});
 			}
+			var shortLink = $"{request.Domain}/{shortCode}";
+			var qrCode = $"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={Uri.EscapeDataString(shortLink)}";
 			var shortUrl = new ShortURL_Link
 			{
 				ProjectName = request.ProjectName,
@@ -226,7 +230,7 @@ namespace server.Controllers
 				Domain = request.Domain,
 				Alias = shortCode,
 				CreateAt = DateTime.Now,
-				QrCode = request.QrCode,
+				QrCode = qrCode,
 				CheckOS = request.CheckOS,
 				IosLink = request.IosLink,
 				AndroidLink = request.AndroidLink,
@@ -256,14 +260,18 @@ namespace server.Controllers
 			_context.ShortUrls.Add(shortUrl);
 			await _context.SaveChangesAsync();
 
-			var shortLink = $"{request.Domain}/{shortCode}";
-			return Ok(new {shortLink });
+			return Ok(new {shortLink, qrCode, shortCode });
 		}
 
 		[AllowAnonymous]
 		[HttpGet("{code}")] // "code" trong domain
 		public async Task<IActionResult> RedirectUrl(string code, [FromQuery] string domain)
 		{
+			foreach (var header in Request.Headers)
+			{
+				Console.WriteLine($"[HEADER] {header.Key}: {header.Value}");
+				_logger.LogInformation("[HEADER] {Key}: {Value}", header.Key, header.Value);
+			}
 			if (string.IsNullOrEmpty(domain))
 			{
 				return BadRequest(new ErrorResponse
@@ -304,6 +312,9 @@ namespace server.Controllers
 
 			string userAgent = Request.Headers["User-Agent"].ToString();
 			string ip = GetClientIp(HttpContext);
+			_logger.LogInformation("[IP DEBUG] X-Forwarded-For: {XForwardedFor}", Request.Headers["X-Forwarded-For"]);
+			_logger.LogInformation("[IP DEBUG] RemoteIpAddress: {RemoteIp}", HttpContext.Connection.RemoteIpAddress);
+			_logger.LogInformation("[IP DEBUG] Resolved IP: {IP}", ip);
 			string referrer = Request.Headers["Referer"].ToString();
 			string source = "Unknown";
 			string uaLower = userAgent.ToLower();
@@ -423,8 +434,6 @@ namespace server.Controllers
 					ErrorMessage = "Domain không được để trống!"
 				});
 			}
-
-
 			if (url.OriginalUrl != request.OriginalUrl) // neu original thay doi thi moi can ktra 
 			{
 				var existingOG = await _context.ShortUrls
@@ -455,11 +464,13 @@ namespace server.Controllers
 					ErrorMessage = $"'{shortCode}' đã được [{existingUrl.CreatedByUser}] sử dụng trước đó cho {existingUrl.ProjectName} "
 				});
 			}
+			var shortLink = $"{request.Domain}/{shortCode}";
+			var qrCode = $"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={Uri.EscapeDataString(shortLink)}";
 			url.Alias = shortCode;
 			url.ProjectName = request.ProjectName;
 			url.OriginalUrl = request.OriginalUrl;
 			url.Domain = request.Domain;
-			url.QrCode = request.QrCode;
+			url.QrCode = qrCode;
 			url.CreateAt = DateTime.Now;
 			url.CreatedByUser = request.CreatedByUser;
 			url.CheckOS = request.CheckOS;
@@ -492,8 +503,7 @@ namespace server.Controllers
 			_context.ShortUrls.Update(url);
 			await _context.SaveChangesAsync();
 			await RemoveOrphanedTagsAsync(removedTagIds);
-			var shortLink = $"{url.Domain}/{url.Alias}";
-			return Ok(new { id = url.ShortId, shortLink });
+			return Ok(new { id = url.ShortId, shortLink, qrCode, shortCode });
 		}
 		
 		[Authorize] 
@@ -570,7 +580,7 @@ namespace server.Controllers
 			}
 		}
 
-		private string GenerateRandomURL(int length = 10)
+		private string GenerateRandomURL(int length = 5)
 		{
 			const string chars = "qwertyuioplkjhgfdsazxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM";
 			var random = new Random();
