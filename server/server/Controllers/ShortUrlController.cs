@@ -267,11 +267,7 @@ namespace server.Controllers
 		[HttpGet("{code}")] // "code" trong domain
 		public async Task<IActionResult> RedirectUrl(string code, [FromQuery] string domain)
 		{
-			foreach (var header in Request.Headers)
-			{
-				Console.WriteLine($"[HEADER] {header.Key}: {header.Value}");
-				_logger.LogInformation("[HEADER] {Key}: {Value}", header.Key, header.Value);
-			}
+
 			if (string.IsNullOrEmpty(domain))
 			{
 				return BadRequest(new ErrorResponse
@@ -587,24 +583,30 @@ namespace server.Controllers
 			return new string(Enumerable.Repeat(chars, length)
 										.Select(s => s[random.Next(s.Length)]).ToArray());
 		}
+		private string GetClientIp(HttpContext context)
+		{
+			// Ưu tiên lấy từ HAProxy header nếu có
+			var haproxyIp = context.Request.Headers["HAProxy-Client-Source-IP"].FirstOrDefault();
+			if (!string.IsNullOrEmpty(haproxyIp))
+				return haproxyIp;
+
+			// Nếu không có thì fallback về X-Forwarded-For
+			var xff = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+			if (!string.IsNullOrEmpty(xff))
+				return xff.Split(',').First().Trim();
+
+			// Cuối cùng lấy từ connection
+			return context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+		}
+
 		//private string GetClientIp(HttpContext context)
 		//{
 		//	var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
 		//	if (!string.IsNullOrEmpty(ip))
-		//	{
-		//		return ip.Split(',')[0];
-		//	}
+		//		return ip.Split(',').First().Trim();
 
 		//	return context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
 		//}
-		private string GetClientIp(HttpContext context)
-		{
-			var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-			if (!string.IsNullOrEmpty(ip))
-				return ip.Split(',').First().Trim();
-
-			return context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
-		}
 		private (string device, string os, string browser) ParseUserAgent(string userAgent)
 		{
 			string device = "Unknown", os = "Unknown", browser = "Unknown";
