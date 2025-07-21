@@ -48,12 +48,12 @@
 }
 
 .linkLog {
-  display: inline-block;
-  max-width: 400px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: middle;
+  max-width: 330px;
+  margin-left: 8px;
 }
 
 
@@ -62,26 +62,10 @@
   align-items: center;
 }
 
+
 .log_header-time {
-  width: 25%;
-  height: 50%;
-}
-
-.log_info-flex {
   width: 100%;
-  margin-left: 40px;
-}
-
-.log_info-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12%;
-}
-
-.log_info-pair {
-  display: flex;
-  gap: 6px;
-  align-items: center;
+  height: 40px;
 }
 
 .log_modal .ant-modal-footer {
@@ -91,6 +75,7 @@
 
 .label {
   font-weight: 600;
+  margin-left: 10px;
 }
 
 .tag-cate {
@@ -104,7 +89,7 @@
 }
 
 .log_modal .ant-tag {
-  padding: 3px 10px;
+  padding: 8px 14px;
 }
 
 .log-modal-cancle {

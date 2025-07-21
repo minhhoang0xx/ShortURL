@@ -136,6 +136,12 @@
         border: none;
 
     }
+    .LSL_search-bar-DeleteMany{
+        background-color: rgb(214, 37, 37) !important;
+    }
+    .LSL_search-bar-DeleteMany:hover{
+        background-color: rgb(187, 31, 31) !important;
+    }
 
     .LSL_shortlink-table {
         margin-top: 20px;
@@ -275,6 +281,10 @@
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: middle;
+        max-width: 320px;
     }
 
     .CSL_qr-code {

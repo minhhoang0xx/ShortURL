@@ -94,6 +94,7 @@ const ListShortLink = () => {
     {
       title: 'Tên đường dẫn',
       dataIndex: 'alias',
+      ellipsis: true,
       key: 'alias',
       width: '12%',
       sorter: (a, b) => a.alias.localeCompare(b.alias),
@@ -656,7 +657,7 @@ const ListShortLink = () => {
             <Button type="primary" className="LSL_search-bar-Excel" onClick={handleExportExcel}>
               <a >Xuất Excel</a>
             </Button>
-            {selectedRows.length !== 0 && (<Button type="primary" onClick={showDeleteManyConfirm}>Xóa dữ liệu</Button>)}
+            {selectedRows.length !== 0 && (<Button type="primary" className="LSL_search-bar-DeleteMany" onClick={showDeleteManyConfirm}>Xóa dữ liệu</Button>)}
           </Space>
         </div>
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Button, DatePicker, message, Modal, Table, Tag } from 'antd';
+import { Button, Col, DatePicker, message, Modal, Row, Table, Tag } from 'antd';
 import * as ShortUrlService from '../services/ShortUrlService';
 import './style.css';
 import { Content } from 'antd/es/layout/layout';
@@ -25,7 +25,7 @@ const LogModal = ({ visible, onCancel, record, onTagClick }) => {
             title: 'STT',
             key: 'STT',
             className: 'STT-column',
-            width: '2%',
+            width: '1%',
             render: (_, __, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
         },
         {
@@ -41,21 +41,18 @@ const LogModal = ({ visible, onCancel, record, onTagClick }) => {
             dataIndex: 'browser',
             key: 'browser',
             width: '4%',
-            className: 'action-column',
         },
         {
             title: 'Thiết bị',
             dataIndex: 'device',
             key: 'device',
             width: '4%',
-            className: 'action-column',
         },
         {
             title: 'Hệ điều hành',
             dataIndex: 'os',
             key: 'os',
-            width: '5%',
-            className: 'action-column',
+            width: '4%',
         },
         // {
         //     title: 'Nguồn truy cập',
@@ -138,7 +135,7 @@ const LogModal = ({ visible, onCancel, record, onTagClick }) => {
             open={visible}
             onCancel={onCancel}
             className="log_modal"
-            width="90vw"
+            width="80vw"
             footer={[
                 <Button key="close" onClick={onCancel} className="log-modal-cancle">
                     Đóng
@@ -147,50 +144,59 @@ const LogModal = ({ visible, onCancel, record, onTagClick }) => {
             <Content className="log_main-container">
                 <div className="log_main-container">
                     <div className="log_header">
-                        <RangePicker
-                            className="log_header-time"
-                            format={dateFormat}
-                            value={dateRange}
-                            onChange={(dates) => setDateRange(dates)}
-                            placeholder={['Từ ngày', 'Đến ngày']}
-                        />
                         {record && (
-                            <div className="log_info-flex">
-                                <div className="log_info-row">
-                                    <div className="log_info-pair">
-                                        <span className="label">Dự án:</span>
-                                        <span>{record.projectName}</span>
-                                    </div>
-                                    <div className="log_info-pair">
-                                        <span className="label">Ngày hết hạn:</span>
-                                        <span>{record.expiry ? dayjs(record.expiry).format('DD/MM/YYYY') : 'Vô thời hạn'}</span>
-                                    </div>
-                                    <div className="log_info-pair">
-                                        <span className="label">Người cập nhật:</span>
-                                        <span>{record.createdByUser}</span>
-                                    </div>
-                                    <div className="log_info-pair">
-                                        <span className="label">Lượt truy cập:</span>
-                                        <span>{record.clickCount}</span>
-                                    </div>
-                                </div>
-
-                                <div className="log_info-row">
-                                    <div className="log_info-pair">
-                                        <span className="label">ShortURL:</span>
-                                        <a href={record.shortLink} target="_blank" rel="noopener noreferrer">{record.shortLink}</a>
-                                    </div>
-                                    <div className="log_info-pair">
-                                        <span className="label">URL gốc:</span>
-                                        <a className="linkLog" href={record.originalUrl} target="_blank" rel="noopener noreferrer" title={record.originalUrl}>{record.originalUrl} </a>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {record && (
-                            <Tag color={record.status ? 'rgb(17 141 52)' : '#F03939'}>
+                            <Tag style={{ fontSize: 14, fontWeight: 'bold' }} color={record.status ? 'rgb(27 186 124)' : '#F03939'}>
                                 {record.status ? 'Hoạt động' : 'Quá hạn'}
-                            </Tag>)}
+                            </Tag>
+                        )}
+                        <div style={{ paddingLeft: 16 }} >
+                            <RangePicker
+                                className="log_header-time"
+                                format={dateFormat}
+                                value={dateRange}
+                                onChange={(dates) => setDateRange(dates)}
+                                placeholder={['Từ ngày', 'Đến ngày']}
+                            />
+                        </div>
+                        {record && (
+                            <Row justify="space-between" style={{ width: '100%', paddingLeft: 24 }}>
+                                <Col style={{ minWidth: 150, paddingRight: 16 }}>
+                                    <div style={{ display: 'flex', marginBottom: 12 }}>
+                                        <span>Dự án: </span>
+                                        <span className="label">{record.projectName}</span>
+                                    </div>
+                                    <div style={{ display: 'flex' }}>
+                                        <span>Ngày hết hạn:</span>
+                                        <span className="label">
+                                            {record.expiry ? dayjs(record.expiry).format('DD/MM/YYYY') : 'Vô thời hạn'}
+                                        </span>
+                                    </div>
+                                </Col>
+                                <Col style={{ minWidth: 150, paddingRight: 16 }}>
+                                    <div style={{ display: 'flex', marginBottom: 12 }}>
+                                        <span>Người cập nhật:</span>
+                                        <span className="label">{record.createdByUser}</span>
+                                    </div>
+                                    <div style={{ display: 'flex' }}>
+                                        <span>ShortURL:</span>
+                                        <a
+                                            href={record.shortLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="linkLog"
+                                        >
+                                            {record.shortLink}
+                                        </a>
+                                    </div>
+                                </Col>
+                                <Col style={{ minWidth: 150 }}>
+                                    <div style={{ display: 'flex', marginBottom: 12 }}>
+                                        <span>Lượt truy cập:</span>
+                                        <span className="label">{record.clickCount}</span>
+                                    </div>
+                                </Col>
+                            </Row>
+                        )}
                     </div>
                 </div>
 
