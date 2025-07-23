@@ -252,7 +252,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
                 label={
                   <>
                     <Checkbox checked={isCustom} onClick={handleCheckCustom} />
-                    <span style={{ marginLeft: 5 }}>Custom</span>
+                    <span style={{ marginLeft: 5 }}>Custom Alias</span>
                   </>
                 }
                 className="CSL_custom-link-alias"

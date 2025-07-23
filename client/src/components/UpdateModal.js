@@ -264,7 +264,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
                 label={
                   <>
                     <Checkbox checked={isCustom} onClick={handleCheckCustom} />
-                    <span style={{ marginLeft: 5 }}>Custom</span>
+                    <span style={{ marginLeft: 5 }}>Custom Alias</span>
                   </>
                 }
                 className="CSL_custom-link-alias"
@@ -290,9 +290,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
               className="CSL_custom-time"
             // label="Hạn sử dụng liên kết:"
             >
-              <DatePicker placeholder="Ngày hết hạn" className="datePicker" format={dateFormat}
-                disabledDate={(current) => current && current < dayjs().startOf('day')}
-              />
+              <DatePicker placeholder="Ngày hết hạn" className="datePicker" format={dateFormat}/>
             </Form.Item>
             <Form.Item
               name="tags"
@@ -357,7 +355,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <span>Kết quả:</span>
                 <div className="CSL_short-url">
-                  {shortUrl} {isExpired && <span style={{ color: 'red', marginLeft: 4, fontWeight: 'bold' }}>(Quá Hạn)</span>}
+                  {shortUrl} 
                 </div>
               </div>
             }
@@ -365,6 +363,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
             <div className="CSL_result">
 
               <div className="CSL_qr-code">
+              {isExpired && <span style={{ color: 'red', marginLeft: 4, fontWeight: 'bold' }}>(Quá Hạn)</span>}
                 {qrLink && (
                   <>
                     <img src={qrLink} disabled={loading} alt="QR Code" id="qr-image" style={{ maxWidth: 200 }} />

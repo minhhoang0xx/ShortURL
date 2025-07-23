@@ -308,9 +308,11 @@ namespace server.Controllers
 
 			string userAgent = Request.Headers["User-Agent"].ToString();
 			string ip = GetClientIp(HttpContext);
-			_logger.LogInformation("[IP DEBUG] X-Forwarded-For: {XForwardedFor}", Request.Headers["X-Forwarded-For"]);
-			_logger.LogInformation("[IP DEBUG] RemoteIpAddress: {RemoteIp}", HttpContext.Connection.RemoteIpAddress);
-			_logger.LogInformation("[IP DEBUG] Resolved IP: {IP}", ip);
+			_logger.LogInformation("[HEADER] HAProxy-Client-Source-IP: {HaproxyIp}", Request.Headers["HAProxy-Client-Source-IP"]);
+			_logger.LogInformation("[HEADER] X-Forwarded-For: {Xff}", Request.Headers["X-Forwarded-For"]);
+			_logger.LogInformation("[HEADER] {RemoteIp}", HttpContext.Connection.RemoteIpAddress);
+			_logger.LogInformation("[RESULT] Resolved IP: {ResolvedIp}", ip);
+
 			string referrer = Request.Headers["Referer"].ToString();
 			string source = "Unknown";
 			string uaLower = userAgent.ToLower();
@@ -585,28 +587,19 @@ namespace server.Controllers
 		}
 		private string GetClientIp(HttpContext context)
 		{
-			// Ưu tiên lấy từ HAProxy header nếu có
+			//  HAProxy header 
 			var haproxyIp = context.Request.Headers["HAProxy-Client-Source-IP"].FirstOrDefault();
 			if (!string.IsNullOrEmpty(haproxyIp))
 				return haproxyIp;
 
-			// Nếu không có thì fallback về X-Forwarded-For
+			// !ip => fallback về X-Forwarded-For
 			var xff = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
 			if (!string.IsNullOrEmpty(xff))
 				return xff.Split(',').First().Trim();
 
-			// Cuối cùng lấy từ connection
 			return context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
 		}
 
-		//private string GetClientIp(HttpContext context)
-		//{
-		//	var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-		//	if (!string.IsNullOrEmpty(ip))
-		//		return ip.Split(',').First().Trim();
-
-		//	return context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
-		//}
 		private (string device, string os, string browser) ParseUserAgent(string userAgent)
 		{
 			string device = "Unknown", os = "Unknown", browser = "Unknown";

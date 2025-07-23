@@ -14,9 +14,10 @@ const LogModal = ({ visible, onCancel, record, onTagClick }) => {
     const [dateRange, setDateRange] = useState([null, null]);
     const [originalData, setOriginalData] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [pagination, setPagination] = useState({
+    const [scrollHeight, setScrollHeight] = useState(200);
+    const [pagination, setPagination] = useState({  
         current: 1,
-        pageSize: 15,
+        pageSize: 20,
         total: 0,
     });
 
@@ -72,7 +73,21 @@ const LogModal = ({ visible, onCancel, record, onTagClick }) => {
             fetchData();
         }
     }, [visible, dateRange]);
-
+    useEffect(() => {
+        const calculateScrollHeight = () => {
+            const windowHeight = window.innerHeight;
+            const offset = 370; 
+            const tableHeight = windowHeight - offset;
+    
+            setScrollHeight(tableHeight > 200 ? tableHeight : 200); 
+        };
+    
+        calculateScrollHeight();
+        window.addEventListener('resize', calculateScrollHeight);
+    
+        return () => window.removeEventListener('resize', calculateScrollHeight);
+    }, []);
+    
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -149,7 +164,7 @@ const LogModal = ({ visible, onCancel, record, onTagClick }) => {
                                 {record.status ? 'Hoạt động' : 'Quá hạn'}
                             </Tag>
                         )}
-                        <div style={{ paddingLeft: 16 }} >
+                        <div style={{ paddingLeft: 16, width:400 }} >
                             <RangePicker
                                 className="log_header-time"
                                 format={dateFormat}
@@ -203,7 +218,7 @@ const LogModal = ({ visible, onCancel, record, onTagClick }) => {
                 <Table
                     columns={columns}
                     dataSource={filteredData}
-                    scroll={{ y: 90 * 15 }}
+                    scroll={{ y: scrollHeight  }}
                     pagination={{
                         ...pagination,
                         showTotal: (total) => `Tổng số: ${total}`,
