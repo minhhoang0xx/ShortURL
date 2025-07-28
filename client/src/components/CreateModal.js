@@ -1,5 +1,5 @@
 import { Button, Checkbox, DatePicker, Form, Input, Modal, Select, Space, message } from "antd";
-import { CopyOutlined, EditOutlined, LinkOutlined, PlusOutlined, SyncOutlined } from '@ant-design/icons';
+import { CopyOutlined, EditOutlined, LinkOutlined, PlusOutlined, QuestionCircleOutlined, QuestionOutlined, SyncOutlined } from '@ant-design/icons';
 import { Content } from "antd/es/layout/layout";
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
@@ -21,6 +21,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
   const [tagOptions, setTagOptions] = useState([]);
   const [isFinish, setIsFinish] = useState(false);
   const [isCustom, setIsCustom] = useState(false);
+  const [isImage, setIsImage] = useState(false);
   const dateFormat = 'DD/MM/YYYY';
 
 
@@ -50,7 +51,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
   };
   const handleFormValuesChange = (changedValues) => {
     if ('domain' in changedValues || 'alias' in changedValues) {
-     
+
       let domain = form.getFieldValue('domain');
       const alias = form.getFieldValue('alias') || '';
       if (domain) {
@@ -70,7 +71,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
     const check = !isCustom;
     setIsCustom(check);
     if (!check) {
-      form.setFieldsValue({ alias: ""});
+      form.setFieldsValue({ alias: "" });
     }
   };
 
@@ -189,6 +190,13 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
     resetForm();
     onCancel();
   }
+  const handleImage = () => {
+    setIsImage(true);
+  };
+
+  const handleImageCancel = () => {
+    setIsImage(false);
+  };
   return (
     <Modal
       open={visible}
@@ -197,7 +205,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       width="560px"
       footer={null}>
       <Content className="CSL_main-container">
-        <h3>CÔNG CỤ TẠO SHORTLINK</h3>
+        <h3>CÔNG CỤ TẠO SHORTLINK <QuestionCircleOutlined onClick={handleImage}/></h3>
 
         <Form
           name="shortlink-form"
@@ -268,13 +276,13 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
                   }
                 ]}
               >
-                 <Input disabled={!isCustom} placeholder="Tên đường dẫn - Alias" /> 
+                <Input disabled={!isCustom} placeholder="Tên đường dẫn - Alias" />
               </Form.Item>
-             
+
             </Space.Compact>
           </Form.Item>
           <Space.Compact style={{ width: '100%', gap: "2%" }}>
-          
+
             <Form.Item
               name="expiry"
               className="CSL_custom-time"
@@ -304,44 +312,44 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
           </Form.Item>
           {isChecked && (
             <Space.Compact style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <div style={{ width: 80,marginBottom: '10px' }}>
-              <span>App Store<span style={{ color: 'red' }}>*</span></span>
-            </div>
-            <Form.Item
-              name="iosLink"
-              rules={[
-                { required: true, message: "Vui lòng nhập URL App Store!" },
-                { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' },
-              ]}
-              style={{ flex: 1, alignItems:'center' }}
-            >
-              <Input placeholder="Nhập URL App Store" />
-            </Form.Item>
-          </Space.Compact>
+              <div style={{ width: 80, marginBottom: '10px' }}>
+                <span>App Store<span style={{ color: 'red' }}>*</span></span>
+              </div>
+              <Form.Item
+                name="iosLink"
+                rules={[
+                  { required: true, message: "Vui lòng nhập URL App Store!" },
+                  { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' },
+                ]}
+                style={{ flex: 1, alignItems: 'center' }}
+              >
+                <Input placeholder="Nhập URL App Store" />
+              </Form.Item>
+            </Space.Compact>
           )}
           {isChecked && (
-               <Space.Compact style={{ display: 'flex', alignItems: 'center', gap: '5px',marginBottom:'10px' }}>
-               <div style={{ width: 80,marginBottom: '10px' }}>
-                 <span>Google Play<span style={{ color: 'red' }}>*</span></span>
-               </div>
-               <Form.Item
-                 name="androidLink"
-                 rules={[
-                   { required: true, message: "Vui lòng nhập URL Google Play!" },
-                   { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' },
-                 ]}
-                 style={{ flex: 1, alignItems:'center' }}
-               >
-                 <Input placeholder="Nhập URL App Store" />
-               </Form.Item>
-             </Space.Compact>
+            <Space.Compact style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '10px' }}>
+              <div style={{ width: 80, marginBottom: '10px' }}>
+                <span>Google Play<span style={{ color: 'red' }}>*</span></span>
+              </div>
+              <Form.Item
+                name="androidLink"
+                rules={[
+                  { required: true, message: "Vui lòng nhập URL Google Play!" },
+                  { pattern: /^[^\s]+$/, message: 'Không được chứa khoảng trắng!' },
+                ]}
+                style={{ flex: 1, alignItems: 'center' }}
+              >
+                <Input placeholder="Nhập URL App Store" />
+              </Form.Item>
+            </Space.Compact>
           )}
           <Form.Item>
             <Button type="primary" htmlType="submit" disabled={loading || isFinish} className="CSL_button-create">
-             {isFinish ?   (<><EditOutlined /> Cập nhật</>):(<> <PlusOutlined />  Tạo mới</>) }
+              {isFinish ? (<><EditOutlined /> Cập nhật</>) : (<> <PlusOutlined />  Tạo mới</>)}
             </Button>
           </Form.Item>
-          <Form.Item 
+          <Form.Item
             label={
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <span>Kết quả:</span>
@@ -350,9 +358,9 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
                 </div>
               </div>
             }
-          className="CSL_form-result">
+            className="CSL_form-result">
             <div className="CSL_result">
-              
+
               <div className="CSL_qr-code">
                 {qrLink && (
                   <>
@@ -378,6 +386,14 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
           </Form.Item>
         </Form>
       </Content>
+      <Modal
+          open={isImage}
+          onCancel={handleImageCancel}
+          footer={null}
+          width={400}
+        >
+          <img src="./BAExpress.png" alt="Popup Image" style={{ width: '100%' }} />
+        </Modal>
     </Modal>
   )
 }
