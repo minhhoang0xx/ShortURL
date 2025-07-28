@@ -213,6 +213,8 @@ namespace server.Controllers
 					});
 				}
 			}
+			var shortLink = $"{request.Domain}/{shortCode}";
+			var qrCode = $"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={Uri.EscapeDataString(shortLink)}";
 			if (request.Expiry.HasValue && request.Expiry < DateTime.Now)
 			{
 				return BadRequest(new ErrorResponse
@@ -260,6 +262,11 @@ namespace server.Controllers
 			_context.ShortUrls.Add(shortUrl);
 			await _context.SaveChangesAsync();
 
+<<<<<<< Updated upstream
+=======
+
+
+>>>>>>> Stashed changes
 			return Ok(new {shortLink, qrCode, shortCode });
 		}
 
@@ -488,7 +495,7 @@ namespace server.Controllers
 					{
 						existingTag = new ShortURL_Tags { Name = tagName };
 						_context.Tags.Add(existingTag);
-						await _context.SaveChangesAsync(); // Lưu để lấy ID
+						await _context.SaveChangesAsync(); 
 					}
 					url.LinkTags.Add(new ShortURL_LinkTag
 					{
@@ -585,6 +592,10 @@ namespace server.Controllers
 			return new string(Enumerable.Repeat(chars, length)
 										.Select(s => s[random.Next(s.Length)]).ToArray());
 		}
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 		private string GetClientIp(HttpContext context)
 		{
 			//  HAProxy header 
