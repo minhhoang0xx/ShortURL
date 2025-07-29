@@ -5,7 +5,7 @@ import './style.css';
 const DeleteManyModal = ({ visible, onCancel, onConfirm, count, loading }) => {
   return (
     <Modal
-      title="Xác nhận xóa ShortLink"
+      title="Xác nhận xóa ShortURL"
       open={visible}
       onOk={onConfirm}
       onCancel={onCancel}
@@ -17,7 +17,7 @@ const DeleteManyModal = ({ visible, onCancel, onConfirm, count, loading }) => {
       cancelButtonProps={{ className: "cancel-button" }} 
     >
     
-      <h3>Số ShortLink đã chọn:  </h3>
+      <h3>Số ShortURL đã chọn:  </h3>
       <h1>{count}</h1>
       <h3>Bạn có chắc chắn muốn xóa không?</h3>
     </Modal>

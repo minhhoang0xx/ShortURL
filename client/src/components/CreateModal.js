@@ -1,5 +1,5 @@
 import { Button, Checkbox, DatePicker, Form, Input, Modal, Select, Space, message } from "antd";
-import { CopyOutlined, EditOutlined, LinkOutlined, PlusOutlined, QuestionCircleOutlined, QuestionOutlined, SyncOutlined } from '@ant-design/icons';
+import { CopyOutlined, EditOutlined, LinkOutlined, PlusOutlined, QuestionCircleFilled, QuestionCircleOutlined, QuestionCircleTwoTone, QuestionOutlined, SyncOutlined } from '@ant-design/icons';
 import { Content } from "antd/es/layout/layout";
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
@@ -205,7 +205,7 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
       width="560px"
       footer={null}>
       <Content className="CSL_main-container">
-        <h3>CÔNG CỤ TẠO SHORTLINK <QuestionCircleOutlined onClick={handleImage}/></h3>
+        <h3>CÔNG CỤ TẠO SHORTURL <QuestionCircleFilled  onClick={handleImage}/></h3>
 
         <Form
           name="shortlink-form"
@@ -390,9 +390,9 @@ const CreateModal = ({ visible, onCancel, onCreate }) => {
           open={isImage}
           onCancel={handleImageCancel}
           footer={null}
-          width={400}
+          width={950}
         >
-          <img src="./BAExpress.png" alt="Popup Image" style={{ width: '100%' }} />
+          <img src="./Example.png" alt="Popup Image" style={{ width: '100%' }} />
         </Modal>
     </Modal>
   )

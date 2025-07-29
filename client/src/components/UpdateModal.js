@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Button, Space, Select, message, Checkbox, DatePicker, Tag } from 'antd';
 import { Content } from 'antd/es/layout/layout';
 import dayjs from 'dayjs';
-import { CopyOutlined, EditOutlined, LinkOutlined } from '@ant-design/icons';
+import { CopyOutlined, EditOutlined, LinkOutlined, QuestionCircleFilled, QuestionCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import * as ShortUrlService from '../services/ShortUrlService';
 import * as DomainService from '../services/DomainService';
@@ -24,6 +24,7 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
   const [initialValues, setInitialValues] = useState({});
   const [hasChanges, setHasChanges] = useState(false);
   const [isCustom, setIsCustom] = useState(true);
+  const [isImage, setIsImage] = useState(false);
   const dateFormat = 'DD/MM/YYYY';
 
   useEffect(() => {
@@ -212,11 +213,18 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
     setHasChanges(false);
     setIsCustom(true);
   }
+  const handleImage = () => {
+    setIsImage(true);
+  };
+
+  const handleImageCancel = () => {
+    setIsImage(false);
+  };
 
   return (
     <Modal open={visible} onCancel={onCancel} loading={loading} width="560px" footer={null}>
       <Content className="CSL_main-container">
-        <h3>CẬP NHẬT SHORTLINK</h3>
+      <h3>CÔNG CỤ TẠO SHORTURL <QuestionCircleFilled  onClick={handleImage}/></h3>
         <Form
           name="shortlink-form"
           onFinish={onFinish}
@@ -387,6 +395,14 @@ const UpdateShortlinkModal = ({ visible, onCancel, onUpdate, record }) => {
           </Form.Item>
         </Form>
       </Content>
+      <Modal
+          open={isImage}
+          onCancel={handleImageCancel}
+          footer={null}
+          width={950}
+        >
+          <img src="./Example.png" alt="Popup Image" style={{ width: '100%' }} />
+        </Modal>
     </Modal>
   );
 };

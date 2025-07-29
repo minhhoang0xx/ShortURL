@@ -148,7 +148,7 @@ const ListShortLink = () => {
           onClick={(e) => {
             if (record.status === false) {
               e.preventDefault();
-              message.error('Shortlink đã hết hạn, không thể mở!');
+              message.error('ShortURL đã hết hạn, không thể mở!');
             }
           }}
         >
@@ -517,13 +517,13 @@ const ListShortLink = () => {
   };
   const copyToClipboard = (record) => {
     if (record.status === false) {
-      message.error('Shortlink đã hết hạn, không thể sao chép!');
+      message.error('ShortURL đã hết hạn, không thể sao chép!');
       return;
     }
     if (record) {
       navigator.clipboard.writeText(record.shortLink)
         .then(() => {
-          message.success('Shortlink đã được sao chép!');
+          message.success('ShortURL đã được sao chép!');
         })
         .catch(() => {
           message.error('Không thể sao chép link!');
