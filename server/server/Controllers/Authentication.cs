@@ -180,6 +180,120 @@ public class Authentication : ControllerBase
 		
 	    }
 
+    [HttpPost("LoginForBagps")]
+    public async Task<IActionResult> LoginForBagps([FromBody] Admin_UserDTO account)
+    {
+        string clientIp = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+            ?? HttpContext.Connection.RemoteIpAddress?.ToString()
+            ?? "local";
+
+        int attempts = Failed(clientIp);
+        if (attempts >= 3)
+        {
+            if (string.IsNullOrEmpty(account.RecaptchaToken))
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorCode = "CAPTCHA_NOT_FOUND",
+                    ErrorMessage = "Hãy thực hiện CAPTCHA trước!",
+                    attempts = Failed(clientIp),
+                    RequiresCaptcha = true
+                });
+            }
+
+            bool isRecaptchaValid = await _recaptchaService.VerifyRecaptchaAsync(account.RecaptchaToken);
+            if (!isRecaptchaValid)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorCode = "CAPTCHA_INVALID",
+                    ErrorMessage = "CAPTCHA chưa được xác thực!",
+                    attempts = Failed(clientIp),
+                    RequiresCaptcha = Failed(clientIp) >= 3
+                });
+            }
+        }
+
+        string usernameOnly = account.UserName;
+        string domain = string.Empty;
+        if (account.UserName.Contains("@"))
+        {
+            var part = account.UserName.Split('@');
+            usernameOnly = part[0];
+            domain = part[1];
+        }
+
+        // Đọc cờ IsAllBAGroup từ configuration
+        bool isAllBAGroup = _configuration["IsAllBAGroup"] == "1";
+
+        if (domain.Equals("bagroup.vn", StringComparison.OrdinalIgnoreCase) && isAllBAGroup)
+        {
+            var ldapOk = await AuthenLDAP(usernameOnly, account.Password, domain);
+            if (!ldapOk)
+            {
+                Increase(clientIp);
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorCode = "LDAP_FAIL",
+                    ErrorMessage = "Đăng nhập bằng tài khoản @bagroup.vn thất bại!",
+                    attempts = Failed(clientIp),
+                    RequiresCaptcha = Failed(clientIp) >= 3
+                });
+            }
+        }
+        else
+        {
+            var checkLogin = await _context.AdminUsers.FirstOrDefaultAsync(x => x.UserName == usernameOnly);
+            if (checkLogin == null)
+            {
+                Increase(clientIp);
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorCode = "USERNAME_NOT_EXISTED",
+                    ErrorMessage = "Tài khoản hoặc mật khẩu không đúng!",
+                    attempts = Failed(clientIp),
+                    RequiresCaptcha = Failed(clientIp) >= 3
+                });
+            }
+
+            if (domain.Equals("bagroup.vn", StringComparison.OrdinalIgnoreCase) ||
+                domain.Equals("bagps.vn", StringComparison.OrdinalIgnoreCase))
+            {
+                var ldapOk = await AuthenLDAP(usernameOnly, account.Password, domain);
+                if (!ldapOk)
+                {
+                    Increase(clientIp);
+                    return BadRequest(new ErrorResponse
+                    {
+                        ErrorCode = "LDAP_FAIL",
+                        ErrorMessage = "Đăng nhập bằng tài khoản @bagroup.vn hoặc @bagps.vn thất bại!",
+                        attempts = Failed(clientIp),
+                        RequiresCaptcha = Failed(clientIp) >= 3
+                    });
+                }
+            }
+            else
+            {
+                var checkPassword = HashToMD5(account.Password).ToUpper();
+                if (checkLogin.Password != checkPassword)
+                {
+                    Increase(clientIp);
+                    return BadRequest(new ErrorResponse
+                    {
+                        ErrorCode = "PASSWORD_INCORRECT",
+                        ErrorMessage = "Tài khoản hoặc mật khẩu không đúng!",
+                        attempts = Failed(clientIp),
+                        RequiresCaptcha = Failed(clientIp) >= 3
+                    });
+                }
+            }
+        }
+
+        Reset(clientIp);
+        var token = _jwtService.GenerateToken(account.UserName.ToString());
+        return Ok(new { message = "Đăng nhập thành công", token, attempts = Failed(clientIp) });
+    }
+   
 	[Authorize]
 	[HttpPost("logout")]
 	public async Task<IActionResult> Logout()

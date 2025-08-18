@@ -18,6 +18,8 @@ Log.Logger = new LoggerConfiguration()
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddXmlFile("web.config", optional: true, reloadOnChange: true);
 builder.Services.AddDbContext<URLContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddControllers();

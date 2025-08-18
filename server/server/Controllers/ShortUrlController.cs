@@ -223,8 +223,6 @@ namespace server.Controllers
 					ErrorMessage = "Ngày hết hạn không được nhỏ hơn ngày hiện tại!"
 				});
 			}
-			var shortLink = $"{request.Domain}/{shortCode}";
-			var qrCode = $"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={Uri.EscapeDataString(shortLink)}";
 			var shortUrl = new ShortURL_Link
 			{
 				ProjectName = request.ProjectName,
@@ -262,11 +260,6 @@ namespace server.Controllers
 			_context.ShortUrls.Add(shortUrl);
 			await _context.SaveChangesAsync();
 
-<<<<<<< Updated upstream
-=======
-
-
->>>>>>> Stashed changes
 			return Ok(new {shortLink, qrCode, shortCode });
 		}
 
@@ -592,10 +585,7 @@ namespace server.Controllers
 			return new string(Enumerable.Repeat(chars, length)
 										.Select(s => s[random.Next(s.Length)]).ToArray());
 		}
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 		private string GetClientIp(HttpContext context)
 		{
 			//  HAProxy header 
