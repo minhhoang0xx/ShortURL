@@ -30,7 +30,7 @@ namespace server.Models
 
 		public string? IPAddress { get; set; }
 
-		public bool IsReadOnly { get; set; }
+		public bool? IsReadOnly { get; set; }
 	}
 }
 
