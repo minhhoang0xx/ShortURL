@@ -80,8 +80,11 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 var app = builder.Build();
 app.UseForwardedHeaders();
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors(MyAllowSpecificOrigins);
@@ -98,5 +101,18 @@ app.Use(async (context, next) =>
         context.Response.Headers["Expires"] = "0";
     }
 });
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["X-Frame-Options"] = "DENY";
+    if (!app.Environment.IsDevelopment())
+        context.Response.Headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload";
+    context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'";
+
+    await next();
+});
+
+app.MapControllers();
 
 app.Run();
