@@ -120,7 +120,13 @@ namespace server.Controllers
             _context.ShortURLRedirects.Add(create);
             _context.SaveChanges();
 
-            return Ok("Thêm mới thành công!");
+            return Ok(new
+            {
+                id = create.ShortRedirectID,
+                domain = create.Domain,
+                description = create.Description,
+                message = "Thêm mới thành công!"
+            }); ;
             //return Ok(new { message = "Thêm mới thành công!", id = create.ShortRedirectID });
         }
 

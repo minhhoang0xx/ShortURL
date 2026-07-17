@@ -103,7 +103,17 @@ app.Use(async (context, next) =>
     if (!app.Environment.IsDevelopment())
         context.Response.Headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload";
     context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
-    context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'";
+    context.Response.Headers["Content-Security-Policy"] =
+     "default-src 'self'; " +
+     "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; " +
+     "style-src 'self' 'unsafe-inline'; " +
+     "img-src 'self' data: blob: " +
+         "https://api.qrserver.com " +
+         "https://maps.gstatic.com " +
+         "https://maps.googleapis.com " +
+         "https://bagps.vn " +
+         "https://www.googletagmanager.com; " +
+     "frame-ancestors 'none';";
 
     await next();
 });

@@ -303,28 +303,49 @@ public class Authentication : ControllerBase
     private async Task<bool> AuthenLDAP(string username, string password, string domain)
     {
         var Config = _configuration.GetSection($"LDAP:Domains:{domain}");
-        var host = Config["Host"];
+        var hosts = Config.GetSection("Hosts").Get<string[]>();
         var port = int.Parse(Config["Port"]);
         var userDN = Config["UserDn"];
         var serviceUsername = Config["ServiceUser"];
         var servicePassword = Config["ServicePassword"];
 
         string userLoginName = string.Format(userDN, username);
-
-        try
-        {
-            using (var connection = new LdapConnection())
-            {
-                connection.SecureSocketLayer = false;
-                await connection.ConnectAsync(host, port);
-                await connection.BindAsync(serviceUsername, servicePassword); // bind với tài khoản xác thực LDAP
-                await connection.BindAsync(userLoginName, password); // bind với tài khoản từ client
-                return connection.Bound;
-            }
-        }
-        catch (LdapException)
+        if (hosts == null || hosts.Length == 0)
         {
             return false;
         }
+        // Duyệt qua từng host để thử kết nối (Failover mechanism)
+        foreach (var host in hosts)
+        {
+            try
+            {
+                using (var connection = new LdapConnection())
+                {
+                    connection.SecureSocketLayer = false;
+
+                    // Thử kết nối tới host hiện tại
+                    await connection.ConnectAsync(host, port);
+
+                    // Bind với tài khoản dịch vụ để kiểm tra quyền truy cập LDAP
+                    await connection.BindAsync(serviceUsername, servicePassword);
+
+                    // Bind với tài khoản thực tế của người dùng từ client
+                    await connection.BindAsync(userLoginName, password);
+
+                    if (connection.Bound)
+                    {
+                        return true; // Xác thực thành công, thoát hàm ngay lập tức
+                    }
+                }
+            }
+            catch (LdapException)
+            {
+                // Nếu host này lỗi (không ping được, offline...),
+                // bỏ qua lỗi này để vòng lặp chạy tiếp sang IP dự phòng tiếp theo
+                continue;
+            }
+        }
+        // Nếu đã thử tất cả các hosts trong danh sách mà vẫn không thành công
+        return false;
     }
 }

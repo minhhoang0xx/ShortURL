@@ -185,7 +185,12 @@ namespace server.Controllers
                 });
             }
             var domainCheck = ExtractDomain(request.OriginalUrl);
-            if (string.IsNullOrEmpty(domainCheck)) return BadRequest("URL không hợp lệ!");
+            if (string.IsNullOrEmpty(domainCheck))
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorCode = "ORIGINALURL_NOT_TRUE",
+                    ErrorMessage = "Vui lòng nhập đường link hợp lệ!"
+                });
 
             var acceptDomains = await _context.ShortURLRedirects.Where(d => d.Domain.ToLower() == domainCheck.ToLower()).ToListAsync();
             if (acceptDomains == null || acceptDomains.Count == 0)
@@ -445,6 +450,18 @@ namespace server.Controllers
             }
             if (url.OriginalUrl != request.OriginalUrl) // neu original thay doi thi moi can ktra
             {
+                var domainCheck = ExtractDomain(request.OriginalUrl);
+                if (string.IsNullOrEmpty(domainCheck)) return BadRequest("URL không hợp lệ!");
+
+                var acceptDomains = await _context.ShortURLRedirects.Where(d => d.Domain.ToLower() == domainCheck.ToLower()).ToListAsync();
+                if (acceptDomains == null || acceptDomains.Count == 0)
+                {
+                    return BadRequest(new ErrorResponse
+                    {
+                        ErrorCode = "ORIGINALURL_NOT_ACCEPT",
+                        ErrorMessage = "Tên miền chưa được xác minh thuộc BAGPS, liên hệ quản trị để thêm!"
+                    });
+                }
                 var existingOG = await _context.ShortUrls
                 .Where(x => x.CreatedByUser == request.CreatedByUser && x.OriginalUrl == request.OriginalUrl)
                 .FirstOrDefaultAsync();
@@ -462,6 +479,14 @@ namespace server.Controllers
             {
                 shortCode = GenerateRandomURL();
             }
+            if (request.Alias.Count() >= 50)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    ErrorCode = "ALIAS_TO_LONG",
+                    ErrorMessage = "Alias chỉ được phép dưới 50 ký tự!"
+                });
+            }
             // Neu shortCode khac voi alias hien tai
             // Kiem tra neu alias moi da ton tai
             var existingUrl = await _context.ShortUrls.FirstOrDefaultAsync(x => x.Alias == shortCode && x.Domain == request.Domain && x.ShortId != id);
@@ -473,6 +498,7 @@ namespace server.Controllers
                     ErrorMessage = $"'{shortCode}' đã được [{existingUrl.CreatedByUser}] sử dụng trước đó cho {existingUrl.ProjectName} "
                 });
             }
+
             var shortLink = $"{request.Domain}/{shortCode}";
             var qrCode = $"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={Uri.EscapeDataString(shortLink)}";
             url.Alias = shortCode;
